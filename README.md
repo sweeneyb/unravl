@@ -28,8 +28,7 @@ UnRAVL was designed and initially implemented and is patent pending by David Bie
 The most fundamental form of validation is to invoke an API and
 validate the response code and response body.
 
-Following an [http://sww.sas.com/blogs/wp/sasdjb/2012/04/25/Scala-REST-for-the-Java-weary/ earlier example of invoking the Google elevation API],
-the REST call
+The REST call
 
  GET  http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false
 should return the JSON body:
