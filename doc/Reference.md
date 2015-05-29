@@ -48,9 +48,9 @@ Most are optional.
 1. `bind` for extracting results into the environment and binding values
 1. `assertions`
 
-```JSON
-{ "name" : test-name,
-  "template" : template-or-array-of-templates
+```
+{ "name" : "test name",
+  "template" : "template-name",
   "env" : { env-bindings },
   "preconditions" : [ preconditions ],
   "if" : condition,
@@ -64,7 +64,7 @@ Most are optional.
 
 In addition, a script file maybe a JSON array
 of script objects:
-```JSON
+```
 [ { "name" : "test1", ... },
   { "name" : "test1", ... },
   ...
@@ -175,7 +175,7 @@ There are several ways to specify the request body.
 
 To pass JSON, simply supply the JSON object or array:
 
-```JSON
+```
   { "json" : json-object-or-array }
 ```
 
@@ -212,7 +212,7 @@ For example,
   "body" : { "x" : 0, "y" : 1, "z" : -1 }
 ```is processed as if it were
 ```JSON
-  "body" : { "json", { "x" : 0, "y" : 1, "z" : -1 } }
+  "body" : { "json": { "x" : 0, "y" : 1, "z" : -1 } }
 ```
 Using <code>{ "json" : ''json-body-specification'' }</code> is safer since it avoid conflict with body generator
 names that may be added in the future, but the direct JSON body
@@ -233,7 +233,7 @@ or
 
 or
 
-```JSON
+```
   { "text" : [ "line 1",
                "line 2",
                ...
@@ -252,7 +252,7 @@ from which the text is read.
 Multiple streams can be concatenated and/or mixed with
 literals by mixing plain strings and @ strings in an array.
 
-```JSON
+```
   { "text" : [ "@{templates}/preamble.txt",
                "some text",
                "using {variable} {substitution}"
@@ -330,7 +330,7 @@ Below is the set of assertions supported by UnRAVL.
 
 Checks that the HTTP status code matches the expected response.
 
-```JSON
+```
  { "status" : integer }
  { "status" : integer-array }
  { "status" : pattern }
@@ -352,7 +352,7 @@ assertion and not a <code>"groovy"</code> assertion such as <code>"status == 404
 
 Asserts that the response body matches the JSON value
 
-```JSON
+```
  { "json" : json-object-or-array }
  { "json" : "@file-or-url" }
 ```
@@ -383,7 +383,8 @@ a subobject equality test.
 #### text ####
 
 Asserts that the response body matches the (usually) plain/text body.
-```JSON
+
+```
  { "text" : "expected text" }
  { "text" : "@file-or-url" }
  { "text" : array-of-strings }
@@ -417,6 +418,8 @@ in external resources.
 
 #### xml ####
 
+TODO
+
 Asserts that the response body matches an XML.
 
 Since UnRAVL is encoded as JSON, there is no way to embed
@@ -427,7 +430,7 @@ or with a @ reference to a file or URL. The <code>"xml"</code> body
 spec operates just like <code>"text"</code> but the net result must be
 valid XML.
 
-```JSON
+```
  { "xml" : "xml-body-encoded-as-a-string"
  { "xml" : "@file-or-url" }
  { "xml" : array-of-strings
@@ -476,7 +479,7 @@ expect variables to be defined via system properties.
 Asserts that a value matches the JSON value identified by a JSONPath expression,
 which refers to a value in the JSON response body.
 
-```JSON
+```
     { "jsonPath" :
        { jsonPathExpression : value,
          jsonPathExpression : value,
@@ -500,7 +503,9 @@ attribute to allow testing another JSON object instead of the response body.
 
 #### jsonPathMatch ####
 
-```JSON
+TODO
+
+```
     { "jsonPathMatch" :
        { jsonPathExpression : pattern,
          jsonPathExpression : pattern,
@@ -518,7 +523,7 @@ matches the given java.util.regex.Pattern patterns.
 Assert that one or more headers exist and have the
 specified value matching a regular expression
 
-```JSON
+```
   { "headers" :
      {
        "Header-Name" : "pattern",
@@ -539,17 +544,6 @@ Examples:
         "Transfer-Encoding": "chunked",
         "Cache-Control" : "public.*"
       }
-    }
-```
-
-An older, deprecated array format is supported but yields a warning message:
-
-```JSON
-    { "headers" : [
-        { "Header-Name" : "pattern" },
-        ...
-        { "Header-Name" : "pattern" }
-      ]
     }
 ```
 
@@ -611,7 +605,7 @@ the JSON schema object for each API call.
 	        "schema" : "http://www.example.com/api/schemas/resourceX.json",
 		"resId" : "<< Rebind this to a specific resurce id >>"
 	       },
-     "GET" : "http://www.example.com/api/resources/{resId}"
+     "GET" : "http://www.example.com/api/resources/{resId}",
      "assert" : { "schema" : "@{schema}" }
    },
    {
@@ -641,15 +635,15 @@ processing the JSON schema only once.
 ```JSON
 [
   {
-     "GET" : "http://www.example.com/api/resources/r123"
+     "GET" : "http://www.example.com/api/resources/r123",
      "bind" : { "json" : "r123" }
    },
   {
-     "GET" : "http://www.example.com/api/resources/r456"
+     "GET" : "http://www.example.com/api/resources/r456",
      "bind" : { "json" : "r456" }
    },
   {
-     "GET" : "http://www.example.com/api/resources/r789"
+     "GET" : "http://www.example.com/api/resources/r789",
      "bind" : { "json" : "r789" }
    },
    {
@@ -666,6 +660,8 @@ JSON schema object in the environment, for later use.
 
 #### XML schema ####
 
+TODO
+
 Assert that the body or variable is XML and that it conforms to the specified
 XML schema
 
@@ -679,7 +675,7 @@ a compiled XML schema object, not an JSON schema object).
 This assertion allows you to execute Groovy script code
 to perform more complex validation and assertions.
 
-```JSON
+```
     { "groovy" : groovy-script }
     { "groovy" : [ groovy-script, ..., groovy-script ] }
 ```
@@ -756,7 +752,7 @@ are shorthand for Groovy expressions which
 the "true" assertion passes iff the Boolean value is true, and
 the "false" assertion passes iff the Boolean value is false.
 
-```JSON
+```
     { "true" : groovy-script }
     { "false" : groovy-script }
 ```
@@ -768,7 +764,7 @@ issues with it.
 
 Asserts that two values are equal. There are two possible forms for this assertion:
 
-```JSON
+```
  { "equal" : [ lhs, rhs ] }
  { "equal" : [ lhs, rhs, epsilon ] }
 ```
@@ -780,7 +776,7 @@ If the optional ''epsilon'' value exists, it should be a floating point value an
 TODO: Allow passing multiple equality tests.
 This is ambiguous right now.
 
-```JSON
+```
 { "equal" : [
               [ expectedA, actualA ],
               [ expectedB, actualB ]
@@ -1055,8 +1051,8 @@ This is all very fluid and subject to change.
             "longitude" : 86.925278,
              "expectedElevation" :  8815.7158203125,
             "API_ROOT" : "http://maps.googleapis.com/maps/api/elevation"
-            "}
-  "GET" : "{API_ROOT}/json?locations={latitude},{longitude}&sensor=false" }
+            }
+  "GET" : "{API_ROOT}/json?locations={latitude},{longitude}&sensor=false" },
   "bind" : [
      { "json" : "@{outputDir}/{name}.json" },
      { "headers" : [ "Content-Type", "contentType" ] },
@@ -1073,7 +1069,7 @@ This is all very fluid and subject to change.
     { "groovy" : [ "response.results[0].elevation.doubleValue() == {expectedElevation}",
                    "response.results[0].location.lat.doubleValue() == {latitude}",
                    "response.results[0].location.lng.doubleValue() == {longitude}",
-                   "\"OK\" == actualStatus"
+                   "'OK' == actualStatus"
                  ]
     }
     ]
@@ -1145,7 +1141,7 @@ The <code>headers</code> element is used to extract text from response headers
 into environment variables. The simplest form consists of a
 JSON object of one or more name/header strings:
 
-```JSON
+```
  { "headers" :  { "var" : "Header-Name", ..., "var" : "Header-Name" }  }
 ```
 For example:
@@ -1162,13 +1158,13 @@ In addition to this simplest binding, an array containing
 the header name and a regular expression
 may be specified instead of just the header name as a string.
 
-```JSON
+```
    "var" : [ headerName, pattern, name1, ..., namen ]
 ```
 For example, the header binding
 
 ```JSON
-  { "header" : { "loc" : [ "Location", "{API_ROOT}/folder/(\\w+)/resources/(\\w+)", folderId, resourceId ] } }
+  { "header" : { "loc" : [ "Location", "{API_ROOT}/folder/(\\w+)/resources/(\\w+)", "folderId", "resourceId" ] } }
 ```
 
 will save the <code>Location</code> header in the variable <code>loc</code>, then
@@ -1179,14 +1175,14 @@ Note: The backslash character \ must be escaped in JSON: use <code>\\w+</code> i
 
 Thus, the format of the headers extractor is an array of arrays.
 
-```JSON
+```
 { "headers" : [ array-of-strings, ..., array-of-strings ] }
 ```
 
 In addition to the simplest binding, a regular expression format
 is allowed:
 
-```JSON
+```
 [ headerName, name0, pattern, name1, ..., namen ]
 ```
 
@@ -1198,7 +1194,7 @@ for HTTP header date/time values such as <code>Fri, 01 Aug 2014 15:16:47 GMT</co
 Each of these have one group for each element of the timestamp.
 
 ```JSON
-{ "headers" : { "lastMod" : [ "Last-Modified", "{httpDate}", dow, dom, mon, year, hh, mm, ss, tz ] } }
+{ "headers" : { "lastMod" : [ "Last-Modified", "{httpDate}", "dow", "dom", "mon", "year", "hh", "mm", "ss", "tz" ] } }
 ```
 
 Tip: Do not use other matcher groups in the regular expression. Where necessary escape special regular expression characters like *, ?, and .
@@ -1208,13 +1204,15 @@ Tip: Do not use other matcher groups in the regular expression. Where necessary 
 Matches text against grouping regular expressions and binds the substrings
 into constituent variable bindings in the current UnRAVL script environment. The extractor form is
 
+```
  { "pattern" : [ string, pattern, var0, ... varn ] }
-
+```
 such as
+```
  { "pattern" : [ "{responseType}", "^(.*)\\s*;\\s*charset=(.*)$", "mediaType", "charset" ] }
-
+```
 This will match the value of the environment expansion of "{responseType}" to the given regular expression pattern <code>^(.*)\s*;\s*charset=(.*)$</code>, and bind the media type and the encoding character set  substrings to the variables <code>mediaType</code> and <code>charset</code>. (Note that a per the JSON grammar,
-backslash (<code>\</code>) characters in a JSON string must be escaped, so the regular expression notation <code>\s</code> is coded in the JSON string as <code>\\s</code>.)
+backslash (<code>\\</code>) characters in a JSON string must be escaped, so the regular expression notation <code>\s</code> is coded in the JSON string as <code>\\\\s</code>.)
 For example, if the <code>responseType</code> binding in the environment was
 
  application/json; charset=UTF-8
@@ -1232,7 +1230,7 @@ Run Groovy scripts and bind the results to variables in the environment.
 This is like <code>"env"</code> extractor, but the values are not just JSON elements,
 but Groovy scripts (encoded as strings).
 
-```JSON
+```
  { "groovy" : { map-of-name-script-pairs } }
 ```
 
@@ -1262,7 +1260,7 @@ TODO
 
 Binds values from the JSON response by extracting data via their JSONPath.
 
-```JSON
+```
  { "jsonPath" : { map-of-var-path-pairs } }
  { "jsonPath" : { map-of-var-path-pairs }, "from" : json }
  { "jsonPath" : { map-of-var-path-pairs }, "from" : "varname" }
@@ -1306,7 +1304,7 @@ Binds values from the XL response by extracting data via their XPath.
 
 This binds the response body to a variable or writes it to a file.
 
-```JSON
+```
  { "text" : "varName" }
  { "text" : "@file", "pretty" : boolean }
 ```
@@ -1325,7 +1323,7 @@ If the content matches ".*[/+]xml", it is pretty printed as XML.
 
 #### json ####
 
-```JSON
+```
  { "json" : "@file-name" }
  { "json" : "var" }
  { "json" : "var", "class" : class-name }
@@ -1349,7 +1347,7 @@ This may not be used with the "@file-name" target.
 
 TODO
 
-```JSON
+```
  { "xml" : XPath, "class" : className }
  { "xml" : XPath, "class" : array-of-classNames }
 ```
@@ -1378,7 +1376,7 @@ as with the "text" extractor.
 
 Extract links via link relation names or link matchers.
 
-```JSON
+```
  { "links" : matchers }
  { "links" : matchers, "from" : "path" }
  { "hrefs" : matchers }
@@ -1396,7 +1394,7 @@ Here's an example. GET a resource at URL stored in the var <code>{location}</cod
      "GET" : "{location}",
      "bind" : [
                 { "json" : "responseBody" },
-                { "hrefs" : [ "self", "update", "delete"] }
+                { "hrefs" : [ "self", "update", "delete"] },
               ]
      "assert" : [ "self == location",
                   "update == location",
@@ -1412,10 +1410,10 @@ this extracts from the JSON object stored in "resource".
 ```JSON
    { "name" : "Extract just the self URL",
      "GET" : "{location}",
-     "bind" :  [
+     "bind" : [
                 { "json" : "resource" },
                 { "links" : [ "self", "update", "delete"], "from" : "resource" }
-               ]
+              ],
      "assert" : [ "self.href.textValue() == location",
                   "self.method.textValue() == 'GET'",
                   "delete.href.textValue() == location",
@@ -1439,7 +1437,7 @@ such as <code>"from" : "responseBody.items[0]"</code>
 These extractors work with
 JSON responses that contain [atom:link](http://tools.ietf.org/html/rfc4287#section-4.2.7) representations. This is also compatible with [Collection+JSON](http://amundsen.com/media-types/collection/) format.
 
-```JSON
+```
   {  ...,
      "links" : [
          { "rel" : "self",
@@ -1464,7 +1462,7 @@ The second format is the the
 [Application Language](http://stateless.co/hal_specification.html Hypertext) (HAL)
 representation by Mike Kelly which uses a "_links" member:
 
-```JSON
+```
   { ...,
     "_links": {
          "self": { "href": "/orders" },
@@ -1478,7 +1476,7 @@ We will refer to this as the HAL response. Each HAl link contains only the href 
 
 The general form of the links (or hrefs) extractor is
 
-```JSON
+```
   { "links" : { "var1" : selector1,
                 "var2" : selector2,
                 ...
@@ -1502,7 +1500,7 @@ is equivalent to
 ```JSON
   { "links" : { "self"   : "self",
                 "update" : "update",
-                "delete" : "delete" ] }
+                "delete" : "delete" } }
 ```
 
 Finally, a single string value value may be used:
@@ -1513,7 +1511,7 @@ Finally, a single string value value may be used:
 is equivalent to
 
 ```JSON
-  { "link" : { "self" : "self" ] }
+  { "link" : { "self" : "self" } }
 ```
 
 (Note that "link" may be used instead of "links"; this is clearer for extracting a single link.)
@@ -1550,15 +1548,15 @@ By default, this extractor works on the variable named "responseBody" which is b
 ```JSON
   "bind" : [
              { "href" : { "coll" : "self" },
-               "from" : "responseBody.collection" } },
+               "from" : "responseBody.collection" } ,
 
              { "href" : { "self0" : "self",
                           "delete0" : "delete" },
-               "from" : "responseBody.collection.items[0]" } },
+               "from" : "responseBody.collection.items[0]" } ,
 
              { "href" : { "selfLast" : "self",
                           "deleteLast" : "delete" },
-               "from" : "responseBody.collection.items[responseBody.collection.items.size()-1]" } }
+               "from" : "responseBody.collection.items[responseBody.collection.items.size()-1]" }
            ]
 ```
 
@@ -1702,7 +1700,7 @@ such as
 
 ```JSON
     { "jsonPath" : "status",
-      "value:  "OK",
+      "value" : "OK",
       "doc" : "assert that the response contains a 'status' with the value 'OK'"
     }
 ```
