@@ -1,4 +1,4 @@
-UnRAVL is a '''''Uniform REST API Validation Language''''' - a JSON domain-specific language|domain-specific language (DSL) for validating REST APIs.
+UnRAVL is a ***Uniform REST API Validation Language*** - a JSON domain-specific language|domain-specific language (DSL) for validating REST APIs.
 
 UnRAVL is a domain-specific language, coded in JSON, for validating REST APIs.
 UnRAVL scripts consist of a JSON description of a REST API call:
@@ -179,7 +179,7 @@ To pass JSON, simply supply the JSON object or array:
   { "json" : json-object-or-array }
 ```
 
-The ''json-object-or-array'' can contain variable references as per
+The *json-object-or-array* can contain variable references as per
 Environments below.
 
 You can also name a variable that is bound to a JSON object or array:
@@ -203,9 +203,9 @@ which will be expanded as per
 Environments below.
 
 In addition, if the body does not match any other body generator, such as
-: <code>{ "json" : ''json-body-specification'' }</code>
-: <code>{ "text" : ''text-body-specification'' }</code>
-: <code>{ "binary" : ''binary-body-specification'' }</code>
+: <code>{ "json" : *json-body-specification* }</code>
+: <code>{ "text" : *text-body-specification* }</code>
+: <code>{ "binary" : *binary-body-specification* }</code>
 then the entire value of the "body" item is used as a JSON body.
 For example,
 ```JSON
@@ -214,7 +214,7 @@ For example,
 ```JSON
   "body" : { "json": { "x" : 0, "y" : 1, "z" : -1 } }
 ```
-Using <code>{ "json" : ''json-body-specification'' }</code> is safer since it avoid conflict with body generator
+Using <code>{ "json" : *json-body-specification* }</code> is safer since it avoid conflict with body generator
 names that may be added in the future, but the direct JSON body
 is more concise and easier to use.
 
@@ -241,7 +241,7 @@ or
   }
 ```
 
-When using an array of text, newlines are inserted only '''between''' elements.
+When using an array of text, newlines are inserted only **between** elements.
 If you want/require a closing newline, add an empty string "" to the end of the array.
 
 Text (including JSON and XML) will be encoded as UTF-8.
@@ -313,7 +313,7 @@ is the convention.
 Assertions are what test the API.
 There are two sets of supported assertions:
 "preconditions" and "assert". Preconditions
-are evaluated '''before''' invoking the API and must
+are evaluated **before** invoking the API and must
 all pass before running the API. This can be used to
 validate environment variables that may have been set
 from other APIs calls in earlier tests.
@@ -360,7 +360,7 @@ Asserts that the response body matches the JSON value
 String values in the JSON are subject to environment substitution,
 and anywhere when using a @file-or-url.
 
-TODO: augment to allow environment substitution for numbers, booleans, etc.
+**TODO**: augment to allow environment substitution for numbers, booleans, etc.
 in literal JSON.  We can't put naked env references in there, such as
 
  { "longitude" : {longitude} }
@@ -369,16 +369,16 @@ to expand into
 
  { "longitude" : 89.392 }
 
-because the JSON is parsed ''before'' the environment is defined,
+because the JSON is parsed *before* the environment is defined,
 and the JSON parser will balk at <code>{longitude}</code> as invalid JSON.
 
-'''TODO''': add an option to allow the result to be a subset of the expected
+**TODO**: add an option to allow the result to be a subset of the expected
 value, or for the expected value to be a subset of the actual object.
 I'm not sure the best way to express this so that it is clear
 which is which. The current Jackson library does not implement
 a subobject equality test.
 
-'''TODO''': add an option to ignore certain fields or JSON Path expressions.
+**TODO**: add an option to ignore certain fields or JSON Path expressions.
 
 #### text ####
 
@@ -409,16 +409,16 @@ Initially, only UTF-8 text would be allowed.
               "" ]
 ```
 
-TODO: add diagnostic to indicate where the text differs.
+**TODO**: add diagnostic to indicate where the text differs.
 
-TODO: add a <code>"literal" : true</code> or other option to suppress environment substitution
+**TODO**: add a <code>"literal" : true</code> or other option to suppress environment substitution
 
-TODO: add a <code>"charset" : "charset-name"</code> option to use another character set.
+**TODO**: add a <code>"charset" : "charset-name"</code> option to use another character set.
 in external resources.
 
 #### xml ####
 
-TODO
+**TODO**
 
 Asserts that the response body matches an XML.
 
@@ -460,7 +460,7 @@ or using environment substitution:
 as with "text",  environment substitution is also performed on string
 literals and content read from files.
 
-TODO: add a <code>"literal" : true</code> or other option to suppress environment substitution
+**TODO**: add a <code>"literal" : true</code> or other option to suppress environment substitution
 in external resources.
 
 #### bound ####
@@ -489,21 +489,21 @@ which refers to a value in the JSON response body.
      }
 ```
 
-Assert that the values at one or more <code>''jsonPathExpressions''</code>
-matches a <code>''value''</code>. The <code>''value''</code> may be any JSON value. Strings in the value expression
+Assert that the values at one or more <code>*jsonPathExpressions*</code>
+matches a <code>*value*</code>. The <code>*value*</code> may be any JSON value. Strings in the value expression
 are subject to  environment substitution.
 
 The value could be a JSON number, string, boolean, array, or object.
 
-TODO: augment to allow environment substitution for numbers,
+**TODO**: augment to allow environment substitution for numbers,
 booleans, etc.
 
-TODO: add a "source" : value
+**TODO**: add a "source" : value
 attribute to allow testing another JSON object instead of the response body.
 
 #### jsonPathMatch ####
 
-TODO
+**TODO**
 
 ```
     { "jsonPathMatch" :
@@ -593,7 +593,7 @@ variable resId and validating the response body against a JSON schema.
 The next three scripts use the template, setting the resId variable
 to different values each time.
 
-Note: At present, the UnRAVL "schema" assertion does '''not'''
+Note: At present, the UnRAVL "schema" assertion does **not**
 cache JSON schema objects, so this will reread, parse, and process
 the JSON schema object for each API call.
 
@@ -655,12 +655,12 @@ processing the JSON schema only once.
 
 ----
 
-TODO: add a member to the "schema" element to save the parsed/loaded
+**TODO**: add a member to the "schema" element to save the parsed/loaded
 JSON schema object in the environment, for later use.
 
 #### XML schema ####
 
-TODO
+**TODO**
 
 Assert that the body or variable is XML and that it conforms to the specified
 XML schema
@@ -695,7 +695,7 @@ from there.
 
 Tip: Avoid absolute path names. Use relative path names, and use
 portable path notation, namely forward slashes which work on
-both Linux '''and''' windows. Make sure the filename case is correct;
+both Linux **and** windows. Make sure the filename case is correct;
 Windows will ignore case differences, but Linux will not.
 
 The values in the current Environment are passed to Groovy scripts.
@@ -714,15 +714,15 @@ to indicate a failed assertion.
 A {[java api|java.lang.RuntimeException}} results in a failed
 assertion but also result in test errors.
 
-Note that if you wish to compare ''values'' in a JSON object,
+Note that if you wish to compare *values* in a JSON object,
 you must extract values with .<code>textValue() , .doubleValue(),
 .longValue(), .intValue(), .booleanValue(),</code> etc.
 
 For example, assuming the response body has been saved in a variable
 named <code>result</code> in the current environment, an assertion such as
  "result[0].type == \"Folder\""
-will always be false, even if the ''type'' field of the 0<sup>th</sup>
-element of the JsonNode ''result'' has the value <code>"Folder"</code>, because
+will always be false, even if the *type* field of the 0<sup>th</sup>
+element of the JsonNode *result* has the value <code>"Folder"</code>, because
 this is comparing a <code>JsonNode</code> to a <code>String</code> which is always <code>false</code>.
 Instead, use
 
@@ -748,7 +748,7 @@ assertion and not a <code>"groovy"</code> assertion such as <code>"status == 404
 
 The special assertions "true" and "false"
 are shorthand for Groovy expressions which
-''must'' evaluate to Boolean values;
+*must* evaluate to Boolean values;
 the "true" assertion passes iff the Boolean value is true, and
 the "false" assertion passes iff the Boolean value is false.
 
@@ -771,9 +771,9 @@ Asserts that two values are equal. There are two possible forms for this asserti
 
 The lhs and rhs values are compared and if not equal, the assertion throws an UnRAVLAssertionException. The values may be JSON null, booleans, integers, strings, doubles, JSON arrays, or JSON objects. The values should be the same type. Environment expansion is performed on all string values (top-level or nested inside JSON arrays or objects), with the exception of JSON field names which are not expanded. Note that this means the string value of variables will be compared.
 
-If the optional ''epsilon'' value exists, it should be a floating point value and the lhs and rhs values are compared as doubles and must be within epsilon of each other. If the lhs or rhs values (after environment expansion) are string values, the value is converted to a double via <code>Double.valueOf(String)</code>
+If the optional *epsilon* value exists, it should be a floating point value and the lhs and rhs values are compared as doubles and must be within epsilon of each other. If the lhs or rhs values (after environment expansion) are string values, the value is converted to a double via <code>Double.valueOf(String)</code>
 
-TODO: Allow passing multiple equality tests.
+**TODO**: Allow passing multiple equality tests.
 This is ambiguous right now.
 
 ```
@@ -830,17 +830,17 @@ will not allow others users to read or write the <code>.netrc</code> file.
 The format of the file is a simplified version of the standard
 [Unix netrc file format](http://www.lehman.cuny.edu/cgi-bin/man-cgi?netrc+4).
 
-Warning: The [<code>''default''</code> entry](http://www.lehman.cuny.edu/cgi-bin/man-cgi?netrc+4) and
-[<code>''macdef''</code>](http://www.lehman.cuny.edu/cgi-bin/man-cgi?netrc+4) are not supported.}}
+Warning: The [<code>*default*</code> entry](http://www.lehman.cuny.edu/cgi-bin/man-cgi?netrc+4) and
+[<code>*macdef*</code>](http://www.lehman.cuny.edu/cgi-bin/man-cgi?netrc+4) are not supported.}}
 Credentials must be specified entirely on one line:
 
- machine ''hostname'' login ''userid'' password ''password''
+ machine *hostname* login *userid* password *password*
 
 such as
 
  machine rdcesx51019.race.sas.com login sasdemo password sasDemoSecret123
 
-The ''hostname'' field must exactly match the hostname in UnRAVL API calls.
+The *hostname* field must exactly match the hostname in UnRAVL API calls.
 
 You may also embed the credentials directly inside the authentication element in the script.
 These may be the login id and password (if there are no security issues with directly embedding
@@ -887,7 +887,7 @@ Tip: In older releases of UnRAVL, authentication was done with "basicAuth" and "
 
 Basic Authentication locates credentials for the REST API call host
 via the .netrc file (see above) and adds an
-: <code>Authentication: Basic ''encoded-credentials''</code>
+: <code>Authentication: Basic *encoded-credentials*</code>
 header to the request.
 
 The scriptlet form is
@@ -935,8 +935,8 @@ will be resused in other scripts that call the same host.
 
 ### Environments ###
 
-Tests run within an ''environment'', which is a mapping of name/value pairs,
-or ''bindings''. When executing an UnRAVL script, values can be captured
+Tests run within an *environment*, which is a mapping of name/value pairs,
+or *bindings*. When executing an UnRAVL script, values can be captured
 from the responses and stored in that environment. These environment values can be used
 for specific assertion values. This is done by referring to bindings
 to the script.
@@ -947,7 +947,7 @@ operating system environmentvariables, so some environment variables
 may exist with names such as <code>os.name</code>, <code>user.name</code> and <code>user.dir</code>. Hwoever,
 such variables are not available in Groovy scripts (but Groovy can directly access Java system properties via <code>System.getProperty(name)</code>.
 
-An environment binding is ''referenced'' by using the <code><nowiki>{varName}</nowiki></code>
+An environment binding is *referenced* by using the <code><nowiki>{varName}</nowiki></code>
 notation. (Do not use leading or trailing whitespace.)
 The value of that binding is substituted.
 (However, Groovy scripts do not need the braces as the environment bindings
@@ -983,13 +983,13 @@ You may also provide alternate text to use if a variable is
 not defined. Add a '|' vertical bar (pipe) character and the alternative text
 before the closing brace:
 
-<code>{varName|''alt text''}</code>
+<code>{varName|*alt text*}</code>
 
-If <code>varName</code> is bound, the result will be the value of that variable and the ''<code>alt text</code>'' is discarded,
-else the result will be ''<code>alt text</code>''. The ''<code>alt text</code>'' can also
-contain nested variable references. (Left and right curly braces must match inside the ''<code>alt text</code>''.)
+If <code>varName</code> is bound, the result will be the value of that variable and the *<code>alt text</code>* is discarded,
+else the result will be *<code>alt text</code>*. The *<code>alt text</code>* can also
+contain nested variable references. (Left and right curly braces must match inside the *<code>alt text</code>*.)
 
-Processing of ''<code>alt text</code>'' is only supported for variable names
+Processing of *<code>alt text</code>* is only supported for variable names
 that consist of the following characters
 : alphanumeric characters <code>a-Z A-Z 0-9</code>,
 : '<code>.</code>' (period)
@@ -1004,18 +1004,18 @@ the following
    if (pending)
       { next = state|ACTIVE ? active : inactive; }
 
-UnRAVL should not process this like a <code>{varName|''alt text''}</code>
+UnRAVL should not process this like a <code>{varName|*alt text*}</code>
 expression. If it did, it would parse this as
 : <code>varName == " next = state"</code>
-: <code>''alt text'' == "ACTIVE ? active : inactive; "</code>
+: <code>*alt text* == "ACTIVE ? active : inactive; "</code>
 Since there is no UnRAVL variable binding for a variable with the name <code> next = state</code>,
-the result would be the <code>''alt text'', "ACTIVE ? active : inactive; "</code>
+the result would be the <code>*alt text*, "ACTIVE ? active : inactive; "</code>
 Thus, the net result would be the unexpected
 
    if (pending)
       ACTIVE ? active : inactive;
 
-Warning: because of this ''alt text'' processing, some text may
+Warning: because of this *alt text* processing, some text may
 be replaced even if you do not intend it to be interpreted as
 variable references. For example, if A and D are not bound, the input text
 
@@ -1025,18 +1025,18 @@ will result in the text
 
    B|C | E is the same as B|C|D|E
 
-Note: If you wish to include unbalanced left and right braces in <code>''alt text''</code>,
+Note: If you wish to include unbalanced left and right braces in <code>*alt text*</code>,
 you may use Unicode replacement.  For example, if you want the value
 of the variable <code>end</code>, but use <code>%}</code> if end is not defined, you cannot use
     {end|}}
-because the first <code>}</code> will be used as the end of the variable reference and the <code>''alt text''</code> will be empty.
+because the first <code>}</code> will be used as the end of the variable reference and the <code>*alt text*</code> will be empty.
 (If <code>end</code> is bound to the string <code>$</code> then <code>{end|}}</code> will result in <code>$}</code>,
 and if <code>end</code> is not bound, the result will be <code>}</code>,
 neither of which is not desired.)
 
 Instead, use
     {end|%{U+002D}}
-Here, the <code>''alt text''</code> is <code>%{U+002D}</code> which will expand to the desired <code>%}</code>.
+Here, the <code>*alt text*</code> is <code>%{U+002D}</code> which will expand to the desired <code>%}</code>.
 
 #### Examples ####
 
@@ -1084,7 +1084,7 @@ and actualStatus which may be used in assertions later.
 The values in the current environment are passed
 to the Groovy scripts as Groovy bindings, so the <code>{varName}</code> notation is not needed
 in the expressions. If you use <code>{varName}</code> in a groovy expression, it will be substituted
-before Groovy is interpreted, so it is useful to ''generate'' the Groovy source,
+before Groovy is interpreted, so it is useful to *generate* the Groovy source,
 or to inject content into  Groovy string literals.
 
 Note how the literal value <code>"OK"</code> may be quoted <code>'OK'</code>
@@ -1113,7 +1113,7 @@ If you only have one extractor, you do not need to embed it in an array:
 
 #### env ####
 
-<code>"env"</code> is the default binding which runs ''before'' a test;
+<code>"env"</code> is the default binding which runs *before* a test;
 it is a top level element and should not be used in the "bind"
 element (which runs after the API call.)
 
@@ -1121,7 +1121,7 @@ element (which runs after the API call.)
 "env" : collection-of-bindings
 ```
 
-This is a collection of <code>"name" : ''value''</code> pairs (a Map, if you will).
+This is a collection of <code>"name" : *value*</code> pairs (a Map, if you will).
 
 Example:
 
@@ -1186,7 +1186,7 @@ is allowed:
 [ headerName, name0, pattern, name1, ..., namen ]
 ```
 
-TODO: Populate the default environment with some reusable
+**TODO**: Populate the default environment with some reusable
 regular expression patterns, such as <code>{iso8601}</code> which is the pattern for an
 ISO 8601 date/time value such as <code>2014-07-16T19:20:30.45+01:00</code>
 and <code>{httpDate}</code> which is the pattern
@@ -1256,7 +1256,7 @@ available for use as local variables in the Groovy script.
 
 #### jsonPath ####
 
-TODO
+**TODO**
 
 Binds values from the JSON response by extracting data via their JSONPath.
 
@@ -1383,7 +1383,7 @@ Extract links via link relation names or link matchers.
  { "hrefs" : matchers, "from" : "path" }
 ```
 
-Each ''matcher'' can be either a string (find the corresponding link with that link relation name),
+Each *matcher* can be either a string (find the corresponding link with that link relation name),
 an array of strings (bind multiple variables via multiple link relation names),
 or a JSON object with pairs of link relation names/matchers.
 
@@ -1603,7 +1603,7 @@ or, to add a comment:
 
 ## Templates ##
 
-If a test name ends with <code>.template</code> then it is assumed to be a ''template''.
+If a test name ends with <code>.template</code> then it is assumed to be a *template*.
 Templates are not executed but saved. Other tests can reuse saved templates
 by specifying a `"template" : "template-name"` attribute.
 The template name is subject to environment substitution},
@@ -1777,7 +1777,7 @@ metod in the base class. For example, BaseAssertion does:
 
 If you implement a plugin, inherit from the base class,
 or else use the <code>@Autowired</code> annotation, implement this setter,
-and call the appropriate <code>runtime.add''Plugin''</code> method.
+and call the appropriate <code>runtime.add*Plugin*</code> method.
 
 ## Logging ##
 
