@@ -124,7 +124,7 @@ For example, if a compound script creates a resource that should be deleted,
 you can use this to ensure the resource is deleted even if other assertion
 or preconditions fail in early scripts.
 
-```JSON
+```
 {
   "if" : "exists",
   "PUT" : "{resourceLocation}",
@@ -469,7 +469,7 @@ Asserts that one or more variables are bound in the environment.
 This is a "safety valve" for a script, especially those which
 expect variables to be defined via system properties.
 
-```JSON
+```
     { "bound" : "var-name" }
     { "bound" : [ "var-name1", ..., "var-namen" ] }
 ```
@@ -1051,14 +1051,14 @@ This is all very fluid and subject to change.
             "longitude" : 86.925278,
              "expectedElevation" :  8815.7158203125,
             "API_ROOT" : "http://maps.googleapis.com/maps/api/elevation"
-            }
+            },
   "GET" : "{API_ROOT}/json?locations={latitude},{longitude}&sensor=false" },
   "bind" : [
      { "json" : "@{outputDir}/{name}.json" },
      { "headers" : [ "Content-Type", "contentType" ] },
      { "json" : "response" },
      { "jsonPath" : {
-           "actualElevation" : "results[0].elevation"
+           "actualElevation" : "results[0].elevation",
            "actualLat" : "results[0].location.lat",
            "actualLong" :"results[0].location.lng",
            "actualStatus" "status" }},
@@ -1395,7 +1395,7 @@ Here's an example. GET a resource at URL stored in the var <code>{location}</cod
      "bind" : [
                 { "json" : "responseBody" },
                 { "hrefs" : [ "self", "update", "delete"] },
-              ]
+              ],
      "assert" : [ "self == location",
                   "update == location",
                   "delete == location"
