@@ -174,7 +174,7 @@ Many string values in UnRAVL scripts are subject to environment substitution
 which replaces substrings of the form <code>{varName}</code> with the value
 of the named variable from the environment.
 
-## Synatx and reference
+## Syntax and reference
 
 To see the full syntax for UnRAVL scripts, refer to [Reference](doc/Reference.md)
 
