@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+
+	xsi:schemaLocation="
+           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+           http://www.springframework.org/schema/context classpath:org/springframework/context/config/spring-context-3.1.xsd">
+
+
+   <!-- 
+        This will instantiate an UnRAVLRuntime instance which the remaining instances require in order to
+        register themselves as extensions.
+
+        A more general approach to just instantiating the runtime instance would
+        be to perform a component scan to find all of our UnRAVL infrastructure components. 
+        
+        <context:component-scan base-package="com.sas.unravl"/>
+        
+         -->
+   <bean id="unravlPlugins" class="com.sas.unravl.UnRAVLPlugins" />
+      
+	<context:component-scan base-package="com.sas" use-default-filters="false">
+		<context:include-filter type="annotation"
+			expression="com.sas.unravl.annotations.UnRAVLAssertionPlugin" />
+		<context:include-filter type="annotation"
+			expression="com.sas.unravl.annotations.UnRAVLRequestBodyGeneratorPlugin" />
+		<context:include-filter type="annotation"
+			expression="com.sas.unravl.annotations.UnRAVLExtractorPlugin" />
+        <context:include-filter type="annotation"
+            expression="com.sas.unravl.annotations.UnRAVLAuthPlugin" />
+	</context:component-scan>
+
+</beans>

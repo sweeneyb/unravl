@@ -1,0 +1,7 @@
+{
+  "name" : "GoogleEverestElevation",
+  "GET" : "http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false",
+  "assert": [
+    { "status" : 200, "doc" : "This member has a trailing comma and is this invalid JSON"  },
+    ]
+}

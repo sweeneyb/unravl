@@ -1,0 +1,18 @@
+[
+   { "name" : "initialize", 
+     "env" : { "count" : 0 }
+   },
+   
+   { "name" : "implicit.template",
+     "preconditions" : [ "count < 3" ],
+     "bind" : { "groovy" : { "count" : "count + 1" } }
+   },
+   
+   {
+     "name" : "uses implicit template",
+     "assert" : "count < 3"
+   },
+   "uses implicit template",
+   "uses implicit template",
+   "uses implicit template"
+]

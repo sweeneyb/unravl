@@ -1,0 +1,9 @@
+/target
+/.settings
+/quiet-log4j.config
+/utf-8.json
+/utf-8.txt
+/build
+.classpath
+.project
+/bin/

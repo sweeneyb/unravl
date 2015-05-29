@@ -1,0 +1,15 @@
+[
+  {
+    "name" : "null value test",
+    "env" : { "objWithNull" : { "nestedValue" : null },
+              "arrayWithNull" : [ null ],
+              "nullValue" : null },
+    "bind" : [ { "groovy" : { "iAmNull" : "null" } } ],
+    "assert": [ 
+        "iAmNull == null",
+        "objWithNull.nestedValue.isNull()",
+        "arrayWithNull[0].isNull()",
+        "nullValue == null" 
+    ]    
+  }
+]

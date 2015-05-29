@@ -1,0 +1,17 @@
+{
+   "env" : { "lat" : 18.5202,
+             "lng" : 73.8567,
+             "expectedElevation" : 560.6177368164062,
+             "host" : "maps.googleapis.com",
+             "api" : "maps/api/elevation/json" },
+  "GET" : "http://{host}/{api}?locations={lat},{lng}",
+  "bind" : [
+     { "headers" : { "contentType" : "Content-Type" } },
+     { "json" : "response" }
+   ],
+   "assert" : [
+		"response.results[0].elevation.doubleValue() == expectedElevation",
+		"response.results[0].location.lat.doubleValue() == lat",
+		"response.results[0].location.lng.doubleValue() == lng"
+               ]
+}

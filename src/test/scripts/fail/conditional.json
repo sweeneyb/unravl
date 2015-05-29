@@ -1,0 +1,78 @@
+[
+ { "name" : "init",
+   "env" : { "run" : true, 
+             "ranSkipped1" : false,
+             "ranSkipped2" : false, 
+             "ranSkipped3" : false}
+   },
+   
+  { "name" : "base.template",
+    "if" : "run"
+  },
+  
+  { "name" : "default condition",
+    "if" : "run",
+    "bind" : { "groovy" : { "ranDefault" : "true",
+                            "run" : "false" }
+             },
+    "assert" : [
+         "ranDefault",
+         "!run",
+         "failedAssertionCount == 0"
+    ]
+  },
+   
+  { "name" : "skip me 1",
+    "template" : "base",
+    "bind" : { "groovy" : { "ranSkipped1" : "true",
+                            "thisShouldNotBeRun" : "true" 
+                          }
+             }
+  },
+   
+  { "name" : "skip me 2",
+    "if" : "false",
+    "bind" : { "groovy" : { "ranSkipped2" : "true",
+                            "thisShouldNotBeRun" : "true" 
+                          }
+             }
+  },
+  { "name" : "skip me 3",
+    "if" : false,
+    "bind" : { "groovy" : { "ranSkipped3" : "true",
+                            "thisShouldNotBeRun" : "true" 
+                          }
+             }
+  },
+   
+  { "name" : "assertion failure",
+    "if" : true,
+    "bind" : { "groovy" : { "ranSkipped" : "true",
+                            "run" : "true" }
+             },
+    "assert" : "false"
+  },
+   
+  { "name" : "unconditionl",
+    "template" : "base",
+    "bind" : { "groovy" : { "ranUnconditional" : "true" }
+             },
+    "assert" : [
+                "ranUnconditional",
+                "failedAssertionCount > 0"
+               ]
+  },
+  
+  { "name" : "check conditions",
+    "if" : "true",
+    "assert" : [
+       "!ranSkipped1",
+       "!ranSkipped2",
+       "!ranSkipped3",
+       "ranUnconditional",
+       "run",
+       "failedAssertionCount > 0"
+    ]
+  }
+ 
+]

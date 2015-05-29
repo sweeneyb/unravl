@@ -1,0 +1,8 @@
+{
+    "env" : { "json" : [ "two", "items", [true, 42 ]] },
+    "assert" :
+    { "schema" : "@src/test/scripts/noSuchSchema.json-schema", 
+      "value" :  "json"
+    }
+}
+    

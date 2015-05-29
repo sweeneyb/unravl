@@ -1,0 +1,47 @@
+[ { "name" : "Validate JSON values using JSON schema",
+    "env" : { "empty" : [],
+              "1 string" : [ "one item" ],
+              "2 strings" : [ "two", "items" ],
+              "1 ints" : [ 42 ],
+              "2 objects" : [ { "key" : "value"}, {"not" : true } ],
+              "mixed" : [ "a string", { "key" : "value", "not" : true } ],
+              
+              "atMost2Items" : { "maxItems" : 2 },
+              "schemaPath" : "src/test/schema"
+             },
+        
+    "assert" :
+    [
+       { "schema" : { "maxItems" : 2 }, 
+         "values" : [ "empty", "1 string", "2 strings", "1 ints", "2 objects", "mixed" ] 
+       },
+       
+       { "schema" : "atMost2Items", 
+         "values" : [ "empty", "1 string", "2 strings", "1 ints", "2 objects", "mixed" ] 
+       },
+       
+       { "schema" : "atMost2Items", 
+         "values" : "empty"
+       },
+       
+       { "schema" : "atMost2Items", 
+         "value" : "mixed"
+       },
+
+       { "schema" : "@{schemaPath}/atMost2items.json", 
+         "values" : [ "empty", "1 string", "2 strings", "1 ints", "2 objects", "mixed" ] 
+       } 
+    ]
+  },
+  
+  {  "name" : "More JSON validation via schema; non-array assert value",
+     "assert" : 
+       { "schema" : "@{schemaPath}/atMost2items.json", 
+         "values" : [ "empty", "1 string", "2 strings", "1 ints", "2 objects", "mixed" ] 
+       } 
+  }
+
+]
+
+ 
+    

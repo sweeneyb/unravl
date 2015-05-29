@@ -1,0 +1,11 @@
+[
+  {
+    "name" : "nothing",
+    "assert": "name == 'nothing'"    
+  },
+    
+  "nothing",
+    
+  "no-such-script"
+  
+]

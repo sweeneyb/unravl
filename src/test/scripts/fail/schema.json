@@ -1,0 +1,8 @@
+{
+    "env" : { "json3" : [ "two", "items", " one too many items for schema" ] },
+    "assert" :
+    { "schema" : { "maxItems" : 2 }, 
+      "value" :  "json3"
+    }
+}
+    

@@ -1,0 +1,63 @@
+[
+	
+ {
+	"name" : "UTF-8",
+	"env" : { "pi" : "\u03C0", "a_accent" : "á" },
+
+	"doc" : [ "These tests depend on this echo API running; it echos the request body to the response body.",
+	          "This allows us to bind a fixed JSON body and text body to @file so we can then read those files",
+	          "and assert the same JSON, when using Unicode characters." ],
+	          
+	"POST" : "http://djb.na.sas.com:1080/SASHello/rest/echo",
+	
+	"headers" : { "Content-type" : "application/octet-stream" },
+	"body" : { "json" : { "pi" : "\u03C0", "a_accent" : "á" } },
+	"bind" : [ 
+	   { "text" : "@utf-8.txt" },
+	   { "json" : "@utf-8.json" }
+	   ],
+	"assert" : [
+		{ "json" : { "pi" : "\u03C0", "a_accent" : "á" } },
+		"pi == requestBody.pi.textValue()",
+		"a_accent == requestBody.a_accent.textValue()",
+		"a_accent == responseBody.a_accent.textValue()",
+		"requestBody == responseBody"
+	]
+ },
+
+	
+ {
+	"name" : "UTF-8.txt",
+	"env" : { "a_accentTxt" : "á" },
+	"POST" : "http://djb.na.sas.com:1080/SASHello/rest/echo",
+	"headers" : { "Content-type" : "application/octet-stream" },
+	"body" : { "json" : "@utf-8.txt" },
+	"bind" : [ 
+	   { "json" : "responseBody" }
+	   ],
+	"assert" : [
+		{ "json" : { "pi" : "\u03C0", "a_accent" : "á" } },
+		"a_accentTxt == requestBody.a_accent.textValue()",
+		"a_accentTxt == responseBody.a_accent.textValue()",
+		"requestBody == responseBody"
+	]
+ },
+	
+ {
+	"name" : "UTF-8.json",
+	"env" : { "a_accentJson" : "{a_accent}" },
+	"POST" : "http://djb.na.sas.com:1080/SASHello/rest/echo",
+	"headers" : { "Content-type" : "application/octet-stream" },
+	"body" : { "json" : "@utf-8.json" },
+	"bind" : [ 
+	   { "json" : "responseBody" }
+	   ],
+	"assert" : [
+		{ "json" : { "pi" : "\u03C0", "a_accent" : "á" } },
+		"a_accentJson == requestBody.a_accent.textValue()",
+		"a_accentJson == responseBody.a_accent.textValue()",
+		"requestBody == responseBody"
+	]
+ }
+
+]

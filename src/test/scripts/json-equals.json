@@ -1,0 +1,36 @@
+{
+
+    "name" : "Test that item order (lat, lng) does not break JSON equality",
+
+    "env": {
+        "actual": {
+            "results": [
+                {
+                    "elevation": 560.6177368164062,
+                    "location": {
+                        "lat": 18.5202,
+                        "lng": 73.8567
+                    },
+                    "resolution": 152.7032318115234
+                }
+            ],
+            "status": "OK"
+        },
+        "expected": {
+            "results": [
+                {
+                    "elevation": 560.6177368164062,
+                    "location": {
+                        "lng": 73.8567,
+                        "lat": 18.5202
+                    },
+                    "resolution": 152.7032318115234
+                }
+            ],
+            "status": "OK"
+        }
+    },
+
+    "assert": "expected == actual"
+
+}

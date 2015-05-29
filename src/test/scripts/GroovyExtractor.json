@@ -1,0 +1,20 @@
+{
+	"name" : "GroovyExtractor",
+	"env" : { "json" : { "a" : [0,1,4,9,16,25], "S" : "JSON", "pi" : 3.14159 } },
+	"bind" : [ { "groovy" : {
+		"unbound" : "\"a string with multiple {unbound} {variables}\"",
+	    "pi" : "Math.PI",
+	    "pi2" : "2*pi",
+	    "r" : "json.a[2].doubleValue()",
+	    "pirsquared" : "pi*r*r",
+	    "S" : "json.S.textValue()",
+	    "doc" : "/* next scriptlet tests using an array which is concatenated to make the Groovy */ true",
+	    "s" : ["S", ".", "toLowerCase()" ]} }
+	   ],
+	 "assert" : [
+	    	"pi2 > 6",
+	    	"pi2 < 7",
+	    	"r == 4",
+	    	"s == \"json\""
+	    ]
+}

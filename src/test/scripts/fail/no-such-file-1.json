@@ -1,0 +1,7 @@
+{
+  "name" : "@no-such-file",
+  "GET" : "http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false",
+  "assert": [
+    { "text" : "@no-such-file"  }
+    ]
+}

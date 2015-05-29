@@ -1,0 +1,23 @@
+{
+  "name" : "GoogleEverestElevation",
+  "GET" : "http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false",
+    "bind" : [
+     { "json": "responseBody" },
+     { "pattern" : ["{responseBody}", ".*\"lat\"\\s*:\\s*([^,}]+)[,}].*", "lat" ] },
+     { "pattern" : ["{responseBody}", ".*\"lng\"\\s*:\\s*([^,}]+)[,}].*", "lng" ] },
+     { "pattern" : ["{responseBody}", ".*\"elevation\"\\s*:\\s*([^,}]+)[,}].*", "elevation" ] },
+     { "headers" : { "responseType" : [ "Content-Type", "^(.*)\\s*;\\s*charset=(.*)$", "mediaType", "charset" ] }
+     }
+  ],
+  "assert": [
+    { "status" : 200 },
+    { "groovy" : "status == 200" },
+    { "ignore" : { "json" : "@benchmark.json" } },
+    { "equal" : [ "{lat}", 27.988056, 0.0001 ] },
+    { "equal" : [ "{lng}", 86.925278, 0.0001 ] },
+    { "equal" : [ "{elevation}", 8815.7158203125, 0.0001 ] },
+    { "headers" : { "Content-Type" : "application/json; *charset=UTF-8" } },
+    { "doc" : "following array form is deprecated" },
+    { "headers" : [ { "content-type" : "application/json; *charset=UTF-8" } ]}
+    ]
+}

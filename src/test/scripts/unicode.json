@@ -1,0 +1,25 @@
+{ "name" : "Unicode code points",
+  "Doc" : "Verify that the {U+xxxx} notation resolves Unicode code points in UnRAVL script strings.",
+  "env" : { "leftBrace" : "{U+007B}",
+            "verticalBar" : "{u+007C}",
+            "rightBrace" : "{u+007d}",
+            "notUnicodeSyntax1" : "{U+ghij}",
+            "notUnicodeSyntax2" : "{U+00}",
+            "notUnicodeSyntax3" : "{U+00oo}",
+            "neither" : "{u+007C|neither unicode nor var}"
+           },
+   "assert" : [
+        "'{' == leftBrace",
+        "'|' == verticalBar",
+        "'}' == rightBrace",
+        "notUnicodeSyntax1.endsWith('U+ghij}')",
+        "notUnicodeSyntax2.endsWith('U+00}')",
+        "notUnicodeSyntax3.endsWith('U+00oo}')",
+        "neither.endsWith('u+007C|neither unicode nor var}')",
+        "notUnicodeSyntax1.startsWith(leftBrace)",
+        "notUnicodeSyntax2.startsWith(leftBrace)",
+        "notUnicodeSyntax3.startsWith(leftBrace)",
+        "neither.startsWith(leftBrace)"
+		]
+}
+            

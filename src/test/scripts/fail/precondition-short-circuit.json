@@ -1,0 +1,24 @@
+[
+	{
+		"preconditions":[
+			"true == true",
+			"true == false",
+			"assertNotNull('this assertion will be skipped')",
+			"assertNotNull('as will this one')",
+			"assertNotNull('and this one')"
+		],
+		"assert":[
+			"assertNotNull('this assertion should be skipped because preconditions failed')",
+			"assertNotNull('as will this one')"
+		]
+
+	},
+	{
+		"preconditions":[
+			"assertNotNull('this test, therefore this assertion, should be skipped')",
+			"assertNotNull('as will this one')"
+		]
+
+	}
+
+]

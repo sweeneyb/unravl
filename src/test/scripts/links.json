@@ -1,0 +1,124 @@
+[
+    {
+        "name" : "Create a fake JSON responseBody, location",
+        "env" : {
+          "location" : "http://www.example.com",
+          "responseBody" : {
+              "description" : "sample response with nested links",
+              "links" : [
+                  { "rel" : "self", "href" : "{location}", "method" : "GET" },
+                  { "rel" : "update", "href" : "{location}", "method" : "PUT" },
+                  { "rel" : "delete", "href" : "{location}", "method" : "DELETE" }
+              ]
+          }
+        }
+    },
+
+    { "name" : "Extract just the self link",
+      "bind" : { "link" : "self"},
+      "assert" : "self.href.textValue() == location"
+    },
+
+    { "name" : "Extract just the self URL",
+      "bind" : { "href" : "self"},
+      "assert" : "self == location"
+    },
+
+    { "name" : "Extract self, update, and delete links",
+      "bind" : { "links" : [ "self", "update", "delete" ]},
+      "assert" : [
+          "self.href.textValue() == location",
+          "update.href.textValue() == location",
+          "delete.href.textValue() == location",
+          "self.rel.textValue() == 'self'",
+          "update.rel.textValue() == 'update'",
+          "delete.rel.textValue() == 'delete'",
+          "self.method.textValue() == 'GET'",
+          "update.method.textValue() == 'PUT'",
+          "delete.method.textValue() == 'DELETE'"
+      ]
+    },
+
+    { "name" : "Extract self, update, and delete URLs",
+      "bind" : { "hrefs" : [ "self", "update", "delete" ]},
+      "assert" : [
+          "self == location",
+          "update == location",
+          "delete == location"
+      ]
+    },
+
+
+    { "name" : "Extract self, update, and delete URLs using structural matching",
+      "bind" : { "hrefs" : {
+            "xself" : { "rel" : "self", "method" : "GET" },
+            "xupdate": { "rel" : "update", "method" : "PUT" },
+            "xdelete": { "rel" : "delete", "method" : "DELETE" }
+            }},
+      "assert" : [
+          "xself == location",
+          "xupdate == location",
+          "xdelete == location"
+      ]
+    },
+
+    { "name" : "Extract HAL links from a JSON env var, not default responseBody",
+
+      "env" : {
+    	  "expectedLink" : "http://www.example.com/hal/resources/r3893",
+    	  "expectedAlt" : "http://www.example.com/hal/resources/r3893.alt",
+          "hal" : { "header" : "this is a HAL resource",
+                    "_links" : {
+                        "link" : { "href" : "{expectedLink}" },
+                        "alt" : { "href" : "{expectedAlt}" }
+                    }
+                  }
+      },
+      "bind" :  { "links" : [ "link", "alt" ], "from" : "hal"},
+      "assert" : [
+          "link.href.textValue() == expectedLink",
+          "alt.href.textValue() == expectedAlt"
+      ]
+    },
+
+    { "name" : "Extract HAL links from a JSON env var, not default responseBody",
+      "bind" : { "hrefs" : [ "link", "alt" ], "from" : "hal"},
+      "assert" : [
+          "link == expectedLink",
+          "alt == expectedAlt"
+      ]
+    },
+
+    { "name" : "Extract Collection+JSON links from a JSON env var, not default responseBody",
+
+      "env" : {
+    	  "expectedLink" : "http://www.example.com/Collection+JSON/resources/r3893",
+    	  "expectedAlt" : "http://www.example.com/Collection+JSON/resources/r3893.alt",
+          "collection+json" : { 
+          "collection" : {
+              "token" : "this is a Collection+JSON resource",
+              "links" : [
+                  { "rel" : "cjLink", "href" : "{expectedLink}" },
+                  { "rel" : "cjAlt",  "href" : "{expectedAlt}" }
+                  ]
+              }
+          }
+      },
+      "bind" :  { "links" : [ "cjLink", "cjAlt" ], "from" : "collection+json"},
+      "assert" : [
+          "cjLink.href.textValue() == expectedLink",
+          "cjAlt.href.textValue() == expectedAlt"
+      ]
+    },
+
+
+    { "name" : "Extract Collection+JSON links from a JSON env var, not default responseBody",
+      "bind" : { "hrefs" : [  "cjLink", "cjAlt" ], "from" : "collection+json"},
+      "assert" : [
+          "cjLink == expectedLink",
+          "cjAlt == expectedAlt"
+      ]
+    }
+
+
+]

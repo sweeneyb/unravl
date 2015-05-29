@@ -1,0 +1,20 @@
+[
+	{
+		"assert":[
+			"true == true",
+			"true == false",
+			"assertNotNull('this assertion will be skipped')",
+			"assertNotNull('as will this one')",
+			"assertNotNull('and this one')"
+		]
+
+	},
+	{
+		"assert":[
+			"assertNotNull('this test, therefore this assertion, should be skipped')",
+			"assertNotNull('as will this one')"
+		]
+
+	}
+
+]

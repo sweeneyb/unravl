@@ -1,0 +1,9 @@
+{
+  "name" : "@file contains invalid JSON",
+  "GET" : "http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false",
+  "assert": [
+    { "json" : "@src/test/scripts/fail/invalid-json.unravl"  }
+    ]
+}
+
+

@@ -1,0 +1,29 @@
+[
+	{
+		"doc":"This script shows how to import system environment variables into script variables",
+		"name":"getenv",
+		"bind":[
+			{
+				"groovy":{
+					"TEST_HOST":"System.getenv('TEST_HOST')",
+					"CAS_PORT":"System.getenv('CAS_PORT')"
+				}
+			}
+		]
+	},
+	{
+		"doc":"This shows using those env variables. Tip: the precondition asserts the values are bound.",
+		"name":"Use env",
+		"preconditions":[
+			{
+				"bound":[
+					"TEST_HOST",
+					"CAS_PORT"
+				]
+			},
+			"TEST_HOST == 'djb.na.sas.com'",
+			"CAS_PORT == '1080'"
+		],
+		"GET":"http://{TEST_HOST}:{CAS_PORT}/SASHello/rest/hello"
+	}
+]
