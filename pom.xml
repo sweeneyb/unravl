@@ -16,17 +16,17 @@
 
    <scm>
       <connection>scm:git://gitlab.sas.com:sasdjb/unravl.git</connection>
-      <url>http://gitlab.sas.com/sasdjb/unravl</url>
+      <url>git@github.com:sassoftware/unravl.git</url>
    </scm>
 
    <developers>
       <developer>
          <name>David Biesack</name>
          <email>David.Biesack@sas.com</email>
-         <url>http://sww.sas.com/saspedia/David_Biesack</url>
-         <id>sasdjb</id>
-         <organization>SAS Technology Office</organization>
-         <organizationUrl>http://sww.sas.com/saspedia/SAS_Technology_Office</organizationUrl>
+         <url>https://github.com/DavidBiesack</url>
+         <id>DavidBiesack</id>
+         <organization>SAS</organization>
+         <organizationUrl>http://www.sas.com</organizationUrl>
       </developer>
    </developers>
 

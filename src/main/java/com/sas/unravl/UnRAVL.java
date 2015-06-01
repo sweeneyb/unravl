@@ -32,8 +32,6 @@ import org.apache.log4j.Logger;
  * which defines the set of possible value bindings (called @link
  * UnRAVLExtractor s) and the set of possible {@link UnRAVLAssertion}s.
  * <p>
- * Full doc is at http://sww.sas.com/saspedia/User:Djb/UnRAVL
- * <p>
  * TODO: This class is too large and does too much. Refactor.
  * 
  * @author David.Biesack@sas.com
