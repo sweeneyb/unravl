@@ -69,7 +69,7 @@ public class GroovyExtractor extends BaseUnRAVLExtractor {
         super.extract(script, scriptlet, call);
         ObjectNode bindings = Json.object(Json.firstFieldValue(scriptlet));
         for (Map.Entry<String, JsonNode> e : Json.fields(bindings)) {
-            String groovy = null, source = null;
+            String source = null;
             JsonNode sourceNode = null;
             try {
                 String name = e.getKey();
@@ -81,13 +81,11 @@ public class GroovyExtractor extends BaseUnRAVLExtractor {
                 }
                 source = new Text(sourceNode).text();
                 Object value = eval(call, source);
-                logger.trace("Groovy extractor " + groovy + " bound " + name
-                        + " to " + value);
                 script.bind(name, value);
 
             } catch (RuntimeException rte) {
                 logger.error("Groovy script '" + sourceNode + "' (expansion '"
-                        + groovy + "') threw a runtime exception "
+                        + source + "') threw a runtime exception "
                         + e.getClass().getName() + ", " + rte.getMessage());
                 throw new UnRAVLException(rte.getMessage(), rte);
             } catch (IOException ioe) {
