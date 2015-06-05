@@ -213,7 +213,7 @@ public class TestSimplifyJsonBody{
 	@Test
 	public void testBinay() throws Exception{
 		
-		String actuals = getActuals("{\"body\":{\"binary\":\"@src/test/thumbnail.png\"}}");
+		String actuals = getActuals("{\"body\":{\"binary\":\"@src/test/data/Un.png\"}}");
 		assertNotNull(actuals);
 		
 		

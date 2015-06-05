@@ -96,7 +96,7 @@ public class Binary {
             buildFromStream(node.substring(1));
         } else {
             throw new UnRAVLException("Unrecognized element " + node
-                    + "in 'binary' input.");
+                    + " in 'binary' input.");
         }
 
     }
