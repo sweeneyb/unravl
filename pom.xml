@@ -275,14 +275,6 @@
                <outputDirectory>${project.build.directory}/apidocs</outputDirectory>
                <docfilessubdirs>true</docfilessubdirs>
                <source>1.6</source>
-               <offlineLinks>
-                  <offlineLink>
-                     <url>http://java.na.sas.com/review/api/other/jdk-1.6/docs/api/</url>
-							<!-- we need a better location for this... -->
-                     <location>/u/sasdjb/javadoc/offline/1.6</location>
-                  </offlineLink>
-               </offlineLinks>
-               <links />
                <quiet>true</quiet>
             </configuration>
             <reportSets>
