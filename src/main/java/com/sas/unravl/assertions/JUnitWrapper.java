@@ -99,7 +99,7 @@ public class JUnitWrapper {
             try {
                 count++;
                 UnRAVLRuntime runtime = new UnRAVLRuntime();
-                Map<String, Object> newEnv = new HashMap<String, Object>(env);
+                Map<String, Object> newEnv = env == null ? new HashMap<String, Object>() : new HashMap<String, Object>(env);
                 bind(runtime, newEnv);
                 System.out.println("Run UnRAVL script " + scriptFile);
                 runtime.execute(scriptFile);
