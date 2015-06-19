@@ -6,5 +6,4 @@
 /build
 .classpath
 .project
-/bin/
 .gradle
