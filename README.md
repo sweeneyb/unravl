@@ -178,6 +178,27 @@ of the named variable from the environment.
 
 To see the full syntax for UnRAVL scripts, refer to [Reference](doc/Reference.md)
 
+## Releases
+
+[Release v0.2.0](https://github.com/sassoftware/unravl/releases/tag/v0.2.0) is the first public release of UnRAVL
+
+## Running UnRAVL
+
+You can download the source from this repo and run
+```
+    ./gradlew clean build copyDeps
+```
+Run UnRAVL as:
+```bash
+    bin/unravl.sh script.json  # from Linux
+    bin\unravl.bat script.json # from Windows
+```
+
+Alternatively, you can download the binary release.
+Create a directory `unravl` for your local copy of UnRAVL, `cd unravl` to that directory,
+then download the release [unravl-0.2.0.zip](https://github.com/sassoftware/unravl/releases/download/v0.2.0/unravl-0.2.0.zip). Unzip the release file in the `unravl` directory.
+Then run UnRAVL using the scripts in the `bin` directory, as described above
+
 ## Contributing
 
 See [ContributorAgreement.txt](ContributorAgreement.txt)
