@@ -21,26 +21,26 @@ import org.apache.log4j.Logger;
  * variable. The scripts can use all defined variable bindings.
  * <p>
  * Usage:
- * 
+ *
  * <pre>
  * "bind" : [
  *    { "groovy" : { var-value-pairs } }
  *    ]
  * </pre>
- * 
+ * <p>
  * The <var>var-value-pairs</var> are JSON object notation such as
  * <code>"varName" : "<em>groovy-expression</em>"</code>. Each
  * <code><em>groovy-expression</em></code> may be a string, a string in the form
  * "@file-or-URL", or an array of such source specifications, as defined in
  * {@link Text}.
- * <p>
+ * </p>
  * <p>
  * Expressions may use any variable binding that is currently in effect,
  * including preceding <var>var-value-pairs</var> in the current "groovy"
  * scriptlet. Example:
- * 
+ * </p>
  * <pre>
- * "bind" : [ 
+ * "bind" : [
  *    { "groovy" : { "pi" : "Math.PI",
  * 	                 "r" : "json.a[2].getDoubleValue()",
  * 	                 "pirsquared" : "pi*r*r",
@@ -49,12 +49,13 @@ import org.apache.log4j.Logger;
  * 	  }
  * 	  ],
  * </pre>
- * 
+ *
  * <p>
  * The final Groovy script value is subject to environment expansion before
  * running. All variables in the environment are available as local variables
  * when the Groovy script runs.
- * 
+ * </p>
+ *
  * @author David.Biesack@sas.com
  */
 @UnRAVLExtractorPlugin({ "groovy", "Groovy" })
@@ -99,7 +100,7 @@ public class GroovyExtractor extends BaseUnRAVLExtractor {
     /**
      * Evaluate script as a Groovy expression and return the result. Environment
      * variable expansion is performed on the input before evaluation.
-     * 
+     *
      * @param call
      *            the API call context
      * @param source

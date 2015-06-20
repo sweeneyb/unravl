@@ -20,20 +20,20 @@ import org.springframework.beans.factory.annotation.Autowired;
  * or elsewhere. An {@link UnRAVL} script will load UnRAVLExtractor objects
  * while executing the "bind" member of the script. The first field in the
  * assertion member is used as the key, i.e.
- * 
+ *
  * <pre>
  * { "headers" : [ ... ] }
  * </pre>
- * 
+ *
  * is a extractor which uses the key "headers". The extractor class is found in
  * the {@link UnRAVLPlugins} list of extractors and instantiated. Then, the
- * {@link #extract(UnRAVL, JsonNode, ApiCall)} method is run, passing the
+ * {@link #extract(UnRAVL, ObjectNode, ApiCall)} method is run, passing the
  * currently executing {@link UnRAVL} script and the JsonNode element that
  * defines the extractor.
  * <p>
  * Extractors should extend {@link BaseUnRAVLExtractor} and their extract()
  * method should invoke super.extract(script,node)
- * 
+ *
  * @author David.Biesack@sas.com
  */
 public class BaseUnRAVLExtractor extends BaseUnRAVLPlugin implements
@@ -60,7 +60,7 @@ public class BaseUnRAVLExtractor extends BaseUnRAVLPlugin implements
     /**
      * Used to register the extractor class with the UnRAVLRuntime This is
      * called from Spring when the UnRAVLPlugins class is loaded.
-     * 
+     *
      * @param plugins
      *            a plugins instance
      */

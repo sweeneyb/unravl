@@ -19,13 +19,13 @@ import org.apache.log4j.Logger;
 
 /**
  * An extractor for
- * 
+ *
  * <pre>
  * { "text" : "varName" }
  * { "text" : "@file-name" }
  * </pre>
  *
- * @todo: allow an encoding, such as<br/>
+ * TODO: allow an encoding, such as<br>
  *        <code>{ "text" : "@file-name", "encoding": "UTF-16" }</code>
  * @author David.Biesack@sas.com
  */

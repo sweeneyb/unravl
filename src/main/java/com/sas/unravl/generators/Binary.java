@@ -44,10 +44,10 @@ public class Binary {
      * ObjectNode <code>{ "binary" : [ 0, 2, 1, 3 ]}</code> the constructor new
      * Binary(object, "binary")
      * 
-     * @param node
-     * @param fieldName
-     * @throws IOException
-     * @throws UnRAVLException
+     * @param node the JSON node for this scriptlet
+     * @param fieldName the field name (normally "binary")
+     * @throws IOException if an I/O exception occurs
+     * @throws UnRAVLException if an other exception occurs, including invalid JSON specification.
      */
     public Binary(ObjectNode node, String fieldName) throws IOException,
             UnRAVLException {
@@ -61,8 +61,8 @@ public class Binary {
      *            either a TextNode with the value "@file-or-url", or a
      *            ArrayNode that contains integer byte values (0 to 255) or
      *            "@file-or-url" strings, or nested arrays.
-     * @throws IOException
-     * @throws UnRAVLException
+     * @throws IOException an I/O error occurred 
+     * @throws UnRAVLException Some other exception occurred, including invalid JSON specification
      */
     public Binary(JsonNode binarySpec) throws IOException, UnRAVLException {
         build(binarySpec);
@@ -124,10 +124,10 @@ public class Binary {
      * Copy bytes from an input stream to an output stream.
      * 
      * @param in
-     *            the input stream. This is closed when done
+     *            the input stream. This is closed when done.
      * @param out
-     *            the output stream. This is <bold>not</bold> closed.
-     * @throws IOException
+     *            the output stream. This is <strong>not</strong> closed.
+     * @throws IOException if there is an error reading from in or writing to out
      */
     public static void copy(InputStream in, OutputStream out)
             throws IOException {

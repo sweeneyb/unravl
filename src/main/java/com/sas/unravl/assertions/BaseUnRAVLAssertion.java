@@ -27,7 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 
  * is an assertion which uses the key "response". The assertion class is found
  * in the {@link UnRAVLPlugins} list of assertions and instantiated. Then, the
- * {@link #check(UnRAVL, JsonNode, Stage, ApiCall)} method is run, passing the
+ * {@link #check(UnRAVL, ObjectNode, Stage, ApiCall)} method is run, passing the
  * currently executing {@link UnRAVL} script and the JsonNode element that
  * defines the assertion scriptlet.
  * <p>

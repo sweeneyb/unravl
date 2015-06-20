@@ -23,20 +23,20 @@ import org.apache.log4j.Logger;
  * optionally parse them into constituent fields.
  * <p>
  * The format is:
- * 
+ *
  * <pre>
  * { "headers" : json-object }
  * </pre>
- * 
+ *
  * For example,
- * 
+ *
  * <pre>
- * { "headers" : { "contentType" : "Content-Type", 
- *                 "location" : "Location" 
+ * { "headers" : { "contentType" : "Content-Type",
+ *                 "location" : "Location"
  *               }
  * }
  * </pre>
- * 
+ *
  * This will bind the value of the Content-Type header to the variable
  * "contentType" and the value of the Location header to the variable
  * "location". If the right hand side of a pair is an array instead of a string,
@@ -45,32 +45,32 @@ import org.apache.log4j.Logger;
  * bound to the groups that are matched from the pattern. The value of the
  * header is parsed with a regular expression and the groups bound to variables.
  * For example,
- * 
+ *
  * <pre>
  * { "headers" : {
  *     "contentType" : [ "Content-Type", "^(.*)\\s*;\\s*charset=(.*)$", "mediaType", "charset" ]
  *     }
  * }
  * </pre>
- * 
+ *
  * will bind contentTye to the complete value of the Content-Type header, and
  * extract the media type and charset into variables named "mediaType" and
  * "charset" according to the pattern.
- * 
- * (Note that a per the JSON grammar, \ characters in a JSON string must be
- * escaped, so the regular expression notation <code>\s</code> is coded in the
- * JSON string as <code>\\s</code>.)
- * 
+ * <p>
+ * (Note that a per the JSON grammar, \\ characters in a JSON string must be
+ * escaped, so the regular expression notation <code>\\s</code> is coded in the
+ * JSON string as <code>\\\\s</code>.)
+ *
  * </p>
  * For example, if the Content-Type header was
- * 
+ *
  * <pre>
  * application/json;charset=UTF-8
  * </pre>
- * 
- * this headers specification will bind the variables:<br/>
- * responseType to "application/json; charset=UTF-8"<br/>
- * mediaType to "application/json, and <br/>
+ *
+ * this headers specification will bind the variables:<br>
+ * responseType to "application/json; charset=UTF-8"<br>
+ * mediaType to "application/json, and <br>
  * charset to "UTF-8".
  * <p>
  * If the regular expression does not match, this extractor will throw an
@@ -81,45 +81,45 @@ import org.apache.log4j.Logger;
  * false positive.
  * <p>
  * The (deprecated) format is
- * 
+ *
  * <pre>
  * { "headers" : array-of-matchers  }
  * </pre>
- * 
+ *
  * where each element of the array is a subarray of strings, in the form
- * 
+ *
  * <pre>
  * [ header, var ]
  * </pre>
- * 
+ *
  * such as
- * 
+ *
  * <pre>
  * [ "Content-Type", "responseType" ]
  * </pre>
- * 
+ *
  * which will bind the value of the Content-Type header into the environment
  * variable named "responseType".
  * <p>
  * The more advanced form works like the {@link PatternExtractor} and binds
  * regular expression grouping values into additional environment variable
  * bindings. in the form
- * 
+ *
  * <pre>
  * [ header, var ]
  * </pre>
- * 
+ *
  * such as
- * 
+ *
  * <pre>
  * [ "Content-Type", "responseType", "^(.*)\\s*;\\s*charset=(.*)$", "mediaType", "charset" ]
  * </pre>
- * 
+ *
  * which will bind the value of the Content-Type header into the environment
  * variable named "responseType", then perform pattern matching to extract the
  * media type and the encoding character set into the variables mediaType and
  * charset.
- * 
+ *
  * @author David.Biesack@sas.com
  */
 

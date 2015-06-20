@@ -211,6 +211,8 @@ public class VariableResolver {
     }
 
     /** 
+     * Test if a string is a Unicode code point that matches the pattern "U+hhhh".
+     * @param string the input string
      * @return True if string matches "U+hhhh" where hhhh is four hex digits.
      * Case is ignored.
      */

@@ -28,7 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 
  * is a body generator which uses the key "json". The body generator class is
  * found in the {@link UnRAVLPlugins} list of body generator classes and
- * instantiated. Then, the {@link #getBody(UnRAVL, JsonNode, ApiCall)} method is
+ * instantiated. Then, the {@link #getBody(UnRAVL, ObjectNode, ApiCall)} method is
  * run, passing the currently executing {@link UnRAVL} script and the JsonNode
  * scriptlet element that defines the body generator.
  * <p>
@@ -53,8 +53,8 @@ public class BaseUnRAVLRequestBodyGenerator extends BaseUnRAVLPlugin implements
      * Used to register the body generator class with the UnRAVL runtime This is
      * called from Spring when the UnRAVLPlugins class is loaded.
      * 
-     * @param runtime
-     *            a runtime instance
+     * @param plugins
+     *            UnRVAL plugins manager instance
      */
     @Autowired
     public void setPluginManager(UnRAVLPlugins plugins) {

@@ -30,7 +30,7 @@ import org.apache.log4j.Logger;
 
 /**
  * JSON utility methods.
- * 
+ *
  * @author David.Biesack@sas.com
  */
 public class Json {
@@ -39,11 +39,11 @@ public class Json {
 
     /**
      * Convenience method for parsing a string as JSON.
-     * 
+     *
      * @param json
      *            text JSON; this must be valid
      * @return the root JsonNode
-     * @throws IllegalArgumentException
+     * @throws UnRAVLException
      *             if the json is not valid.
      */
     public static JsonNode parse(String json) throws UnRAVLException {
@@ -61,13 +61,12 @@ public class Json {
     /**
      * Process a JsonNode and its subtree and perform environment expansion on
      * all text.
-     * 
+     *
      * @param actual
      *            an input Json
      * @param script
      *            the Unravl script
      * @return a new JsonNode with the text mapped
-     * @throws UnRAVLException
      */
     public static JsonNode expand(JsonNode actual, final UnRAVL script) {
         final JsonNodeFactory jnf = jsonNodeFactory();
@@ -77,7 +76,7 @@ public class Json {
          * each string with its environment expansion, That is, replace
          * {varName} with the current binding for "varName" in the script's
          * environment.
-         * 
+         *
          * @param node
          *            the input JSON
          * @return the node or a replacement which the text expanded.
@@ -98,7 +97,7 @@ public class Json {
                     ObjectNode from = (ObjectNode) node;
                     ObjectNode to = new ObjectNode(jnf);
                     for (Map.Entry<String, JsonNode> f : Json.fields(from)) {
-                        to.put(f.getKey(), this.apply(f.getValue()));
+                        to.set(f.getKey(), this.apply(f.getValue()));
                     }
                     return to;
                 } else
@@ -112,21 +111,21 @@ public class Json {
     /**
      * Transform a JsonNode tree by applying a mapping function to the nodes in
      * it.
-     * 
-     * @param actual
-     * @param mappingFunction
+     *
+     * @param node the input JSON
+     * @param mappingFunction a Function that maps a node to a node
      * @return the transformed map which may be the input JsonNode or a new
      *         node.
      */
-    public static JsonNode map(JsonNode actual,
+    public static JsonNode map(JsonNode node,
             Function<JsonNode, JsonNode> mappingFunction) {
-        return mappingFunction.apply(actual);
+        return mappingFunction.apply(node);
     }
 
     /**
      * Return the input node as an ArrayNode when an UnRAVL script expects an
      * array node.
-     * 
+     *
      * @param node
      *            input node
      * @return the input node, cast as an ArrayNode
@@ -146,7 +145,7 @@ public class Json {
     /**
      * Return the input node as an ObjectNode when an UnRAVL script expects an
      * array node.
-     * 
+     *
      * @param node
      *            input node
      * @return the input node, cast as an ObjectNode
@@ -166,7 +165,7 @@ public class Json {
     /**
      * Return the input node as an TextNode when an UnRAVL script expects an
      * text node.
-     * 
+     *
      * @param node
      *            input node
      * @return the input node, cast as an TextNode
@@ -186,7 +185,7 @@ public class Json {
 
     /**
      * Access the first field of a JsonNode, which must be an ObjectNode
-     * 
+     *
      * @param node
      *            a JsonNode which will be used as an ObjectNode
      * @return the first field in the ObjectNode as a Map.Entry
@@ -207,7 +206,7 @@ public class Json {
 
     /**
      * Convert an ArrayNode into an iterable list of JsonNode
-     * 
+     *
      * @param node
      *            a JsonNode which will be used as an ObjectNode
      * @return a List containing the elements
@@ -226,7 +225,7 @@ public class Json {
 
     /**
      * Return the name of the first field in a JsonNode
-     * 
+     *
      * @param node
      *            a node which must be a non-empty ObjectNode
      * @return the name of the first field
@@ -239,7 +238,7 @@ public class Json {
 
     /**
      * Return the name of the first field in a JsonNode
-     * 
+     *
      * @param node
      *            a node which must be a non-empty ObjectNode
      * @return the value of the first field
@@ -259,7 +258,7 @@ public class Json {
 
     /**
      * Convert an ObjectNode to a List of Map.Entry objects
-     * 
+     *
      * @param object
      *            an JSON object
      * @return a List of Map.Entry objects. These are active and updating them
@@ -277,7 +276,7 @@ public class Json {
 
     /**
      * Write a JSON tree to a stream
-     * 
+     *
      * @param json
      *            the JSON node
      * @param fileName
@@ -325,7 +324,7 @@ public class Json {
     /**
      * If the JSON node contains a field with the given name and it is text,
      * return that text, else return the default value
-     * 
+     *
      * @param node
      *            a JSON node
      * @param fieldName

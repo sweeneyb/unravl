@@ -10,24 +10,26 @@ import java.lang.annotation.Target;
  * UnRAVLRuntime to associate a string (the annotation value) with this class
  * within "body" element. For example, the class
  * com.sas.unravl.generators.JsonRequestBodyGenerator uses the annotation
- * 
+ *
  * <pre>
  * &#x40;UnRAVLRequestBodyGeneratorPlugin("json")
  * </pre>
- * 
+ *
  * so that UnRAVL scripts which use the "body" scriptlet
- * 
+ *
  * <pre>
  * "body" : { "json" : { ... } }
  * </pre>
- * 
+ *
  * can execute that body generator by instantiating a JsonRequestBodyGenerator.
- * 
+ *
  * @author DavidBiesack@sas.com
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface UnRAVLRequestBodyGeneratorPlugin {
-    /** The tag by which this plug in is named in UnRAVL scripts */
+    /** The tags by which this plugin is named in UnRAVL scripts
+        @return the plugin tags
+     */
     String[] value();
 }

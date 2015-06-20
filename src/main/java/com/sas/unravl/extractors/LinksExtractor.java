@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
  * representations. This is also compatible with <a
  * href='http://amundsen.com/media-types/collection/'>Collection+JSON</a>
  * format.
- * 
+ *
  * <pre>
  *  {  ...,
  *     "links" : [
@@ -44,7 +44,7 @@ import org.apache.log4j.Logger;
  *     ...
  *  }
  * </pre>
- * 
+ *
  * We will refer to the above as the atom:link response. With Collection+JSON,
  * the "links" are embedded in the top level "collection" object.
  * <p>
@@ -53,7 +53,7 @@ import org.apache.log4j.Logger;
  * The second format is the the <a
  * href='http://stateless.co/hal_specification.html'>Hypertext Application
  * Language</a> (HAL) representation by Mike Kelly which uses a "_links" member:
- * 
+ *
  * <pre>
  *  { ...,
  *    "_links": {
@@ -62,7 +62,7 @@ import org.apache.log4j.Logger;
  *    }
  *  }
  * </pre>
- * 
+ *
  * We will refer to this as the HAL response.
  * <p>
  * This UnRAVL "bind" element can extract links from only one set of links in a
@@ -72,14 +72,14 @@ import org.apache.log4j.Logger;
  * want to extract links from another environment variable or expression.
  * <p>
  * The syntax for the links extractor is
- * 
+ *
  * <pre>
  *  { "links" : { "var1" : selector1,
  *                "var2" : selector2,
  *                ...
  *                "varn" : selectorn } }
  * </pre>
- * 
+ *
  * "var1" through "varn" are environment variable names which will be bound to
  * the links as per their corresponding selectors. Each selector may be:
  * <dl>
@@ -96,29 +96,29 @@ import org.apache.log4j.Logger;
  * Instead of an object of name/spec pairs, the value of the links extractor may
  * be an array of strings, in which case each string is used as both the
  * variable name and the link relation (selector) name. Thus,
- * 
+ *
  * <pre>
  *  { "links" : [ "self", "update", "delete" ] }
  * </pre>
- * 
+ *
  * is equivalent to
- * 
+ *
  * <pre>
  *  { "links" : { "self" : "self", "update" : "update", "delete" : "delete" ] }
  * </pre>
- * 
+ *
  * Finally, a single value may be used:
- * 
+ *
  * <pre>
  *  { "link" : "self" }
  * </pre>
- * 
+ *
  * which is equivalent to
- * 
+ *
  * <pre>
  *  { "link" : { "self" : "self" } }
  * </pre>
- * 
+ *
  * Note that "link" may be used instead of "links"; this is clearer for
  * extracting a single link.
  * <h3>Extracting just the href value from links</h3>
@@ -127,40 +127,40 @@ import org.apache.log4j.Logger;
  * then the extracted value will be just the string value of the "href" member
  * of the corresponding link representation. not the entire link object. For
  * example,
- * 
+ * </p>
  * <pre>
  *  { "links" : [ "self", "update", "delete" ] }
  * </pre>
- * 
+ * <p>
  * will bind "self", "update", and "delete" to the corresponding <strong>href
  * string values</strong> of the "self", "update, and "delete" links links.
  * </p>
  * <h2>Extracting from JSON other than responseBody</h2>
  * <p>
  * The links/href extractors also has an additional option
- * 
+ *
  * <pre>
  *              "from" : "var-or-path"
  * </pre>
  * <p>
  * If "from" is present, its value should be the name of an UnRAVL variable that
  * contains the links collection. By default, this is the JSON response object.
- * 
+ *
  * <h2>Example: Extracting multiple links</h2>
- * 
+ *
  * <p>
  * Consider two different JSON responses, the atom:link response and the HAL
  * response, as described above. The UnRAVL "bind" element
- * 
+ *
  * <pre>
  *  { "links" : { "selfLink" : "self",
  *                "searchLink" : "search" }
  *  }
  * </pre>
- * 
+ *
  * will select links based on their "rel" names. This will bind the variable
  * "selfLink" to the object
- * 
+ *
  * <pre>
  *  { "rel" : "self",
  *    "method" : "GET",
@@ -168,57 +168,56 @@ import org.apache.log4j.Logger;
  *    "type" : "application/json"
  *  }
  * </pre>
- * 
+ *
  * when used with the the atom:link response, or to the object
- * 
+ *
  * <pre>
  *  { "href": "/orders" }
  * </pre>
- * 
+ * <p>
  * when used with the HAL response. The variable named "searchLink" will be
  * bound to the link with the link relation "search".
- * <p>
- * 
+ * </p>
+ *
  * <pre>
  *  { "href" : [ "self", "search" ] }
  * </pre>
- * 
+ *
  * will bind "self" to the string "http://www.example.com/orders" and bind
  * "search" to the string "http://www.example.com/orders?id={order_id}" (because
  * we use the "href" form instead of the "links" form.)
- * 
+ *
  * <h2>Example: Extracting from other sources</h2>
- * 
+ *
  * By default, this extractor works on the variable named "responseBody" which
  * is bound when using the "json" extractor. However, you can use the optional
  * "from" member to name another variable that is bound, or you can use a Groovy
  * expression that returns a JsonNode. This is useful if you want to extract the
  * links of nested objects. It is required for Collection+JSON nodes to select
  * from the "collection" element inside the response, for example.
- * <p>
- * 
+ *
  * <pre>
  *  "bind" : [
  *             { "href" : { "coll" : "self" },
  *               "from" : "responseBody.collection" } },
- * 
+ *
  *             { "href" : { "self0" : "self",
  *                          "delete0" : "delete" },
  *               "from" : "responseBody.collection.items[0]" } },
- * 
+ *
  *             { "href" : { "selfLast" : "self",
  *                          "deleteLast" : "delete" },
  *               "from" : "responseBody.collection.items[responseBody.collection.items.size()-1]" } }
  *           ]
  * </pre>
- * 
+ *
  * this will extract the href from the link to the collection as well as the the
  * href values from the "self" and "delete" links in the first and last element
  * of the nested items array, respectively. Environment variable substitution is
  * performed on the string before evaluating it as a Groovy expression.
- * 
+ *
  * <h2>Example: Complex matching</h2>
- * 
+ *
  * By default, if the selector is a string, this extractor only matches the link
  * relation. This is also the only option for HAL. For atom:link, the "links"
  * array may contain multiple links with the same link relation. Thus, you may
@@ -226,7 +225,7 @@ import org.apache.log4j.Logger;
  * or more members of the link. For example, to match a link that has a "rel"
  * value of "update" and a "method" value of "PUT" and a "href" label that
  * contains "models", use
- * 
+ *
  * <pre>
  *  "bind" : { "link" : { "updateLink" : { "rel" : "update",
  *                                         "method" : "PUT",
@@ -237,13 +236,13 @@ import org.apache.log4j.Logger;
  * </pre>
  * <p>
  * It is easy to see that
- * 
+ *
  * <pre>
  *  "bind" : { "link" : { "updateLink" : "update" } }
  * </pre>
- * 
+ *
  * is shorthand for
- * 
+ *
  * <pre>
  *  "bind" : { "link" : { "updateLink" : { "rel" : "update" } } }
  * </pre>
@@ -251,7 +250,7 @@ import org.apache.log4j.Logger;
  * (Note that this element may be specified with either "links" or "link",
  * depending on your preference - use "links" when binding more than one link,
  * and "link" when binding only one.)
- * 
+ *
  * @author David.Biesack@sas.com
  */
 

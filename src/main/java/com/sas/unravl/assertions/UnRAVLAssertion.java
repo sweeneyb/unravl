@@ -13,11 +13,11 @@ import com.sas.unravl.UnRAVLPlugins;
  * {@link UnRAVL} script will load UnRAVLAssertion objects while executing the
  * "preconditions" or "assert" members of the script. The first field in the
  * assertion member is used as the key, i.e.
- * 
+ *
  * <pre>
  * { "headers" : specification }
  * </pre>
- * 
+ *
  * is a headers assertion which uses the key "headers". The assertion class is
  * found in the {@link UnRAVLPlugins} list of assertions, and instantiated.
  * Then, the {@link #check(UnRAVL, ObjectNode, Stage, ApiCall)} method is run,
@@ -27,7 +27,7 @@ import com.sas.unravl.UnRAVLPlugins;
  * <p>
  * Assertions should extend {@link BaseUnRAVLAssertion} and their check() method
  * should invoke super.check(script,node)
- * 
+ *
  * @author David.Biesack@sas.com
  */
 public interface UnRAVLAssertion {
@@ -41,7 +41,7 @@ public interface UnRAVLAssertion {
 
     /**
      * execute the assertion within the given script
-     * 
+     *
      * @param script
      *            the currently running script
      * @param assertion
@@ -61,36 +61,51 @@ public interface UnRAVLAssertion {
     /**
      * Return the UnRAVLAssertionException, if running this assertion had an
      * exception
+     * @return a caught assertion exception
      */
     public UnRAVLAssertionException getUnRAVLAssertionException();
 
     /**
      * Set the UnRAVLAssertionException, if running this assertion had an
      * exception
+     * @param e an exception
      */
     public void setUnRAVLAssertionException(UnRAVLAssertionException e);
 
-    /** Set the scriptlet that defines this assertion */
+    /**
+     * Set the scriptlet that defines this assertion
+     * @param node the current node this assertion is processing
+     */
     public void setAssertion(ObjectNode node);
 
-    /** Get the scriptlet that defines this assertion */
+    /**
+     * Get the scriptlet that defines this assertion
+     * @return the current assertion element scirptlet
+     */
     public ObjectNode getAssertion();
 
-    /** Set the UnRAVL script that this instance is running in */
+    /**
+     * Set the UnRAVL script that this instance is running in
+     * @param script the current UnRAVL script
+     */
     public void setScript(UnRAVL script);
 
-    /** Set the UnRAVL script that this instance is running in */
+    /**
+     * Get the UnRAVL script that this instance is running in
+     * @return the script object
+     */
     public UnRAVL getScript();
 
     /**
-     * Set the UnRAVL stage (Precondition, assert) that this instance is running
+     * Set the UnRAVL stage (PRECONDITIONS, ASSERT) that this instance is running
      * in
+     * @param stage which ssertion stage this instance is running in
      */
     public void setStage(Stage stage);
 
     /**
-     * Get the UnRAVL stage (Precondition, assert) that this instance is running
-     * in
+     * @return the UnRAVL stage (PRECONDITIONS, ASSERT) that this instance is running
+     * in.
      */
     public Stage getStage();
 }

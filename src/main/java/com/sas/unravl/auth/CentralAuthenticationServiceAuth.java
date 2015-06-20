@@ -41,26 +41,26 @@ import org.apache.log4j.Logger;
  * credentials may be enclosed directly in the "cas" element.
  * <p>
  * This auth element is specified via
- * 
+ *
  * <pre>
  * "auth" : { "cas" : <em>logon-URL</em> }
  * "auth" : { "cas" : <em>logon-URL</em>, "login" : "myuserid" }
  * "auth" : { "cas" : <em>logon-URL</em>, "login" : "userid", "password" : "mySecret" }
  * "auth" : { "cas" : <em>logon-URL</em>, "mock" : <em>boolean-value</em>
  * </pre>
- * 
+ *
  * where <em>logon-URL</em> is a string containing the URL of the ticket
  * granting ticket authentication API, such as
  * <code>"http://www.example.com/SASLogon/v1/tickets"</code>
  * <p>
- * The service ticket is appended as a query parameter to the end of the uri as
- * <code>&ticket=&lt<em>service-ticket</em>></code> or
- * <code>?ticket=&lt<em>service-ticket</em>></code> as needed. The TGT location
- * is added to the environment as <code>&lt<em>hostname</em>>.TGT</code> where
+ * The service ticket is appended as a query parameter to the end of the URI as
+ * <code>&amp;ticket=&lt;<em>service-ticket</em>&gt;</code> or
+ * <code>?ticket=&lt;<em>service-ticket</em>&gt;</code> as needed. The TGT location
+ * is added to the environment as <code>&lt;<em>hostname</em>&gt;.TGT</code> where
  * hostname is taken from the logon-URL value in the JSON specification
  * <p>
  * If mock is true, this precondition will create a mock service ticket.
- * 
+ *
  * @author DavidBiesack@sas.com
  */
 @UnRAVLAuthPlugin("cas")
@@ -125,7 +125,7 @@ public class CentralAuthenticationServiceAuth extends BaseUnRAVLAuth {
      * acquired TGT is also stored in the environment as "{user}.{host}.TGT",
      * and also to "casauth.TGT", which enables logging out by performing a
      * DELETE on the TGT.
-     * 
+     *
      * @param tgt
      *            the ticket granting ticket
      * @param uri
