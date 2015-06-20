@@ -190,14 +190,14 @@ You can download the source from this repo and run
 ```
 Run UnRAVL as:
 ```bash
-    bin/unravl.sh script.json  # from Linux
-    bin\unravl.bat script.json # from Windows
+    bin/unravl.sh src/test/scripts/hello.json  # from Linux
+    bin\unravl.bat src/test/scripts/hello.json # from Windows
 ```
 
 Alternatively, you can download the binary release.
 Create a directory `unravl` for your local copy of UnRAVL, `cd unravl` to that directory,
 then download the release [unravl-0.2.0.zip](https://github.com/sassoftware/unravl/releases/download/v0.2.0/unravl-0.2.0.zip). Unzip the release file in the `unravl` directory.
-Then run UnRAVL using the scripts in the `bin` directory, as described above
+Then run UnRAVL using the scripts in the `bin` directory, as described above.
 
 ## Contributing
 

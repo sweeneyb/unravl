@@ -14,10 +14,17 @@ public abstract class BaseUnRAVLPlugin implements UnRAVLPlugin {
     private ObjectNode scriptlet;
     private ApiCall call;
 
+    /**
+     * @return the API call that this plugin is processing
+     */
     public ApiCall getCall() {
         return call;
     }
 
+    /**
+     * Set the runtime API call instance
+     * @param call the current API call instance
+     */
     public void setCall(ApiCall call) {
         this.call = call;
     }

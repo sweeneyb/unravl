@@ -6,9 +6,8 @@ import java.util.Properties;
 
 /**
  * The main command-line interface for running {@link UnRAVL} scripts. You can
- * run via <code>/u/sasdjb/bin/unravl</code> or
- * <code>\\\\dntsrc\\u\\sasdjb\\bin\\unravl</code>
- *
+ * run via <code>bin/unravl.sh</code> (Linux, Mac OS X) or <code>bin\\unravl.bat</code> (Windows)
+ * Below, <code>unravl</code> refers to the correct script for you environment
  * <pre>
  * unravl script-file [... script-file]
  * </pre>
@@ -18,27 +17,30 @@ import java.util.Properties;
  * a JSON array of UnRAVL scripts.
  * <p>
  * By default, unravl has a built-in Log4j configuration file, which has tracing
- * enabled for the com.sas.unravl package, but you can pass your own with
+ * enabled for the com.sas.unravl package, but you can pass your own 
+ * by setting UNRAVL_OPT:
  *
  * <pre>
- * java -Djog4j.configuration=mylog4j.properties -jar sas.unravl.jar script.json
+ * UNRAVL_OPT="-Djog4j.configuration=mylog4j.properties"  unravl script-file
  * </pre>
  *
- * You can also use this java invocation if you want to pass initial variable
- * bindings for the {@link UnRAVLRuntime} environment.
+ * You can also use this UNRAVL_OPT if you want to pass initial variable
+ * bindings for the {@link UnRAVLRuntime} environment. See the
+ * unravl.sh 
  *
  * <pre>
- * java -Dvar1=value1 -Dvar2=value2 -jar sas.unravl.jar script.json
+ * UNRAVL_OPT="-Dvar1=value1 -Dvar2=value2" unravl script.json
  * </pre>
  *
- * @author sasdjb
+ * @author David.Biesack@sas.com
  */
 public final class Main {
 
     /**
-     * Man entry point. Each arg is the name of an UnRAVL script file or URL All
+     * Man entry point. Each command line argument <em>script-file</em> is the name of an UnRAVL script file or URL. All
      * scripts will run in the same shared UnRAVLRuntime and thus share a common
      * environment and set of variables.
+     * @param argv commmand line arguments
      */
     public static void main(String argv[]) {
         argv = preProcessArgs(argv);

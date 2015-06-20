@@ -83,7 +83,7 @@ public class ApiCall {
     private static final ObjectNode STATUS_ASSERTION = new ObjectNode(
             JsonNodeFactory.instance);
     static {
-        STATUS_ASSERTION.put("status", new TextNode("2.."));
+        STATUS_ASSERTION.set("status", new TextNode("2.."));
     }
 
     public ApiCall(UnRAVL script) throws UnRAVLException, IOException {
@@ -233,7 +233,7 @@ public class ApiCall {
 
         if (bgClass == null || body.isArray() || body.isTextual()) {
             bodyObj = new ObjectNode(JsonNodeFactory.instance);
-            bodyObj.put(JSON_GENERATOR_KEY, body);
+            bodyObj.set(JSON_GENERATOR_KEY, body);
             generatorKey = JSON_GENERATOR_KEY;
             bgClass = JsonRequestBodyGenerator.class;
         }
@@ -580,8 +580,8 @@ public class ApiCall {
      * Wrap exception in an UnRAVLException (unless it already is one), then
      * throw the UnRAVLException
      * 
-     * @param exception
-     * @throws UnRAVLException
+     * @param exception an exception
+     * @throws UnRAVLException the wrapped exception
      */
     public void throwException(Exception exception) throws UnRAVLException {
         if (exception instanceof UnRAVLException)

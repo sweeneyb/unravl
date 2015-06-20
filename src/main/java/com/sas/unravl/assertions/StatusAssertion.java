@@ -11,29 +11,32 @@ import com.sas.unravl.util.Json;
 /**
  * StatusAssertion asserts that the API call returned an HTTP status code that
  * matches the specification. There are three possible forms for this assertion:
- * 
+ *
  * <pre>
  * { "status" : int }
  * { "status" : [ int, int, ..., int ] }
  * { "status" : "<em>pattern</em>" }
  * </pre>
- * 
- * In the first form, the status must match the given int value exactly. <br/>
- * Example: <code>{ "status" : 200 }<code>
+ *
+ * In the first form, the status must match the given int value exactly. <br>
+ * Example: <code>{ "status" : 200 }</code>
  * <p>
  * In the second, the HTTP status code must match one of the int values.
  * The int values must be greater than or equal to 100 and
- * less than 600. 
- * <br/>Example: <code>{ "status" : 200, 201, 204 }<code>
+ * less than 600.
+ * <br>Example: <code>{ "status" : 200, 201, 204 }</code>
+ * </p>
  * <p>
  * In the third, the string representation of the status code must regular expression pattern.
- * This is the "default" assertion. 
- * <br/>Example: <code>{ "status" : "2.." }<code>
+ * This is the "default" assertion.
+ * <br>Example: <code>{ "status" : "2.." }</code>
+ * </p>
  * <p>
  * If an UnRAVL script has no "status" assertion, an implicit
- * assertion of <br/><code>{ "status" : "2.." }<code><br/>is applied,  which matches all 200-level
+ * assertion of <br><code>{ "status" : "2.." }</code><br>is applied, which matches all 200-level
  * status codes.
- * 
+ * </p>
+ *
  * @author David.Biesack@sas.com
  *
  */

@@ -8,22 +8,22 @@ version = '0.2.1-SNAPSHOT'
 description = "Uniform REST API Validation Language"
 
 ext {
-	jacksonVersion = "2.2.3"
-	groovyVersion = "2.3.7"
-	springVersion = "3.2.11.RELEASE"
-	httpClientVersion = "4.3.6"
-	httpCoreVersion = "4.3.3"
-	commonsCodecVersion = "1.9"
-	log4jVersion = "1.2.16"
-	guavaVersion = "17.0"
-	junitVersion = "4.8.1"
-    	jsonSchemaValidatorVersion = "2.2.6"
-    	jsonSchemaCoreVersion = "1.2.5"
-    	jacksonCoreUtilsVersion = "1.8"
+	jacksonVersion = "2.5.+"
+	groovyVersion = "2.4.3"
+	springVersion = "4.1.6.RELEASE"
+	httpClientVersion = "4.5"
+	httpCoreVersion = "4.4.1"
+	commonsCodecVersion = "1.10"
+	log4jVersion = "1.2.17"
+	guavaVersion = "18.0"
+	junitVersion = "4.12"
+    jsonSchemaValidatorVersion = "2.2.6"
+    jsonSchemaCoreVersion = "1.2.5"
+    jacksonCoreUtilsVersion = "1.8"
 }
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 repositories {
        maven { url "https://repo1.maven.org/maven2/" }
@@ -36,9 +36,7 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
-    compile group: 'com.github.fge', name: 'json-schema-validator', version: jsonSchemaValidatorVersion
-    compile group: 'com.github.fge', name: 'json-schema-core', version: jsonSchemaCoreVersion
-    compile group: 'com.github.fge', name: 'jackson-coreutils', version: jacksonCoreUtilsVersion
+    testCompile group: 'com.fasterxml.jackson.module', name: 'jackson-module-jaxb-annotations', version: jacksonVersion
     compile group: 'org.codehaus.groovy', name: 'groovy-bsf', version: groovyVersion
     compile group: 'org.springframework', name: 'spring-core', version: springVersion
     compile group: 'org.springframework', name: 'spring-web', version: springVersion
@@ -49,10 +47,18 @@ dependencies {
     compile group: 'com.google.guava', name: 'guava', version: guavaVersion
     // Note: junit is an intentional runtime dependency, not just testCompile
     compile group: 'junit', name: 'junit', version: junitVersion
-    testCompile group: 'com.fasterxml.jackson.module', name: 'jackson-module-jaxb-annotations', version: jacksonVersion
+    compile group: 'com.github.fge', name: 'json-schema-validator', version: jsonSchemaValidatorVersion
+    compile group: 'com.github.fge', name: 'json-schema-core', version: jsonSchemaCoreVersion
+    compile group: 'com.github.fge', name: 'jackson-coreutils', version: jacksonCoreUtilsVersion
 }
 
 task copyDeps(type: Copy) {
     into "$buildDir/output/lib"
     from configurations.runtime
+}
+
+
+javadoc {
+     source = sourceSets.main.allJava
+     classpath = configurations.compile
 }

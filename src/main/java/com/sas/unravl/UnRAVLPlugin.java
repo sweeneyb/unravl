@@ -8,27 +8,39 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
  * and extractors. Each plugin contains the UnRAVL script and the
  * ObjectNodescriptlet that it executes. For example, the UnRAVL assertion to
  * test if a variable is bound in the current environment is expressed as
- * 
+ *
  * <pre>
  * { "bound" : "varName" }
  * </pre>
- * 
+ *
  * within an UnRAVL script's "preconditions" or "assert" member.
- * 
+ *
  * @author DavidBiesack@sas.com
  */
 public interface UnRAVLPlugin {
 
-    /** Get the scriptlet which defines/configures this instance */
+    /**
+     * Get the scriptlet that defines this assertion
+     * @return the scriptlet node
+     */
     public abstract ObjectNode getScriptlet();
 
-    /** Set the scriptlet which defines/configures this instance */
-    public abstract void setScriptlet(ObjectNode scriptlet);
+    /**
+     * Set the scriptlet that defines this assertion
+     * @param node the UnRAVL scriptlet node
+     */
+    public abstract void setScriptlet(ObjectNode node);
 
-    /** Set the UnRAVL script in which this plugin runs. */
+    /**
+     * Set the UnRAVL script that this instance is running in
+     * @param script the current UnRAVL script
+     */
     public abstract void setScript(UnRAVL script);
 
-    /** Get the UnRAVL script in which this plugin runs. */
+    /**
+     * Get the UnRAVL script in which this plugin runs.
+     * @return the current script this plugin is processing
+     */
     public abstract UnRAVL getScript();
 
 }

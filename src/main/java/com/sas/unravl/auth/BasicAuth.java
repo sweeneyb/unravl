@@ -31,17 +31,17 @@ import org.apache.http.message.BasicHeader;
  * "auth" : { "basic" : true, "mock" : "false" }
  * </pre>
  * <p>
- * This adds an <code>Authentication:Basic </em>encoded-credentials</em></code>
- * header to the request. The <code></em>encoded-credentials</em></code> is the
+ * This adds an <code>Authentication:Basic <em>encoded-credentials</em></code>
+ * header to the request. The <code><em>encoded-credentials</em></code> is the
  * Base64 encoding of the username:password. The encoded credentials are masked
  * when logging the request headers.
- * 
+ * </p>
  * <p>
  * If mock is true, present mock authentication credentials
  * <p>
  * TODO: allow an alternate location so credentials can be shared across
  * hosts/domains instead of having to have a .netrc file for each host
- * 
+ * </p>
  * <pre>
  * "auth" : { "basic" : "hostname" }
  * </pre>

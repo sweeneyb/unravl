@@ -14,18 +14,18 @@ import java.io.InputStream;
 /**
  * Generates a text request body for this API call. The value associated with
  * "body" can have one of several forms:
- * 
+ *
  * <pre>
  * { "text" : "request body string" }
  * { "text" : "@file-or-URL" }
  * { "text" : [ array-of-text-or-@file-or-URL ]
  * </pre>
- * 
- * The request body is built as described in {@Text}.
+ *
+ * The request body is built as described in {@link Text}.
  * <p>
  * The text is bound to the current environment as a string named
  * <code>"requestBody"</code>.
- * 
+ *
  * @author David.Biesack@sas.com
  *
  */

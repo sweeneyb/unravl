@@ -100,7 +100,7 @@ public class GroovyAssertion extends BaseUnRAVLAssertion {
 
     public static ObjectNode assertionScriptlet(TextNode scriptlet) {
         ObjectNode o = new ObjectNode(JsonNodeFactory.instance);
-        o.put("groovy", scriptlet);
+        o.set("groovy", scriptlet);
         return o;
     }
 }

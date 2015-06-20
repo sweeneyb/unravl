@@ -21,7 +21,7 @@ import org.apache.log4j.Logger;
  * A convenience class for running UnRAVL scripts within a JUnit environment.
  * {@link UnRAVLException}s (including {@link UnRAVLAssertionException}s) are
  * wrapped in {#link AssertionErrors}.
- * 
+ *
  * @author DavidBiesack@sas.com
  */
 public class JUnitWrapper {
@@ -43,7 +43,6 @@ public class JUnitWrapper {
      * THis will try to run all scripts, even if some fail.
      * @param map initial environment
      * @param directoryName directory where scripts should be found
-     * @throws UnRAVLException if one or more scripts fail.
      */
     public static void runScriptsInDirectory(Map<String, Object> map,
             String directoryName) {
@@ -57,7 +56,6 @@ public class JUnitWrapper {
      * @param map initial environment
      * @param directoryName directory where scripts should be found
      * @param pattern Only run scripts whose name match this file name pattern.
-     * @throws UnRAVLException if one or more scripts fail.
      */
     public static void runScriptsInDirectory(Map<String, Object> map,
             String directoryName, final String pattern) {
@@ -84,11 +82,11 @@ public class JUnitWrapper {
      * environments modified by each script is discarded). This method asserts
      * that each script has no assertion failures. Run each script,
      * even if earlier ones had failures.
-     * 
+     *
      * @param env
      *            The initial environment to pass to each.
      * @param scriptFileNames an array of script file names to run.
-     * @throws UnRAVLException
+     * @return number of scripts which ran
      */
     public static int runScriptFiles(Map<String, Object> env,
             String... scriptFileNames) {
@@ -131,10 +129,11 @@ public class JUnitWrapper {
     /**
      * Run all scripts in the directory, but expect an UnRAVLException. This
      * should be used to test invalid scripts.
-     * 
+     *
      * TODO: Add boolean recursive option
      *
-     * @param directoryName
+     * @param env Additional variable bindings
+     * @param directoryName directory to scan for scripts
      */
     public static void tryScriptsInDirectory(Map<String, Object> env,
             String directoryName) {
@@ -164,8 +163,9 @@ public class JUnitWrapper {
     /**
      * Run a set of script files, but expect an UnRAVLException. This should be
      * used to test invalid scripts
-     * 
-     * @throws UnRAVLException
+     * @param env Additional variable bindings
+     * @param scriptFileNames script file names to scan for scripts
+     * @return the number of scripts which ran
      */
     public static int tryScriptFiles(Map<String, Object> env,
             String... scriptFileNames) {

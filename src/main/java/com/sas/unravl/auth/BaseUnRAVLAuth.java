@@ -20,20 +20,20 @@ import org.springframework.beans.factory.annotation.Autowired;
  * An {@link UnRAVL} script will load UnRAVLAssertion objects while executing
  * the "assert" or "precondition" members of the script. The first field in the
  * assertion member is used as the key, i.e.
- * 
+ *
  * <pre>
  * { "response" : [ ... ] }
  * </pre>
- * 
+ *
  * is an assertion which uses the key "response". The assertion class is found
  * in the {@link UnRAVLPlugins} list of assertions and instantiated. Then, the
- * {@link #check(UnRAVL, JsonNode, Stage, ApiCall)} method is run, passing the
+ * {@link #authenticate(UnRAVL, ObjectNode, ApiCall)} method is run, passing the
  * currently executing {@link UnRAVL} script and the JsonNode element that
  * defines the assertion scriptlet.
  * <p>
  * Extractors should extend {@link BaseUnRAVLAuth} and their check() method
  * should invoke super.check(script,node)
- * 
+ *
  * @author David.Biesack@sas.com
  */
 public class BaseUnRAVLAuth extends BaseUnRAVLPlugin implements UnRAVLAuth {
@@ -57,7 +57,7 @@ public class BaseUnRAVLAuth extends BaseUnRAVLPlugin implements UnRAVLAuth {
 
     /**
      * Create a Null Object assertion
-     * 
+     *
      * @param script
      *            the script
      * @param auth
@@ -83,7 +83,7 @@ public class BaseUnRAVLAuth extends BaseUnRAVLPlugin implements UnRAVLAuth {
     /**
      * Used to register the assertion class with the UnRAVL runtime. This is
      * called from Spring when the UnRAVLPlugins class is loaded.
-     * 
+     *
      * @param plugins
      *            a plugins instance
      */

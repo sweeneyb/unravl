@@ -28,17 +28,19 @@ import java.nio.charset.Charset;
  * { "key" : array-of-text }
  * </pre>
  * 
- * </p>
  * <p>
  * In the first form, the text is expressed as a single JSON string.
  * </p>
+ * <p>
  * In the second form, the text is read from a text file or a URL. The text is
- * assumed to be in UTF-8 encoding. </p>
+ * assumed to be in UTF-8 encoding. 
+ * </p>
  * <p>
  * In the third form, Text will combine texts in an array. Each element of the
  * array may be a text-value or a <code>{@literal @}file-or-url</code> or a
  * nested array. The values are separated by a newline. If you want a trailing
  * newline, the last value should be the empty string, "".
+ * </p>
  * <p>
  * TODO: add an <code>"encoding" : <em>encoding-name</em></code>
  * </p>

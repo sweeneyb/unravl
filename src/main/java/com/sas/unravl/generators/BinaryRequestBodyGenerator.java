@@ -13,21 +13,20 @@ import java.io.InputStream;
 /**
  * Generates a binary request body for this API call. The node bodySpec can have
  * one of several forms:
- * 
+ *
  * <pre>
  * { "body" : [ array of byte values }
  * { "body" : "@file-or-URL" }
  * { "body" : [ array-of-binary-or-@file-or-URL ]
  * </pre>
- * 
+ *
  * which are used to create a byte array which will be passed as the REST API
- * call's request body. The body is build as described in {@Binary}.
- * <p>
- * 
+ * call's request body. The body is build as described in {@link Binary}.
+ *
  * <p>
  * The resulting <code>byte[]</code> is bound to the current environment as
  * <code>"requestBody"</code>.
- * 
+ *
  * @author David.Biesack@sas.com
  *
  */
