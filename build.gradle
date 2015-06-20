@@ -8,22 +8,22 @@ version = '0.2.1-SNAPSHOT'
 description = "Uniform REST API Validation Language"
 
 ext {
-	jacksonVersion = "2.+"
-	groovyVersion = "2.+"
-	springVersion = "4.+"
-	httpClientVersion = "4.+"
-	httpCoreVersion = "4.+"
-	commonsCodecVersion = "1.+"
-	log4jVersion = "1.+"
-	guavaVersion = "18.+"
-	junitVersion = "4.+"
-    jsonSchemaValidatorVersion = "2.+"
-    jsonSchemaCoreVersion = "1.+"
-    jacksonCoreUtilsVersion = "1.+"
+	jacksonVersion = "2.5.+"
+	groovyVersion = "2.4.3"
+	springVersion = "4.1.6.RELEASE"
+	httpClientVersion = "4.5"
+	httpCoreVersion = "4.4.1"
+	commonsCodecVersion = "1.10"
+	log4jVersion = "1.2.17"
+	guavaVersion = "18.0"
+	junitVersion = "4.12"
+    jsonSchemaValidatorVersion = "2.2.6"
+    jsonSchemaCoreVersion = "1.2.5"
+    jacksonCoreUtilsVersion = "1.8"
 }
 
-sourceCompatibility = 1.6
-targetCompatibility = 1.6
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
 
 repositories {
        maven { url "https://repo1.maven.org/maven2/" }
