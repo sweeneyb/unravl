@@ -5,6 +5,8 @@
    <artifactId>sas.unravl</artifactId>
    <version>0.2.1-SNAPSHOT</version>
    <description>Uniform REST API Validation Language  (UnRAVL) - a JSON DSL for validating REST APIs</description>
+   <url>https://github.com/sassoftware/unravl</url>
+   <inceptionYear>2014</inceptionYear>
 
    <properties>
       <jackson.version>2.5.3</jackson.version>
@@ -22,20 +24,48 @@
    </properties>
 
    <scm>
-      <connection>scm:git://gitlab.sas.com:sasdjb/unravl.git</connection>
-      <url>git@github.com:sassoftware/unravl.git</url>
+      <connection>scm:git:https://github.com/sassoftware/unravl.git</connection>
+      <url>https://github.com/sassoftware/unravl</url>
    </scm>
+
+   <organization>
+      <name>SAS</name>
+      <url>http://www.sas.com</url>
+  </organization>
 
    <developers>
       <developer>
          <name>David Biesack</name>
+         <id>DavidBiesack</id>
          <email>David.Biesack@sas.com</email>
          <url>https://github.com/DavidBiesack</url>
-         <id>DavidBiesack</id>
          <organization>SAS</organization>
          <organizationUrl>http://www.sas.com</organizationUrl>
+         <roles>
+           <role>architect</role>
+           <role>developer</role>
+           <role>tester</role>
+         </roles>
+         <timezone>America/New_York</timezone>
+         <properties>
+           <picUrl>https://avatars1.githubusercontent.com/u/545944?v=3&amp;s=460</picUrl>
+         </properties>
       </developer>
    </developers>
+
+   <licenses>
+     <license>
+       <name>Apache License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        <distribution>repo</distribution>
+       <comments>A business-friendly OSS license</comments>
+     </license>
+   </licenses>
+
+   <issueManagement>
+     <system>GitHub</system>
+     <url>https://github.com/sassoftware/unravl/issues</url>
+   </issueManagement>
 
    <build>
       <plugins>
