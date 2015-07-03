@@ -26,7 +26,7 @@ import org.apache.log4j.Logger;
  * </pre>
  *
  * TODO: allow an encoding, such as<br>
- *        <code>{ "text" : "@file-name", "encoding": "UTF-16" }</code>
+ * <code>{ "text" : "@file-name", "encoding": "UTF-16" }</code>
  * @author David.Biesack@sas.com
  */
 

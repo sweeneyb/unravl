@@ -19,44 +19,46 @@ import org.apache.log4j.Logger;
  * Matches text against grouping regular expressions and binds the substrings
  * into constituent variable bindings in the current UnRAVL script environment.
  * The extractor form is
- *
+ * 
  * <pre>
  * { "pattern" : [ string, pattern, var0, ... varn ] }
  * </pre>
- *
+ * 
  * such as
- *
+ * 
  * <pre>
  * { "pattern" : [ "{responseType}", "^(.*)\\s*;\\s*charset=(.*)$", "mediaType", "charset" ] }
  * </pre>
- *
+ * 
+ * <p>
  * This will match the value of the environment expansion of "{responseType}" to
- * the given regular expression pattern <code>^(.*)\\s*;\\s*charset=(.*)$</code>,
+ * the given regular expression pattern <code>^(.*)\s*;\s*charset=(.*)$</code>,
  * and bind the media type and the encoding character set substrings to the
  * variables <code>mediaType</code> and <code>charset</code>. (Note that a per
- * the JSON grammar, backslash (<code>\\</code>) characters in a JSON string must
- * be escaped, so the regular expression notation <code>\\s</code> is coded in
- * the JSON string as <code>\\\\s</code>.)
+ * the JSON grammar, backslash (<code>\</code>) characters in a JSON string must
+ * be escaped, so the regular expression notation <code>\s</code> is coded in
+ * the JSON string as <code>\\s</code>.) </p> 
+ * 
  * <p>
  * For example, if the
  * <code>responseType</code> binding in the environment was
- *
+ * 
  * <pre>
  * application/json; charset=UTF-8
  * </pre>
- *
+ * 
  * this pattern specification will bind the variables:<br>
  * mediaType to <code>"application/json"</code>, and <br>
  * charset to <code>"UTF-8"</code>.
  * <p>
  * If the regular expression does not match, this extractor will throw an
  * {@link UnRAVLAssertionException}
- *
+ * 
  * <p>
  * This extractor will unbind all the variables before testing the regular
  * expression, so that bindings left from other tests won't persist and leave a
  * false positive.
- *
+ * 
  * @author David.Biesack@sas.com
  *
  */

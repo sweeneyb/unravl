@@ -3,15 +3,22 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.sas</groupId>
    <artifactId>sas.unravl</artifactId>
-   <version>0.2.0-SNAPSHOT</version>
+   <version>0.2.1-SNAPSHOT</version>
    <description>Uniform REST API Validation Language  (UnRAVL) - a JSON DSL for validating REST APIs</description>
 
    <properties>
-      <spring.version>3.2.11.RELEASE</spring.version>
-      <jackson.version>2.2.3</jackson.version>
-      <log4j.version>1.2.16</log4j.version>
-      <junit.version>4.8.1</junit.version>
-      <groovy.version>2.3.7</groovy.version>
+      <jackson.version>2.5.3</jackson.version>
+      <groovy.version>2.4.3</groovy.version>
+      <spring.version>4.1.5.RELEASE</spring.version>
+      <http.client.version>4.5</http.client.version>
+      <http.core.version>4.4.1</http.core.version>
+      <commons.codec.version>1.10</commons.codec.version>
+      <log4j.version>1.2.17</log4j.version>
+      <quava.version>18.0</quava.version>
+      <junit.version>4.12</junit.version>
+      <json.schema.validator.version>2.2.6</json.schema.validator.version>
+      <json.schema.core.version>1.2.5</json.schema.core.version>
+      <jackson.core.utils.version>1.8</jackson.core.utils.version>
    </properties>
 
    <scm>
@@ -137,28 +144,22 @@
          <version>${groovy.version}</version>
       </dependency>
 
-
       <dependency>
          <groupId>com.github.fge</groupId>
          <artifactId>json-schema-validator</artifactId>
-         <version>2.2.6</version>
+         <version>${json.schema.validator.version}</version>
       </dependency>
 
       <dependency>
          <groupId>com.github.fge</groupId>
          <artifactId>json-schema-core</artifactId>
-         <version>1.2.5</version>
+         <version>${json.schema.core.version}</version>
       </dependency>
       <dependency>
          <groupId>com.github.fge</groupId>
          <artifactId>jackson-coreutils</artifactId>
-         <version>1.8</version>
+         <version>${jackson.core.utils.version}</version>
       </dependency>
-      <!-- dependency>
-         <groupId>com.github.fge</groupId>
-         <artifactId>uri-template</artifactId>
-         <version>0.9</version>
-      </dependency-->
 
       <dependency>
          <groupId>org.springframework</groupId>
@@ -173,17 +174,17 @@
       <dependency>
          <groupId>org.apache.httpcomponents</groupId>
          <artifactId>httpclient</artifactId>
-         <version>4.3.6</version>
+         <version>${http.client.version}</version>
       </dependency>
       <dependency>
          <groupId>org.apache.httpcomponents</groupId>
          <artifactId>httpcore</artifactId>
-         <version>4.3.3</version>
+         <version>${http.core.version}</version>
       </dependency>
       <dependency>
          <groupId>commons-codec</groupId>
          <artifactId>commons-codec</artifactId>
-         <version>1.9</version>
+         <version>${commons.codec.version}</version>
       </dependency>
       <dependency>
          <groupId>log4j</groupId>
@@ -201,13 +202,9 @@
       <dependency>
          <groupId>com.google.guava</groupId>
          <artifactId>guava</artifactId>
-         <version>17.0</version>
+         <version>${quava.version}</version>
       </dependency>
-		<!-- <dependency> <groupId>org.apache.commons</groupId> <artifactId>commons-lang3</artifactId>
-			<version>3.3.2</version> </dependency> <dependency> <groupId>org.skyscreamer</groupId>
-			<artifactId>jsonassert</artifactId> <version>1.2.3</version> <scope>test</scope>
-			</dependency> <dependency> <groupId>org.json</groupId> <artifactId>json</artifactId>
-			<version>20090211</version> </dependency> -->
+
    </dependencies>
 
    <reporting>
