@@ -1,6 +1,7 @@
 package com.sas.unravl.generators;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.util.Json;
 
@@ -33,7 +34,7 @@ import java.nio.charset.Charset;
  * </p>
  * <p>
  * In the second form, the text is read from a text file or a URL. The text is
- * assumed to be in UTF-8 encoding. 
+ * assumed to be in UTF-8 encoding.
  * </p>
  * <p>
  * In the third form, Text will combine texts in an array. Each element of the
@@ -53,16 +54,26 @@ public class Text implements CharSequence {
     private static final int BUFSIZE = 256;
     public static final Charset UTF_8 = Charset.forName("UTF-8");
     StringBuilder text = new StringBuilder();
+    private final UnRAVL script;
 
-    public Text() {
+    public Text(UnRAVL script) {
+        this.script = script;
     }
 
-    public Text(JsonNode node, String key) throws IOException, UnRAVLException {
-        this(node.get(key));
+    public Text(UnRAVL script, JsonNode node, String key) throws IOException,
+            UnRAVLException {
+        this(script, node.get(key));
     }
 
-    public Text(JsonNode node) throws IOException, UnRAVLException {
+    public Text(UnRAVL script, JsonNode node) throws IOException,
+            UnRAVLException {
+        this(script);
         build(node);
+    }
+
+    public Text(UnRAVL script, String text) throws IOException, UnRAVLException {
+        this(script);
+        build(text);
     }
 
     private void build(JsonNode node) throws IOException, UnRAVLException {
@@ -80,8 +91,10 @@ public class Text implements CharSequence {
     }
 
     private void build(String textValue) throws IOException {
-        if (textValue.startsWith("@")) {
-            buildFromStream(textValue.substring(1));
+        if (textValue.startsWith(UnRAVL.REDIRECT_PREFIX)) {
+            String expanded = script.expand(textValue
+                    .substring(UnRAVL.REDIRECT_PREFIX.length()));
+            buildFromStream(expanded);
         } else {
             text.append(textValue);
         }

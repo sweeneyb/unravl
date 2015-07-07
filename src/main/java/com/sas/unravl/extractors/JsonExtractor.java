@@ -39,8 +39,9 @@ public class JsonExtractor extends BaseUnRAVLExtractor {
         JsonNode json = Json.parse(Text.utf8ToString(call.getResponseBody()
                 .toByteArray()));
         current.bind("responseBody", json);
-        if (to.startsWith("@")) {
-            String where = to.substring(1);
+        if (to.startsWith(UnRAVL.REDIRECT_PREFIX)) {
+            String where = to.substring(UnRAVL.REDIRECT_PREFIX.length());
+            where = getScript().expand(where);
             Json.extractToStream(json, where);
             if (!where.equals("-"))
                 logger.info("Wrote JSON to file " + where);

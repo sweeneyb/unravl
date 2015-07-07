@@ -39,8 +39,9 @@ public class BinaryExtractor extends BaseUnRAVLExtractor {
         byte bytes[] = call.getResponseBody().toByteArray();
         current.bind("responseBody", bytes);
         String to = target.textValue();
-        if (to.startsWith("@")) {
-            String where = to.substring(1);
+        if (to.startsWith(UnRAVL.REDIRECT_PREFIX)) {
+            String where = to.substring(UnRAVL.REDIRECT_PREFIX.length());
+            where = getScript().expand(where);
             try {
                 BufferedOutputStream b = new BufferedOutputStream(
                         new FileOutputStream(where));

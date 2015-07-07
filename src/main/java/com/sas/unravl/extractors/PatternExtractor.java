@@ -37,11 +37,11 @@ import org.apache.log4j.Logger;
  * variables <code>mediaType</code> and <code>charset</code>. (Note that a per
  * the JSON grammar, backslash (<code>\</code>) characters in a JSON string must
  * be escaped, so the regular expression notation <code>\s</code> is coded in
- * the JSON string as <code>\\s</code>.) </p> 
+ * the JSON string as <code>\\s</code>.)
+ * </p>
  * 
  * <p>
- * For example, if the
- * <code>responseType</code> binding in the environment was
+ * For example, if the <code>responseType</code> binding in the environment was
  * 
  * <pre>
  * application/json; charset=UTF-8

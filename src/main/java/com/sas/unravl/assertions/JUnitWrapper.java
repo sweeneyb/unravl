@@ -39,23 +39,30 @@ public class JUnitWrapper {
     };
 
     /**
-     * Run all scripts in the directory. TODO: Add boolean recursive option
-     * THis will try to run all scripts, even if some fail.
-     * @param map initial environment
-     * @param directoryName directory where scripts should be found
+     * Run all scripts in the directory. TODO: Add boolean recursive option THis
+     * will try to run all scripts, even if some fail.
+     * 
+     * @param map
+     *            initial environment
+     * @param directoryName
+     *            directory where scripts should be found
      */
     public static void runScriptsInDirectory(Map<String, Object> map,
             String directoryName) {
         runScriptsInDirectory(map, directoryName, null);
     }
 
-
     /**
-     * Run scripts in the directory if the file names match the pattern. TODO: Add boolean recursive option
-     * THis will try to run all scripts, even if some fail.
-     * @param map initial environment
-     * @param directoryName directory where scripts should be found
-     * @param pattern Only run scripts whose name match this file name pattern.
+     * Run scripts in the directory if the file names match the pattern. TODO:
+     * Add boolean recursive option THis will try to run all scripts, even if
+     * some fail.
+     * 
+     * @param map
+     *            initial environment
+     * @param directoryName
+     *            directory where scripts should be found
+     * @param pattern
+     *            Only run scripts whose name match this file name pattern.
      */
     public static void runScriptsInDirectory(Map<String, Object> map,
             String directoryName, final String pattern) {
@@ -80,12 +87,13 @@ public class JUnitWrapper {
     /**
      * Run a set of script files. Each runs in the initial env passed in (the
      * environments modified by each script is discarded). This method asserts
-     * that each script has no assertion failures. Run each script,
-     * even if earlier ones had failures.
+     * that each script has no assertion failures. Run each script, even if
+     * earlier ones had failures.
      *
      * @param env
      *            The initial environment to pass to each.
-     * @param scriptFileNames an array of script file names to run.
+     * @param scriptFileNames
+     *            an array of script file names to run.
      * @return number of scripts which ran
      */
     public static int runScriptFiles(Map<String, Object> env,
@@ -97,7 +105,8 @@ public class JUnitWrapper {
             try {
                 count++;
                 UnRAVLRuntime runtime = new UnRAVLRuntime();
-                Map<String, Object> newEnv = env == null ? new HashMap<String, Object>() : new HashMap<String, Object>(env);
+                Map<String, Object> newEnv = env == null ? new HashMap<String, Object>()
+                        : new HashMap<String, Object>(env);
                 bind(runtime, newEnv);
                 System.out.println("Run UnRAVL script " + scriptFile);
                 runtime.execute(scriptFile);
@@ -132,8 +141,10 @@ public class JUnitWrapper {
      *
      * TODO: Add boolean recursive option
      *
-     * @param env Additional variable bindings
-     * @param directoryName directory to scan for scripts
+     * @param env
+     *            Additional variable bindings
+     * @param directoryName
+     *            directory to scan for scripts
      */
     public static void tryScriptsInDirectory(Map<String, Object> env,
             String directoryName) {
@@ -163,8 +174,11 @@ public class JUnitWrapper {
     /**
      * Run a set of script files, but expect an UnRAVLException. This should be
      * used to test invalid scripts
-     * @param env Additional variable bindings
-     * @param scriptFileNames script file names to scan for scripts
+     * 
+     * @param env
+     *            Additional variable bindings
+     * @param scriptFileNames
+     *            script file names to scan for scripts
      * @return the number of scripts which ran
      */
     public static int tryScriptFiles(Map<String, Object> env,

@@ -34,8 +34,8 @@ public class TestScripts {
         // failed unRAVL assertions, etc.
         JUnitWrapper.tryScriptsInDirectory(env(), "src/test/scripts/fail");
     }
-    
-    @Test(expected=AssertionError.class)
+
+    @Test(expected = AssertionError.class)
     public void runFailingScripts() {
         // All scripts in this folder should fail - i.e. bad scripts,
         // failed unRAVL assertions, etc.

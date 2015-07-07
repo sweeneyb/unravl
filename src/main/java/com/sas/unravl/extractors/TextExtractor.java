@@ -27,6 +27,7 @@ import org.apache.log4j.Logger;
  *
  * TODO: allow an encoding, such as<br>
  * <code>{ "text" : "@file-name", "encoding": "UTF-16" }</code>
+ * 
  * @author David.Biesack@sas.com
  */
 
@@ -47,8 +48,9 @@ public class TextExtractor extends BaseUnRAVLExtractor {
 
         String text = Text.utf8ToString(call.getResponseBody().toByteArray());
         current.bind("responseBody", text);
-        if (to.startsWith("@")) {
-            String where = to.substring(1);
+        if (to.startsWith(UnRAVL.REDIRECT_PREFIX)) {
+            String where = to.substring(UnRAVL.REDIRECT_PREFIX.length());
+            where = getScript().expand(where);
             try {
                 boolean stdout = where.equals("-");
                 Writer f = stdout ? new PrintWriter(System.out)

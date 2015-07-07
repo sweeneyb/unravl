@@ -20,8 +20,8 @@ import java.io.InputStream;
 public interface UnRAVLRequestBodyGenerator {
     /**
      * Generate the body. This is done by providing an input stream (Perhaps
-     * this should just be a Future&lt;byte []&gt;). The UnRAVL script will call this
-     * and read the stream and store the result.
+     * this should just be a Future&lt;byte []&gt;). The UnRAVL script will call
+     * this and read the stream and store the result.
      * 
      * @param script
      *            the currently running UnRAVL script
@@ -30,8 +30,10 @@ public interface UnRAVLRequestBodyGenerator {
      * @param call
      *            The current API call
      * @return an input stream which the script will read
-     * @throws IOException if an I/O problem occurs
-     * @throws UnRAVLException if the body cannot be generated
+     * @throws IOException
+     *             if an I/O problem occurs
+     * @throws UnRAVLException
+     *             if the body cannot be generated
      */
     public InputStream getBody(UnRAVL script, ObjectNode scriptlet, ApiCall call)
             throws IOException, UnRAVLException;

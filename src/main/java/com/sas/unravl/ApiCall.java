@@ -206,7 +206,7 @@ public class ApiCall {
         }
         if (body.isTextual() && !isVariableHoldingJson(body.asText())) {
             String s = script.expand(body.asText());
-            if (!s.trim().startsWith("@")) {
+            if (!s.trim().startsWith(UnRAVL.REDIRECT_PREFIX)) {
                 requestBody = new ByteArrayOutputStream();
                 try {
                     requestBody.write(s.getBytes("UTF-8"));
@@ -257,7 +257,7 @@ public class ApiCall {
     }
 
     private boolean isVariableHoldingJson(String value) {
-        if (value != null && !value.startsWith("@")) {
+        if (value != null && !value.startsWith(UnRAVL.REDIRECT_PREFIX)) {
             try {
                 Object ref = script.getEnv().getVariable(value);
                 if (ref instanceof JsonNode) {
@@ -580,8 +580,10 @@ public class ApiCall {
      * Wrap exception in an UnRAVLException (unless it already is one), then
      * throw the UnRAVLException
      * 
-     * @param exception an exception
-     * @throws UnRAVLException the wrapped exception
+     * @param exception
+     *            an exception
+     * @throws UnRAVLException
+     *             the wrapped exception
      */
     public void throwException(Exception exception) throws UnRAVLException {
         if (exception instanceof UnRAVLException)

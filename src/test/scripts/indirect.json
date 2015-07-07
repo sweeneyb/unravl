@@ -1,0 +1,9 @@
+[
+ { "env" : { "path" : "src/test/scripts",
+             "test" : "null.json"
+           }
+ },
+ "@src/test/scripts/null.json",
+ "@{path}/{test}",
+ "null value test"
+]

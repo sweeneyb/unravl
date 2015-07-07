@@ -31,8 +31,10 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface UnRAVLAuthPlugin {
-    /** The tags by which this plugin is named in UnRAVL scripts
-        @return the plugin tags
+    /**
+     * The tags by which this plugin is named in UnRAVL scripts
+     * 
+     * @return the plugin tags
      */
     String[] value();
 }

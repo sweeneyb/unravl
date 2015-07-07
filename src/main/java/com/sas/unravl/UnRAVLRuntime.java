@@ -138,7 +138,19 @@ public class UnRAVLRuntime {
 
     private void execute(List<JsonNode> roots) throws JsonProcessingException,
             IOException, UnRAVLException {
-        for (JsonNode root : roots) {
+
+        for (int i = 0; i < roots.size(); i++) {
+            JsonNode root = roots.get(i);
+            if (root.isTextual()) {
+                String ref = root.textValue();
+                if (ref.startsWith(UnRAVL.REDIRECT_PREFIX)) {
+                    roots.remove(i);
+                    String where = expand(ref.substring(UnRAVL.REDIRECT_PREFIX
+                            .length()));
+                    roots.addAll(i + 1, read(where));
+                    continue;
+                }
+            }
             String label = "";
             try {
                 UnRAVL u = null;
@@ -166,6 +178,7 @@ public class UnRAVLRuntime {
                 } else
                     throw rte;
             }
+
         }
     }
 
@@ -265,7 +278,7 @@ public class UnRAVLRuntime {
         variableResolver = null;
     }
 
-    public static List<JsonNode> read(String scriptFile)
+    public List<JsonNode> read(String scriptFile)
             throws JsonProcessingException, IOException, UnRAVLException {
         JsonNode root;
         List<JsonNode> roots = new ArrayList<JsonNode>();
@@ -284,18 +297,11 @@ public class UnRAVLRuntime {
 
         if (root.isArray()) {
             for (JsonNode next : Json.array(root)) {
-                if (next.isTextual()) {
-                    String ref = next.textValue();
-                    if (ref.startsWith("@"))
-                        roots.addAll(read(ref.substring(1)));
-                    else {
-                        roots.add(next);
-                    }
-                } else
-                    roots.add(Json.object(next));
+                roots.add(next);
             }
-        } else
+        } else {
             roots.add(root);
+        }
         return roots;
     }
 

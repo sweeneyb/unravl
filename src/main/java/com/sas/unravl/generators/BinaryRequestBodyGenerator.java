@@ -36,7 +36,7 @@ public class BinaryRequestBodyGenerator extends BaseUnRAVLRequestBodyGenerator {
     @Override
     public InputStream getBody(UnRAVL script, ObjectNode bodySpec, ApiCall call)
             throws IOException, UnRAVLException {
-        Binary binary = new Binary(Json.object(bodySpec), "binary");
+        Binary binary = new Binary(script, Json.object(bodySpec), "binary");
         byte requestBody[] = binary.bytes();
         script.bind("requestBody", requestBody);
         return binary.stream();

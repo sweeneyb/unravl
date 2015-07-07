@@ -5,14 +5,12 @@ import com.sas.unravl.ApiCall;
 import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.UnRAVLPlugins;
-import com.sas.unravl.assertions.UnRAVLAssertion.Stage;
 
 /**
- * An UnRAVL script authentication. Authentication objects run before
- * invoking an API call and may decorate the call. An
- * {@link UnRAVL} script will load UnRAVLAuth objects while executing the
- * "auth" members of the script. The first field in the
- * assertion member is used as the key, i.e.
+ * An UnRAVL script authentication. Authentication objects run before invoking
+ * an API call and may decorate the call. An {@link UnRAVL} script will load
+ * UnRAVLAuth objects while executing the "auth" members of the script. The
+ * first field in the assertion member is used as the key, i.e.
  *
  * <pre>
  * { "basic" : specification }
@@ -25,8 +23,8 @@ import com.sas.unravl.assertions.UnRAVLAssertion.Stage;
  * element that defines the auth specification (in this case, the value
  * associated with "auth")
  * <p>
- * Authentication plugins should extend {@link BaseUnRAVLAuth} and their autheenticate() method
- * should invoke super.check(script,node)
+ * Authentication plugins should extend {@link BaseUnRAVLAuth} and their
+ * autheenticate() method should invoke super.check(script,node)
  *
  * @author David.Biesack@sas.com
  */
@@ -49,24 +47,30 @@ public interface UnRAVLAuth {
 
     /**
      * Set the scriptlet that defines this assertion
-     * @param node the UnRAVL scriptlet node
+     * 
+     * @param node
+     *            the UnRAVL scriptlet node
      */
     public void setAuth(ObjectNode node);
 
     /**
      * Get the scriptlet that defines this assertion
+     * 
      * @return the scriptlet node
      */
     public ObjectNode getAuth();
 
     /**
      * Set the UnRAVL script that this instance is running in
-     * @param script the current UnRAVL script
+     * 
+     * @param script
+     *            the current UnRAVL script
      */
     public void setScript(UnRAVL script);
 
     /**
      * Get the UnRAVL script in which this plugin runs.
+     * 
      * @return the current script this plugin is processing
      */
     public UnRAVL getScript();

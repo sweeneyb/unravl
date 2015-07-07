@@ -1,0 +1,35 @@
+[
+  {
+  "name" : "GoogleEverestElevation",
+  "env" : { "lat" : 27.988056, 
+            "lng" : 86.925278, 
+            "expectedElevation" : 8815.7158203125,
+            "epsilon" : 0.001,
+            "fileName" : "elev-{lat}-{lng}" },
+            
+  "GET" : "http://maps.googleapis.com/maps/api/elevation/json?locations={lat},{lng}&sensor=false",
+
+  "bind" :
+     [
+     	
+     { "doc" : "Save the response body as a JSON object (a JsonNode) in a temp file" },
+     { "json": "@{java.io.tmpdir}/{fileName}.json" },
+     { "text": "@{java.io.tmpdir}/{fileName}.txt" },
+     { "binary": "@{java.io.tmpdir}/{fileName}.bin" }
+  ] 
+  },
+  
+  {
+  "name" : "Elevation2",
+       
+  "GET" : "http://maps.googleapis.com/maps/api/elevation/json?locations={lat},{lng}&sensor=false",
+
+  "assert": [
+  	{ "doc" : "Compare the response to the file we created above" },
+    { "json" : "@{java.io.tmpdir}/{fileName}.json" },
+    { "text" : "@{java.io.tmpdir}/{fileName}.txt" },
+    { "binary" : "@{java.io.tmpdir}/{fileName}.bin" }
+    
+    ]
+    }
+]

@@ -96,7 +96,9 @@ public class JsonBodyAssertion extends BaseUnRAVLAssertion implements
             throws IOException, UnRAVLException {
         JsonNode json = expected;
         if (expected.isTextual()) {
-            String text = getScript().expand(new Text(expected).text());
+            String path = getScript().expand(expected.textValue());
+            String text = getScript()
+                    .expand(new Text(getScript(), path).text());
             json = mapper.readTree(text);
         }
         return json;
