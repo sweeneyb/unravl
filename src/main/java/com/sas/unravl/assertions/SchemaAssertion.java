@@ -105,14 +105,12 @@ public class SchemaAssertion extends BaseUnRAVLAssertion {
         JsonNode jsonSchema = schemaRef; // assume default - a schema object
         if (schemaRef.isTextual()) {
             String request = schemaRef.textValue();
-            if (request.startsWith("@")) {
+            if (request.startsWith(Text.REDIRECT_PREFIX)) {
                 Text text;
                 try {
-                    // TODO: Add UnRAVL script to new Text(JsonNode) signature so it
-                    // can expand vars in the path
                     TextNode expanded = new TextNode(current.expand(schemaRef
                             .textValue()));
-                    text = new Text(expanded);
+                    text = new Text(current, expanded);
                     jsonSchema = Json.parse(text.text());
                 } catch (IOException e) {
                     throw new UnRAVLException(String.format(

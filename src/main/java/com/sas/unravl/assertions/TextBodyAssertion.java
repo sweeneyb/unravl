@@ -29,7 +29,7 @@ public class TextBodyAssertion extends BaseUnRAVLAssertion implements
         super.check(current, assertion, when, call);
         JsonNode value = assertion.get("text");
         try {
-            Text text = new Text(value);
+            Text text = new Text(current, value);
             String expected = text.text();
             String actual = Text.utf8ToString(call.getResponseBody()
                     .toByteArray());

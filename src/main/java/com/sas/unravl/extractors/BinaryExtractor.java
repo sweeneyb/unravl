@@ -7,6 +7,7 @@ import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.annotations.UnRAVLExtractorPlugin;
 import com.sas.unravl.generators.Binary;
+import com.sas.unravl.generators.Text;
 import com.sas.unravl.util.Json;
 
 import java.io.BufferedOutputStream;
@@ -39,8 +40,9 @@ public class BinaryExtractor extends BaseUnRAVLExtractor {
         byte bytes[] = call.getResponseBody().toByteArray();
         current.bind("responseBody", bytes);
         String to = target.textValue();
-        if (to.startsWith("@")) {
-            String where = to.substring(1);
+        if (to.startsWith(Text.REDIRECT_PREFIX)) {
+            String where = to.substring(Text.REDIRECT_PREFIX.length());
+            where = getScript().expand(where);
             try {
                 BufferedOutputStream b = new BufferedOutputStream(
                         new FileOutputStream(where));
