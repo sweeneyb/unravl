@@ -1128,12 +1128,15 @@ Example:
 ```JSON
   "env" : { "lat" : 27.988056,
             "longitude" : 86.925278,
-            "API_ROOT" : "http://maps.googleapis.com/maps/api/elevation"
-            "}
+            "API_ROOT" : "http://maps.googleapis.com/maps/api/elevation",
+            "obj" : { "x" : 0, "y" : 10, "z" : -1 },
+            "a" : [ 0, 1, 4, 9 ]
+          }
 ```
 
-Values may be any valid JSON type. JSON { } objects just result
-in JSON ObjectNode objects (not Java object bindings via Jackson).
+Values may be any valid JSON type. The values are Jackson `com.fasterxml.jackson.databind.node.JsonNode`
+instances: `BooleanNode`, `TextNode`, `DoubleNode`, `IntNode`, `LongNode`, `ObjectNode`, `ArrayNode`,
+`NullNode`, etc.
 
 #### headers ####
 
