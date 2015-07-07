@@ -1,6 +1,5 @@
 package com.sas.unravl.assertions;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.BaseUnRAVLPlugin;

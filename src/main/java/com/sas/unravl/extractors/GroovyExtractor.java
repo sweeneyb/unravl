@@ -39,6 +39,7 @@ import org.apache.log4j.Logger;
  * including preceding <var>var-value-pairs</var> in the current "groovy"
  * scriptlet. Example:
  * </p>
+ * 
  * <pre>
  * "bind" : [
  *    { "groovy" : { "pi" : "Math.PI",
@@ -75,7 +76,7 @@ public class GroovyExtractor extends BaseUnRAVLExtractor {
             try {
                 String name = e.getKey();
                 sourceNode = e.getValue();
-                if (! (sourceNode.isTextual() || sourceNode.isArray()) ) {
+                if (!(sourceNode.isTextual() || sourceNode.isArray())) {
                     throw new UnRAVLException(
                             "Groovy extractor requires a string or array of strings, found "
                                     + sourceNode);

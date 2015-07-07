@@ -39,35 +39,49 @@ public class Binary {
     private static final int BUFSIZE = 256;
     ByteArrayOutputStream bytes = new ByteArrayOutputStream();
     private final UnRAVL script;
+
     /**
      * Create an instance from a JSON object; the value associated with the
      * field name defines how to create the binary data. For example, for the
      * ObjectNode <code>{ "binary" : [ 0, 2, 1, 3 ]}</code> the constructor new
      * Binary(object, "binary")
-     * @param script TODO
-     * @param node the JSON node for this scriptlet
-     * @param fieldName the field name (normally "binary")
      * 
-     * @throws IOException if an I/O exception occurs
-     * @throws UnRAVLException if an other exception occurs, including invalid JSON specification.
+     * @param script
+     *            TODO
+     * @param node
+     *            the JSON node for this scriptlet
+     * @param fieldName
+     *            the field name (normally "binary")
+     * 
+     * @throws IOException
+     *             if an I/O exception occurs
+     * @throws UnRAVLException
+     *             if an other exception occurs, including invalid JSON
+     *             specification.
      */
-    public Binary(UnRAVL script, ObjectNode node, String fieldName) throws IOException,
-            UnRAVLException {
+    public Binary(UnRAVL script, ObjectNode node, String fieldName)
+            throws IOException, UnRAVLException {
         this(script, node.get(fieldName));
     }
 
     /**
      * Construct a Binary instance from the binary spec value.
-     * @param script TODO
+     * 
+     * @param script
+     *            TODO
      * @param binarySpec
      *            either a TextNode with the value "@file-or-url", or a
      *            ArrayNode that contains integer byte values (0 to 255) or
      *            "@file-or-url" strings, or nested arrays.
      * 
-     * @throws IOException an I/O error occurred 
-     * @throws UnRAVLException Some other exception occurred, including invalid JSON specification
+     * @throws IOException
+     *             an I/O error occurred
+     * @throws UnRAVLException
+     *             Some other exception occurred, including invalid JSON
+     *             specification
      */
-    public Binary(UnRAVL script, JsonNode binarySpec) throws IOException, UnRAVLException {
+    public Binary(UnRAVL script, JsonNode binarySpec) throws IOException,
+            UnRAVLException {
         this.script = script;
         build(binarySpec);
     }
@@ -96,8 +110,8 @@ public class Binary {
     }
 
     private void build(String node) throws IOException, UnRAVLException {
-        if (node.startsWith(Text.REDIRECT_PREFIX)) {
-            String path = node.substring(Text.REDIRECT_PREFIX.length());
+        if (node.startsWith(UnRAVL.REDIRECT_PREFIX)) {
+            String path = node.substring(UnRAVL.REDIRECT_PREFIX.length());
             path = script.expand(path);
             buildFromStream(path);
         } else {
@@ -133,7 +147,8 @@ public class Binary {
      *            the input stream. This is closed when done.
      * @param out
      *            the output stream. This is <strong>not</strong> closed.
-     * @throws IOException if there is an error reading from in or writing to out
+     * @throws IOException
+     *             if there is an error reading from in or writing to out
      */
     public static void copy(InputStream in, OutputStream out)
             throws IOException {

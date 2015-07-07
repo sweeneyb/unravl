@@ -55,9 +55,10 @@ import org.apache.log4j.Logger;
  * <p>
  * The service ticket is appended as a query parameter to the end of the URI as
  * <code>&amp;ticket=&lt;<em>service-ticket</em>&gt;</code> or
- * <code>?ticket=&lt;<em>service-ticket</em>&gt;</code> as needed. The TGT location
- * is added to the environment as <code>&lt;<em>hostname</em>&gt;.TGT</code> where
- * hostname is taken from the logon-URL value in the JSON specification
+ * <code>?ticket=&lt;<em>service-ticket</em>&gt;</code> as needed. The TGT
+ * location is added to the environment as
+ * <code>&lt;<em>hostname</em>&gt;.TGT</code> where hostname is taken from the
+ * logon-URL value in the JSON specification
  * <p>
  * If mock is true, this precondition will create a mock service ticket.
  *

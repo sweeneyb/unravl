@@ -1,13 +1,11 @@
 package com.sas.unravl.auth;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.BaseUnRAVLPlugin;
 import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.UnRAVLPlugins;
-import com.sas.unravl.assertions.UnRAVLAssertion.Stage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 

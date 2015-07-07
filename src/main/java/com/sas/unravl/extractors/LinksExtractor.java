@@ -128,6 +128,7 @@ import org.apache.log4j.Logger;
  * of the corresponding link representation. not the entire link object. For
  * example,
  * </p>
+ * 
  * <pre>
  *  { "links" : [ "self", "update", "delete" ] }
  * </pre>
@@ -200,11 +201,11 @@ import org.apache.log4j.Logger;
  *  "bind" : [
  *             { "href" : { "coll" : "self" },
  *               "from" : "responseBody.collection" } },
- *
+ * 
  *             { "href" : { "self0" : "self",
  *                          "delete0" : "delete" },
  *               "from" : "responseBody.collection.items[0]" } },
- *
+ * 
  *             { "href" : { "selfLast" : "self",
  *                          "deleteLast" : "delete" },
  *               "from" : "responseBody.collection.items[responseBody.collection.items.size()-1]" } }

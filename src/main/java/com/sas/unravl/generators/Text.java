@@ -34,7 +34,7 @@ import java.nio.charset.Charset;
  * </p>
  * <p>
  * In the second form, the text is read from a text file or a URL. The text is
- * assumed to be in UTF-8 encoding. 
+ * assumed to be in UTF-8 encoding.
  * </p>
  * <p>
  * In the third form, Text will combine texts in an array. Each element of the
@@ -51,20 +51,22 @@ import java.nio.charset.Charset;
  */
 public class Text implements CharSequence {
 
-    public static final String REDIRECT_PREFIX = "@";
     private static final int BUFSIZE = 256;
     public static final Charset UTF_8 = Charset.forName("UTF-8");
     StringBuilder text = new StringBuilder();
     private final UnRAVL script;
+
     public Text(UnRAVL script) {
         this.script = script;
     }
 
-    public Text(UnRAVL script, JsonNode node, String key) throws IOException, UnRAVLException {
+    public Text(UnRAVL script, JsonNode node, String key) throws IOException,
+            UnRAVLException {
         this(script, node.get(key));
     }
 
-    public Text(UnRAVL script, JsonNode node) throws IOException, UnRAVLException {
+    public Text(UnRAVL script, JsonNode node) throws IOException,
+            UnRAVLException {
         this(script);
         build(node);
     }
@@ -89,8 +91,9 @@ public class Text implements CharSequence {
     }
 
     private void build(String textValue) throws IOException {
-        if (textValue.startsWith(REDIRECT_PREFIX)) {
-            String expanded = script.expand(textValue.substring(REDIRECT_PREFIX.length()));
+        if (textValue.startsWith(UnRAVL.REDIRECT_PREFIX)) {
+            String expanded = script.expand(textValue
+                    .substring(UnRAVL.REDIRECT_PREFIX.length()));
             buildFromStream(expanded);
         } else {
             text.append(textValue);

@@ -1,6 +1,5 @@
 package com.sas.unravl.generators;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.BaseUnRAVLPlugin;
@@ -28,9 +27,9 @@ import org.springframework.beans.factory.annotation.Autowired;
  * 
  * is a body generator which uses the key "json". The body generator class is
  * found in the {@link UnRAVLPlugins} list of body generator classes and
- * instantiated. Then, the {@link #getBody(UnRAVL, ObjectNode, ApiCall)} method is
- * run, passing the currently executing {@link UnRAVL} script and the JsonNode
- * scriptlet element that defines the body generator.
+ * instantiated. Then, the {@link #getBody(UnRAVL, ObjectNode, ApiCall)} method
+ * is run, passing the currently executing {@link UnRAVL} script and the
+ * JsonNode scriptlet element that defines the body generator.
  * <p>
  * Body generators should extend {@link BaseUnRAVLRequestBodyGenerator} and
  * their getBody() method should invoke super.getBody(script,node)

@@ -97,7 +97,8 @@ public class JsonBodyAssertion extends BaseUnRAVLAssertion implements
         JsonNode json = expected;
         if (expected.isTextual()) {
             String path = getScript().expand(expected.textValue());
-            String text = getScript().expand(new Text(getScript(), path).text());
+            String text = getScript()
+                    .expand(new Text(getScript(), path).text());
             json = mapper.readTree(text);
         }
         return json;

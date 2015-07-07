@@ -112,8 +112,10 @@ public class Json {
      * Transform a JsonNode tree by applying a mapping function to the nodes in
      * it.
      *
-     * @param node the input JSON
-     * @param mappingFunction a Function that maps a node to a node
+     * @param node
+     *            the input JSON
+     * @param mappingFunction
+     *            a Function that maps a node to a node
      * @return the transformed map which may be the input JsonNode or a new
      *         node.
      */

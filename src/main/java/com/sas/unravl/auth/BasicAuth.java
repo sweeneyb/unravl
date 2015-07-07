@@ -42,6 +42,7 @@ import org.apache.http.message.BasicHeader;
  * TODO: allow an alternate location so credentials can be shared across
  * hosts/domains instead of having to have a .netrc file for each host
  * </p>
+ * 
  * <pre>
  * "auth" : { "basic" : "hostname" }
  * </pre>

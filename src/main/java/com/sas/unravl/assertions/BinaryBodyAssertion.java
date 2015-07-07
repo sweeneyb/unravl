@@ -14,7 +14,8 @@ import java.io.IOException;
 
 /**
  * Asserts that the HTTP response body matches some text. There are several
- * forms for specifying the expected text response, as defined by {@link Binary}.
+ * forms for specifying the expected text response, as defined by {@link Binary}
+ * .
  * 
  * @author David.Biesack@sas.com
  *

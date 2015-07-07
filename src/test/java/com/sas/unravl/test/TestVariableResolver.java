@@ -2,14 +2,14 @@ package com.sas.unravl.test;
 
 import static org.junit.Assert.assertEquals;
 
+import com.sas.unravl.util.VariableResolver;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import com.sas.unravl.util.VariableResolver;
 
 public class TestVariableResolver {
 

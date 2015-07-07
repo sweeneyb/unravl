@@ -2,17 +2,17 @@ package com.sas.unravl.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.IOException;
-import java.util.HashMap;
-
-import org.junit.Test;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.UnRAVLRuntime;
 import com.sas.unravl.util.Json;
+
+import java.io.IOException;
+import java.util.HashMap;
+
+import org.junit.Test;
 
 public class TestExpand extends TestBase {
 

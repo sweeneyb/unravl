@@ -6,16 +6,15 @@ import java.util.regex.Pattern;
 /**
  * Expand {varName} or {varName|alt text} or {U+nnnn} in strings.
  * <ol>
- * <li>Variables (bound with "env" elements or "groovy"
- * elements) may be referenced in strings via {varName} and replaced with their
- * corresponding string value.
+ * <li>Variables (bound with "env" elements or "groovy" elements) may be
+ * referenced in strings via {varName} and replaced with their corresponding
+ * string value.
  * <li>
- * If a variable is not bound, alternate text is substituted
- * instead.
- * <li>Any Unicode code point may be inserted by referencing
- * it using U+nnnn where nnnn is four hex digits naming a Unicode code point. For example,
- * {U+002D} will be replaced with the right curly (close) brace, '}',
- * and {U+03C0} will be replaced with the Unicode GREEK SMALL LETTER PI &#x3c0;
+ * If a variable is not bound, alternate text is substituted instead.
+ * <li>Any Unicode code point may be inserted by referencing it using U+nnnn
+ * where nnnn is four hex digits naming a Unicode code point. For example,
+ * {U+002D} will be replaced with the right curly (close) brace, '}', and
+ * {U+03C0} will be replaced with the Unicode GREEK SMALL LETTER PI &#x3c0;
  * </ol>
  * 
  * @author David.Biesack@sas.com
@@ -210,11 +209,14 @@ public class VariableResolver {
         return VAR_NAME_PATTERN.matcher(candidateVarName).matches();
     }
 
-    /** 
-     * Test if a string is a Unicode code point that matches the pattern "U+hhhh".
-     * @param string the input string
+    /**
+     * Test if a string is a Unicode code point that matches the pattern
+     * "U+hhhh".
+     * 
+     * @param string
+     *            the input string
      * @return True if string matches "U+hhhh" where hhhh is four hex digits.
-     * Case is ignored.
+     *         Case is ignored.
      */
     public static boolean isUnicodeCodePointName(String string) {
         return UNICODE_CHARACTER_NAME_PATTERN.matcher(string).matches();

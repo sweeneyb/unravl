@@ -46,7 +46,7 @@ public class JsonRequestBodyGenerator extends BaseUnRAVLRequestBodyGenerator {
         JsonNode body = null;
         if (json.isTextual()) {
             String val = json.textValue();
-            if (val.startsWith(Text.REDIRECT_PREFIX)) {
+            if (val.startsWith(UnRAVL.REDIRECT_PREFIX)) {
                 Text request = new Text(script, json);
                 json = Json.parse(request.text());
                 body = Json.expand(json, script);

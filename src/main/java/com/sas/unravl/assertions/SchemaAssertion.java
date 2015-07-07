@@ -105,7 +105,7 @@ public class SchemaAssertion extends BaseUnRAVLAssertion {
         JsonNode jsonSchema = schemaRef; // assume default - a schema object
         if (schemaRef.isTextual()) {
             String request = schemaRef.textValue();
-            if (request.startsWith(Text.REDIRECT_PREFIX)) {
+            if (request.startsWith(UnRAVL.REDIRECT_PREFIX)) {
                 Text text;
                 try {
                     TextNode expanded = new TextNode(current.expand(schemaRef

@@ -7,7 +7,6 @@ import com.sas.unravl.annotations.UnRAVLAssertionPlugin;
 import com.sas.unravl.annotations.UnRAVLExtractorPlugin;
 import com.sas.unravl.assertions.UnRAVLAssertion;
 import com.sas.unravl.assertions.UnRAVLAssertionException;
-import com.sas.unravl.generators.Text;
 import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
 import com.sas.unravl.util.Json;
 import com.sas.unravl.util.VariableResolver;
@@ -139,7 +138,19 @@ public class UnRAVLRuntime {
 
     private void execute(List<JsonNode> roots) throws JsonProcessingException,
             IOException, UnRAVLException {
-        for (JsonNode root : roots) {
+
+        for (int i = 0; i < roots.size(); i++) {
+            JsonNode root = roots.get(i);
+            if (root.isTextual()) {
+                String ref = root.textValue();
+                if (ref.startsWith(UnRAVL.REDIRECT_PREFIX)) {
+                    roots.remove(i);
+                    String where = expand(ref.substring(UnRAVL.REDIRECT_PREFIX
+                            .length()));
+                    roots.addAll(i + 1, read(where));
+                    continue;
+                }
+            }
             String label = "";
             try {
                 UnRAVL u = null;
@@ -167,6 +178,7 @@ public class UnRAVLRuntime {
                 } else
                     throw rte;
             }
+
         }
     }
 
@@ -285,20 +297,11 @@ public class UnRAVLRuntime {
 
         if (root.isArray()) {
             for (JsonNode next : Json.array(root)) {
-                if (next.isTextual()) {
-                    String ref = next.textValue();
-                    if (ref.startsWith(Text.REDIRECT_PREFIX)) {
-                        String where = expand(ref.substring(Text.REDIRECT_PREFIX.length()));
-                        roots.addAll(read(where));
-                    }
-                    else {
-                        roots.add(next);
-                    }
-                } else
-                    roots.add(Json.object(next));
+                roots.add(next);
             }
-        } else
+        } else {
             roots.add(root);
+        }
         return roots;
     }
 

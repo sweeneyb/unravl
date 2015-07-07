@@ -21,24 +21,30 @@ public interface UnRAVLPlugin {
 
     /**
      * Get the scriptlet that defines this assertion
+     * 
      * @return the scriptlet node
      */
     public abstract ObjectNode getScriptlet();
 
     /**
      * Set the scriptlet that defines this assertion
-     * @param node the UnRAVL scriptlet node
+     * 
+     * @param node
+     *            the UnRAVL scriptlet node
      */
     public abstract void setScriptlet(ObjectNode node);
 
     /**
      * Set the UnRAVL script that this instance is running in
-     * @param script the current UnRAVL script
+     * 
+     * @param script
+     *            the current UnRAVL script
      */
     public abstract void setScript(UnRAVL script);
 
     /**
      * Get the UnRAVL script in which this plugin runs.
+     * 
      * @return the current script this plugin is processing
      */
     public abstract UnRAVL getScript();
