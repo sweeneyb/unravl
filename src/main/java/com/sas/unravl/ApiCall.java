@@ -18,6 +18,7 @@ import com.sas.unravl.extractors.GroovyExtractor;
 import com.sas.unravl.extractors.UnRAVLExtractor;
 import com.sas.unravl.generators.Binary;
 import com.sas.unravl.generators.JsonRequestBodyGenerator;
+import com.sas.unravl.generators.Text;
 import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
 import com.sas.unravl.util.Json;
 
@@ -206,7 +207,7 @@ public class ApiCall {
         }
         if (body.isTextual() && !isVariableHoldingJson(body.asText())) {
             String s = script.expand(body.asText());
-            if (!s.trim().startsWith("@")) {
+            if (!s.trim().startsWith(Text.REDIRECT_PREFIX)) {
                 requestBody = new ByteArrayOutputStream();
                 try {
                     requestBody.write(s.getBytes("UTF-8"));
@@ -257,7 +258,7 @@ public class ApiCall {
     }
 
     private boolean isVariableHoldingJson(String value) {
-        if (value != null && !value.startsWith("@")) {
+        if (value != null && !value.startsWith(Text.REDIRECT_PREFIX)) {
             try {
                 Object ref = script.getEnv().getVariable(value);
                 if (ref instanceof JsonNode) {

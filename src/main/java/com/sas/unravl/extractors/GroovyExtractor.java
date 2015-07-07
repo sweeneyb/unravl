@@ -80,7 +80,7 @@ public class GroovyExtractor extends BaseUnRAVLExtractor {
                             "Groovy extractor requires a string or array of strings, found "
                                     + sourceNode);
                 }
-                source = new Text(sourceNode).text();
+                source = new Text(script, sourceNode).text();
                 Object value = eval(call, source);
                 script.bind(name, value);
 

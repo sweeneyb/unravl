@@ -3,7 +3,9 @@ package com.sas.unravl.test;
 import static org.junit.Assert.assertArrayEquals;
 
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
+import com.sas.unravl.UnRAVLRuntime;
 import com.sas.unravl.generators.Binary;
 import com.sas.unravl.util.Json;
 
@@ -26,7 +28,8 @@ public class TestBinary extends TestBase {
     private void testBinary(String json, byte expected[]) throws IOException,
             UnRAVLException {
         ObjectNode node = Json.object(mockJson(json));
-        Binary binary = new Binary(node, "binary");
+        UnRAVL script = new UnRAVL(new UnRAVLRuntime());
+        Binary binary = new Binary(script, node, "binary");
         byte actual[] = binary.bytes();
         assertArrayEquals(expected, actual);
     }
@@ -34,14 +37,16 @@ public class TestBinary extends TestBase {
     @Test(expected = IOException.class)
     public void noSuchFile() throws IOException, UnRAVLException {
         ObjectNode node = Json.object(mockJson("{'binary' : '@noSuchFile' }"));
-        new Binary(node, "binary");
+        UnRAVL script = new UnRAVL(new UnRAVLRuntime());
+        new Binary(script, node, "binary");
     }
 
     @Test(expected = IOException.class)
     public void noSuchURL() throws IOException, UnRAVLException {
         ObjectNode node = Json
                 .object(mockJson("{'binary' : '@scheme://host:9090/no/such/resource.ext' }"));
-        new Binary(node, "binary");
+        UnRAVL script = new UnRAVL(new UnRAVLRuntime());
+        new Binary(script, node, "binary");
     }
 
 }

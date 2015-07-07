@@ -47,8 +47,9 @@ public class TextExtractor extends BaseUnRAVLExtractor {
 
         String text = Text.utf8ToString(call.getResponseBody().toByteArray());
         current.bind("responseBody", text);
-        if (to.startsWith("@")) {
-            String where = to.substring(1);
+        if (to.startsWith(Text.REDIRECT_PREFIX)) {
+            String where = to.substring(Text.REDIRECT_PREFIX.length());
+            where = getScript().expand(where);
             try {
                 boolean stdout = where.equals("-");
                 Writer f = stdout ? new PrintWriter(System.out)

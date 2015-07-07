@@ -73,7 +73,7 @@ public class GroovyAssertion extends BaseUnRAVLAssertion {
         String groovyScript = null;
         try {
             g = Json.firstFieldValue(assertion);
-            Text t = new Text(g);
+            Text t = new Text(script, g);
             groovyScript = script.expand(t.text());
             GroovyShell shell = new GroovyShell(script.getRuntime()
                     .getBindings(), configuration);

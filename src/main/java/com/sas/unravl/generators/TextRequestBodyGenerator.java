@@ -36,7 +36,7 @@ public class TextRequestBodyGenerator extends BaseUnRAVLRequestBodyGenerator {
     public InputStream getBody(UnRAVL script, ObjectNode body, ApiCall call)
             throws IOException, UnRAVLException {
         JsonNode value = body.get("text");
-        Text request = new Text(value);
+        Text request = new Text(script, value);
         String requestBody = request.text();
         script.bind("requestBody", requestBody);
         return new ByteArrayInputStream(Text.utf8(requestBody));

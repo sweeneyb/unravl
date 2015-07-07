@@ -7,6 +7,7 @@ import com.sas.unravl.annotations.UnRAVLAssertionPlugin;
 import com.sas.unravl.annotations.UnRAVLExtractorPlugin;
 import com.sas.unravl.assertions.UnRAVLAssertion;
 import com.sas.unravl.assertions.UnRAVLAssertionException;
+import com.sas.unravl.generators.Text;
 import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
 import com.sas.unravl.util.Json;
 import com.sas.unravl.util.VariableResolver;
@@ -265,7 +266,7 @@ public class UnRAVLRuntime {
         variableResolver = null;
     }
 
-    public static List<JsonNode> read(String scriptFile)
+    public List<JsonNode> read(String scriptFile)
             throws JsonProcessingException, IOException, UnRAVLException {
         JsonNode root;
         List<JsonNode> roots = new ArrayList<JsonNode>();
@@ -286,8 +287,10 @@ public class UnRAVLRuntime {
             for (JsonNode next : Json.array(root)) {
                 if (next.isTextual()) {
                     String ref = next.textValue();
-                    if (ref.startsWith("@"))
-                        roots.addAll(read(ref.substring(1)));
+                    if (ref.startsWith(Text.REDIRECT_PREFIX)) {
+                        String where = expand(ref.substring(Text.REDIRECT_PREFIX.length()));
+                        roots.addAll(read(where));
+                    }
                     else {
                         roots.add(next);
                     }
