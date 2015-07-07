@@ -1040,9 +1040,8 @@ Here, the <code>*alt text*</code> is <code>%{U+002D}</code> which will expand to
 
 #### Examples ####
 
-Here is an example that shows binding values in an environment,
+Here is an example that shows setting values in an environment,
 using them to invoke an API call, and binding values from the API results.
-This is all very fluid and subject to change.
 
 ```JSON
 {
@@ -1055,7 +1054,7 @@ This is all very fluid and subject to change.
   "GET" : "{API_ROOT}/json?locations={latitude},{longitude}&sensor=false" },
   "bind" : [
      { "json" : "@{outputDir}/{name}.json" },
-     { "headers" : [ "Content-Type", "contentType" ] },
+     { "headers" : { "contentType" : "Content-Type" } },
      { "json" : "response" },
      { "jsonPath" : {
            "actualElevation" : "results[0].elevation",
