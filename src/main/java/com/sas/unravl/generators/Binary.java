@@ -98,6 +98,7 @@ public class Binary {
     private void build(String node) throws IOException, UnRAVLException {
         if (node.startsWith(Text.REDIRECT_PREFIX)) {
             String path = node.substring(Text.REDIRECT_PREFIX.length());
+            path = script.expand(path);
             buildFromStream(path);
         } else {
             throw new UnRAVLException("Unrecognized element " + node
