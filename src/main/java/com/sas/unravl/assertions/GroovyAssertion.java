@@ -7,10 +7,12 @@ import com.fasterxml.jackson.databind.node.TextNode;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
+import com.sas.unravl.UnRAVLRuntime;
 import com.sas.unravl.annotations.UnRAVLAssertionPlugin;
 import com.sas.unravl.generators.Text;
 import com.sas.unravl.util.Json;
 
+import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 
 import java.io.IOException;
@@ -75,8 +77,8 @@ public class GroovyAssertion extends BaseUnRAVLAssertion {
             g = Json.firstFieldValue(assertion);
             Text t = new Text(script, g);
             groovyScript = script.expand(t.text());
-            GroovyShell shell = new GroovyShell(script.getRuntime()
-                    .getBindings(), configuration);
+            Binding bindings = bindings(script.getRuntime());
+            GroovyShell shell = new GroovyShell(bindings, configuration);
             Object value = shell.evaluate(groovyScript);
             logger.info("Groovy script " + groovyScript + ", returned " + value);
             if (value instanceof Boolean) {
@@ -96,6 +98,10 @@ public class GroovyAssertion extends BaseUnRAVLAssertion {
                     + " trying to load Groovy assertion '" + g);
             throw new UnRAVLException(e.getMessage(), e);
         }
+    }
+
+    public static Binding bindings(UnRAVLRuntime runtime) {
+        return new Binding(runtime.getBindings());
     }
 
     public static ObjectNode assertionScriptlet(TextNode scriptlet) {

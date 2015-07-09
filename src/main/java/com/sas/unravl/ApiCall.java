@@ -21,9 +21,6 @@ import com.sas.unravl.generators.JsonRequestBodyGenerator;
 import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
 import com.sas.unravl.util.Json;
 
-import groovy.lang.Binding;
-import groovy.lang.MissingPropertyException;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -258,13 +255,9 @@ public class ApiCall {
 
     private boolean isVariableHoldingJson(String value) {
         if (value != null && !value.startsWith(UnRAVL.REDIRECT_PREFIX)) {
-            try {
-                Object ref = script.getEnv().getVariable(value);
-                if (ref instanceof JsonNode) {
-                    return true;
-                }
-            } catch (MissingPropertyException e) {
-
+            Object ref = script.binding(value);
+            if (ref instanceof JsonNode) {
+                return true;
             }
         }
         return false;
@@ -408,19 +401,15 @@ public class ApiCall {
     /**
      * Remove a binding from this script's environment. After this,
      * {@link #getVariable(String)} will return null and
-     * {@link #isBound(String)} will return false
+     * {@link #bound(String)} will return false
      * 
      * @param key
      *            the var name
      * @see #bind(String, Object)
-     * @see #isBound(String)
+     * @see #bound(String)
      */
     public void unbind(String key) {
-        // The contract for Binding does not include a remove operation,
-        // nor does it say that getVariables() is active and not a read-only
-        // view,
-        // so this is dangerous and not guaranteed to work.
-        getEnv().getVariables().remove(key);
+        getRuntime().unbind(key);
     }
 
     /**
@@ -431,10 +420,10 @@ public class ApiCall {
      * @return the bound value, or null
      * @see #bind(String, Object)
      * @see #unbind(String)
-     * @see #isBound(String)
+     * @see #bound(String)
      */
     public Object getVariable(String key) {
-        return getEnv().getVariable(key);
+        return getRuntime().binding(key);
     }
 
     /**
@@ -446,8 +435,8 @@ public class ApiCall {
      * @see #bind(String, Object)
      * @see #unbind(String)
      */
-    public boolean isBound(String key) {
-        return getEnv().getVariables().containsKey(key);
+    public boolean bound(String key) {
+        return getRuntime().bound(key);
     }
 
     public InputStream getResponseBodyAsInputStream() {
@@ -541,9 +530,9 @@ public class ApiCall {
         this.responseHeaders = responseHeaders;
     }
 
-    public Binding getEnv() {
-        return getRuntime().getBindings();
-    }
+//    public Binding getEnv() {
+//        return getRuntime().getBindings();
+//    }
 
     private void assertStatus(HttpResponse response)
             throws UnRAVLAssertionException, UnRAVLException {

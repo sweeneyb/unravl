@@ -8,8 +8,6 @@ import com.sas.unravl.assertions.UnRAVLAssertion.Stage;
 import com.sas.unravl.extractors.UnRAVLExtractor;
 import com.sas.unravl.util.Json;
 
-import groovy.lang.Binding;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -79,9 +77,9 @@ public class UnRAVL {
         return runtime;
     }
 
-    public Binding getEnv() {
-        return runtime.getBindings();
-    }
+//    public Map<String, Object> getEnv() {
+//        return runtime.getBindings();
+//    }
 
     public JsonNode getRoot() {
         return root;

@@ -11,8 +11,6 @@ import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
 import com.sas.unravl.util.Json;
 import com.sas.unravl.util.VariableResolver;
 
-import groovy.lang.Binding;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -39,7 +37,7 @@ import org.springframework.stereotype.Component;
 public class UnRAVLRuntime {
 
     private static final Logger logger = Logger.getLogger(UnRAVLRuntime.class);
-    private Binding env; // script variables
+    private Map<String, Object> env; // script variables
     private Map<String, UnRAVL> scripts = new LinkedHashMap<String, UnRAVL>();
     private Map<String, UnRAVL> templates = new LinkedHashMap<String, UnRAVL>();
     // a history of the API calls we've made in this runtime
@@ -50,14 +48,10 @@ public class UnRAVLRuntime {
     private VariableResolver variableResolver;
 
     public UnRAVLRuntime() {
-        this(new Binding());
+        this(new LinkedHashMap<String, Object>());
     }
 
     public UnRAVLRuntime(Map<String, Object> environment) {
-        this(new Binding(environment));
-    }
-
-    private UnRAVLRuntime(Binding environment) {
         configure();
         this.env = environment;
         // dont't pass System.getProperies() directly to the Binding(Map)
@@ -69,7 +63,7 @@ public class UnRAVLRuntime {
         resetBindings();
     }
 
-    public Binding getBindings() {
+    public Map<String, Object> getBindings() {
         return env;
     }
 
@@ -80,11 +74,6 @@ public class UnRAVLRuntime {
     public void incrementFailedAssertionCount() {
         failedAssertionCount++;
         bind("failedAssertionCount", Integer.valueOf(failedAssertionCount));
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, ?> getEnv() {
-        return env.getVariables();
     }
 
     public Map<String, UnRAVL> getScripts() {
@@ -242,8 +231,7 @@ public class UnRAVLRuntime {
     // as the current implementation returns the internal LinkedHashMap.
     // But we reconstruct the VariableResolver to be safe.
     private void prepareEnvironmentExpansion() {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> substitutions = getBindings().getVariables();
+        Map<String, Object> substitutions = getBindings();
         variableResolver = new VariableResolver(substitutions);
     }
 
@@ -253,7 +241,7 @@ public class UnRAVLRuntime {
                     "Cannot rebind special Unicode variable %s", varName));
             throw new RuntimeException(ue);
         }
-        getBindings().setVariable(varName, value);
+        env.put(varName, value);
         logger.trace("bind(" + varName + "," + value + ")");
         // reset the pattern so it gets rebuilt on demand
         // in expand(String)
@@ -261,11 +249,11 @@ public class UnRAVLRuntime {
     }
 
     public boolean bound(String varName) {
-        return getBindings().hasVariable(varName);
+        return env.containsKey(varName);
     }
 
     public Object binding(String varName) {
-        return getBindings().getVariable(varName);
+        return env.get(varName);
     }
 
     /**
@@ -383,6 +371,10 @@ public class UnRAVLRuntime {
 
     public boolean hasTemplate(String name) {
         return getTemplates().containsKey(name);
+    }
+
+    public void unbind(String key) {
+        env.remove(key);
     }
 
 }

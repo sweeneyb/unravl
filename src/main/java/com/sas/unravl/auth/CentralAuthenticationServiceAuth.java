@@ -196,7 +196,7 @@ public class CentralAuthenticationServiceAuth extends BaseUnRAVLAuth {
         String tgt = null;
         // See if the TGT is cached for this user/host
         // Note that this risks a TGT timeout
-        if (getCall().isBound(key)) {
+        if (getCall().bound(key)) {
             Object tgto = getCall().getVariable(key);
             if (tgto instanceof String) {
                 tgt = (String) getCall().getVariable(key);

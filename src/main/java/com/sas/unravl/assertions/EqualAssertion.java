@@ -9,7 +9,7 @@ import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.annotations.UnRAVLAssertionPlugin;
 import com.sas.unravl.util.Json;
 
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.apache.log4j.Logger;
 
