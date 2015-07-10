@@ -650,7 +650,7 @@ public class ApiCall {
             try {
                 if (s.isTextual()) {
                     ObjectNode o = new ObjectNode(JsonNodeFactory.instance);
-                    o.set("groovy", (TextNode) s);
+                    o.set(getRuntime().scriptLanguage(), (TextNode) s);
                     s = o;
                 }
                 String aName = Json.firstFieldName(s);

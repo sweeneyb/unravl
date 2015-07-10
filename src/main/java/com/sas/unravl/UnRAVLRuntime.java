@@ -67,6 +67,10 @@ public class UnRAVLRuntime {
         resetBindings();
     }
     
+    public String scriptLanguage() {
+        return getPlugins().scriptLanguage();
+    }
+    
     /**
      * Return a script engine that can evaluate (interpret) script strings.
      * The returned engine is determined by the UnRAVLPlugins;
