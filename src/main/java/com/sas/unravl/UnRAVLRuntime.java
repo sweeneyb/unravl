@@ -58,9 +58,6 @@ public class UnRAVLRuntime {
     public UnRAVLRuntime(Map<String, Object> environment) {
         configure();
         this.env = environment;
-        // dont't pass System.getProperies() directly to the Binding(Map)
-        // constructor;
-        // see http://gitlab.sas.com/sasdjb/unravl/issues/13
         for (Map.Entry<Object, Object> e : System.getProperties().entrySet())
             bind(e.getKey().toString(), e.getValue());
         bind("failedAssertionCount", Integer.valueOf(0));
@@ -259,18 +256,9 @@ public class UnRAVLRuntime {
      */
     public String expand(String text) {
         if (variableResolver == null) {
-            prepareEnvironmentExpansion();
+            variableResolver = new VariableResolver(getBindings());
         }
         return variableResolver.expand(text);
-    }
-
-    // The contract for Bindings is not clear. We perhaps do not
-    // have to reset the variable resolver when Bindings have changed,
-    // as the current implementation returns the internal LinkedHashMap.
-    // But we reconstruct the VariableResolver to be safe.
-    private void prepareEnvironmentExpansion() {
-        Map<String, Object> substitutions = getBindings();
-        variableResolver = new VariableResolver(substitutions);
     }
 
     public void bind(String varName, Object value) {
@@ -281,8 +269,6 @@ public class UnRAVLRuntime {
         }
         env.put(varName, value);
         logger.trace("bind(" + varName + "," + value + ")");
-        // reset the pattern so it gets rebuilt on demand
-        // in expand(String)
         resetBindings();
     }
 
@@ -298,10 +284,15 @@ public class UnRAVLRuntime {
      * Call this when bindings have changed.
      */
     public void resetBindings() {
-        // null signals that we need to recreate the resolver since
-        // the Bindings object has changed.
-        // this gets bound again if needed in expand(String)
-        variableResolver = null;
+        // null signals that we need to recreate the resolver after
+        // the bindings have changed.
+        // if null, variableResolver gets recreated if needed in expand(String).
+        // 
+        // We no longer need to reset the resolver instance
+        // since we do not copy the environment.
+        // This used to do:
+
+        /* variableResolver = null; */
     }
 
     public List<JsonNode> read(String scriptFile)
