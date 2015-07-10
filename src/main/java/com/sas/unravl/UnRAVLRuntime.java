@@ -20,6 +20,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.SimpleBindings;
+
 import org.apache.log4j.Logger;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Component;
@@ -61,6 +65,24 @@ public class UnRAVLRuntime {
             bind(e.getKey().toString(), e.getValue());
         bind("failedAssertionCount", Integer.valueOf(0));
         resetBindings();
+    }
+    
+    /**
+     * Return a script engine that can evaluate (interpret) script strings.
+     * The returned engine is determined by the UnRAVLPlugins;
+     * the default is a Groovy engine if Groovy is available.
+     * The system property unravl.script.language may be set to 
+     * a valid engine such as JavaScript; the default is "Groovy".
+     * Run with -Dunravl.script.language=<em>language</em> such as
+     * -Dunravl.script.language=JavaScript to choose an alternate language
+     * @return a script engine
+     * @throws UnRAVLException if no interpreter exists for the configured script language
+     */
+    public ScriptEngine interpreter() throws UnRAVLException {
+        ScriptEngine engine = getPlugins().interpreter();
+        SimpleBindings bindings = new SimpleBindings(getBindings());
+        engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
+        return engine;
     }
 
     public Map<String, Object> getBindings() {

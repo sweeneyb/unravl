@@ -8,13 +8,11 @@ import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.sas.unravl.assertions.BaseUnRAVLAssertion;
-import com.sas.unravl.assertions.GroovyAssertion;
 import com.sas.unravl.assertions.StatusAssertion;
 import com.sas.unravl.assertions.UnRAVLAssertion;
 import com.sas.unravl.assertions.UnRAVLAssertion.Stage;
 import com.sas.unravl.assertions.UnRAVLAssertionException;
 import com.sas.unravl.auth.UnRAVLAuth;
-import com.sas.unravl.extractors.GroovyExtractor;
 import com.sas.unravl.extractors.UnRAVLExtractor;
 import com.sas.unravl.generators.Binary;
 import com.sas.unravl.generators.JsonRequestBodyGenerator;
@@ -30,6 +28,11 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
+import javax.script.SimpleBindings;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -138,9 +141,15 @@ public class ApiCall {
                 condition = getScript().binding(condS);
             else {
                 try {
-                    condition = GroovyExtractor.eval(this, condS);
+                    ScriptEngine engine = script.getRuntime().interpreter();
+                    condition = engine.eval(condS, engine.getContext());
                 } catch (RuntimeException e) {
-                    logger.error("Groovy script '" + condS
+                    logger.error("script '" + condS
+                            + "' threw a runtime exception "
+                            + e.getClass().getName() + ", " + e.getMessage());
+                    throw new UnRAVLException(e.getMessage(), e);
+                } catch (ScriptException e) {
+                    logger.error("script '" + condS
                             + "' threw a runtime exception "
                             + e.getClass().getName() + ", " + e.getMessage());
                     throw new UnRAVLException(e.getMessage(), e);
@@ -400,8 +409,8 @@ public class ApiCall {
 
     /**
      * Remove a binding from this script's environment. After this,
-     * {@link #getVariable(String)} will return null and
-     * {@link #bound(String)} will return false
+     * {@link #getVariable(String)} will return null and {@link #bound(String)}
+     * will return false
      * 
      * @param key
      *            the var name
@@ -530,9 +539,9 @@ public class ApiCall {
         this.responseHeaders = responseHeaders;
     }
 
-//    public Binding getEnv() {
-//        return getRuntime().getBindings();
-//    }
+    // public Binding getEnv() {
+    // return getRuntime().getBindings();
+    // }
 
     private void assertStatus(HttpResponse response)
             throws UnRAVLAssertionException, UnRAVLException {
@@ -640,19 +649,18 @@ public class ApiCall {
             Class<? extends UnRAVLAssertion> aClass = null;
             try {
                 if (s.isTextual()) {
-                    assertionScriptlet = GroovyAssertion
-                            .assertionScriptlet((TextNode) s);
-                    a = new GroovyAssertion();
-                } else {
-                    String aName = Json.firstFieldName(s);
-                    assertionScriptlet = Json.object(s);
-                    aClass = getPlugins().getAssertions().get(aName);
-                    if (aClass == null)
-                        throw new UnRAVLException(
-                                "No such assertion class registered for "
-                                        + stage + " keyword " + aName);
-                    a = aClass.newInstance();
+                    ObjectNode o = new ObjectNode(JsonNodeFactory.instance);
+                    o.set("groovy", (TextNode) s);
+                    s = o;
                 }
+                String aName = Json.firstFieldName(s);
+                assertionScriptlet = Json.object(s);
+                aClass = getPlugins().getAssertions().get(aName);
+                if (aClass == null)
+                    throw new UnRAVLException(
+                            "No such assertion class registered for " + stage
+                                    + " keyword " + aName);
+                a = aClass.newInstance();
                 a.setAssertion(assertionScriptlet);
                 a.check(this.script, assertionScriptlet, stage, this);
                 passedAssertions.add(a);
@@ -670,10 +678,13 @@ public class ApiCall {
                 failedAssertions.add(a);
                 for (int j = i + 1; j < assertions.size(); j++) {
                     JsonNode skipped = assertions.get(j);
+                    if (skipped.isTextual()) {
+                        ObjectNode g = new ObjectNode(JsonNodeFactory.instance);
+                        g.set("groovy", (TextNode) skipped);
+                        skipped = g;
+                    }
                     skippedAssertions.add(BaseUnRAVLAssertion.of(getScript(),
-                            Json.object(skipped.isTextual() ? GroovyAssertion
-                                    .assertionScriptlet((TextNode) skipped)
-                                    : skipped)));
+                            Json.object(skipped)));
                 }
                 throw e;
             }

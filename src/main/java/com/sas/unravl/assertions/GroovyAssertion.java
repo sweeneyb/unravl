@@ -103,10 +103,4 @@ public class GroovyAssertion extends BaseUnRAVLAssertion {
     public static Binding bindings(UnRAVLRuntime runtime) {
         return new Binding(runtime.getBindings());
     }
-
-    public static ObjectNode assertionScriptlet(TextNode scriptlet) {
-        ObjectNode o = new ObjectNode(JsonNodeFactory.instance);
-        o.set("groovy", scriptlet);
-        return o;
-    }
 }
