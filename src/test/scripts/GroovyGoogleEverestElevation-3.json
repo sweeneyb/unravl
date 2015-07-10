@@ -27,9 +27,9 @@
   	
     { "doc" : "Below are some Groovy scripts to assert actual values match the expected values." },
     "responseType.startsWith('application/json')",
-    "assertEquals(expectedElevation, actualEl,  epsilon)",
-    "assertEquals(lat, actualLat, epsilon)",
-    "assertEquals(lng, response.results[0].location.lng.doubleValue(), epsilon)",
+    "org.junit.Assert.assertEquals(expectedElevation, actualEl,  epsilon)",
+    "org.junit.Assert.assertEquals(lat, actualLat, epsilon)",
+    "org.junit.Assert.assertEquals(lng, response.results[0].location.lng.doubleValue(), epsilon)",
     
     { "equal" : [ "application/json", "{mediaType}"] },
     { "equal" : [ "UTF-8", "{charset}" ] }

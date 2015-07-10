@@ -12,8 +12,6 @@ import com.sas.unravl.util.Json;
 import java.io.IOException;
 
 import org.apache.log4j.Logger;
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
 /**
  * Run a Groovy script, passing the current environment. If the script returns
@@ -52,15 +50,6 @@ public class GroovyAssertion extends BaseUnRAVLAssertion {
 
     static final Logger logger = Logger.getLogger(GroovyAssertion.class);
 
-    static final CompilerConfiguration configuration = new CompilerConfiguration();
-
-    static {
-        ImportCustomizer iczr = new ImportCustomizer();
-        iczr.addStaticStars("org.junit.Assert"); // add static imports
-                                                 // org.junit.Assert.*
-        configuration.addCompilationCustomizers(iczr);
-    }
-
     @Override
     public void check(UnRAVL script, ObjectNode assertion, Stage when,
             ApiCall call) throws UnRAVLAssertionException, UnRAVLException {
@@ -70,8 +59,9 @@ public class GroovyAssertion extends BaseUnRAVLAssertion {
         try {
             g = Json.firstFieldValue(assertion);
             Text t = new Text(script, g);
-            groovyScript = "import org.junit.Assert.*;\n" + script.expand(t.text());
-            Object value = script.evalWith(groovyScript, "groovy");
+            groovyScript = script.expand(t.text()); 
+            String prefix = ""; // "import org.junit.Assert.*;\n" 
+            Object value = script.evalWith(prefix + groovyScript, "groovy");
             logger.info("Groovy script " + groovyScript + ", returned " + value);
             if (value instanceof Boolean) {
                 Boolean b = (Boolean) value;
