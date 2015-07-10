@@ -70,7 +70,7 @@ public class GroovyAssertion extends BaseUnRAVLAssertion {
         try {
             g = Json.firstFieldValue(assertion);
             Text t = new Text(script, g);
-            groovyScript = script.expand(t.text());
+            groovyScript = "import org.junit.Assert.*;\n" + script.expand(t.text());
             Object value = script.evalWith(groovyScript, "groovy");
             logger.info("Groovy script " + groovyScript + ", returned " + value);
             if (value instanceof Boolean) {
