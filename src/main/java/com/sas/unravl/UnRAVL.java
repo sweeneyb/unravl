@@ -14,27 +14,30 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptException;
+
 import org.apache.http.Header;
 import org.apache.http.message.BasicHeader;
 import org.apache.log4j.Logger;
 
 /**
- * An UnRAVL script object - this is a wrapper around a JSON UnRAVL script. An
- * UnRAVL script (Uniform REST API Validation Language) is an executable domain
- * specific language for validating REST APIs. An UNRAVL script consists of an
- * execution environment (bindings of name/value pairs), an HTTP method, URI,
- * and HTTP headers. The REST API method is called, then values may be extracted
- * from the results and assertions run to validate the call.
+ * An UnRAVL script object - this is a wrapper around a JSON UnRAVL script. An UnRAVL script
+ * (Uniform REST API Validation Language) is an executable domain specific language for validating
+ * REST APIs. An UNRAVL script consists of an execution environment (bindings of name/value pairs),
+ * an HTTP method, URI, and HTTP headers. The REST API method is called, then values may be
+ * extracted from the results and assertions run to validate the call.
  * <p>
- * An UnRAVL script runs within an {@link UnRAVLRuntime rutime environment}
- * which defines the set of possible value bindings (called @link
- * UnRAVLExtractor s) and the set of possible {@link UnRAVLAssertion}s.
+ * An UnRAVL script runs within an {@link UnRAVLRuntime rutime environment} which defines the set of
+ * possible value bindings (called @link UnRAVLExtractor s) and the set of possible
+ * {@link UnRAVLAssertion}s.
  * <p>
  * TODO: This class is too large and does too much. Refactor.
  * 
  * @author David.Biesack@sas.com
  */
-public class UnRAVL {
+public class UnRAVL
+{
 
     private static final String IMPLICIT_TEMPLATE = "implicit.template";
     private static final String TEMPLATE_KEY = "template";
@@ -52,12 +55,14 @@ public class UnRAVL {
     private List<UnRAVLExtractor> extractors;
     static Logger logger = Logger.getLogger(UnRAVL.class);
 
-    public UnRAVL(UnRAVLRuntime runtime) {
+    public UnRAVL(UnRAVLRuntime runtime)
+    {
         this.runtime = runtime;
     }
 
     public UnRAVL(UnRAVLRuntime runtime, JsonNode root)
-            throws JsonProcessingException, IOException, UnRAVLException {
+        throws JsonProcessingException, IOException, UnRAVLException
+    {
         // TODO: create a new transient env for this test?
         // this.env = new Binding(env.getVariables());
         // Unfortunately, unlike java.util.Properties,
@@ -68,41 +73,48 @@ public class UnRAVL {
     }
 
     @Override
-    public String toString() {
-        return "UnRAVL:[" + getName() + " " + getMethod() + " " + getURI()
-                + "]";
+    public String toString()
+    {
+        return "UnRAVL:[" + getName() + " " + getMethod() + " " + getURI() + "]";
     }
 
-    public UnRAVLRuntime getRuntime() {
+    public UnRAVLRuntime getRuntime()
+    {
         return runtime;
     }
 
-//    public Map<String, Object> getEnv() {
-//        return runtime.getBindings();
-//    }
+    // public Map<String, Object> getEnv() {
+    // return runtime.getBindings();
+    // }
 
-    public JsonNode getRoot() {
+    public JsonNode getRoot()
+    {
         return root;
     }
 
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
-    public void setName() {
+    public void setName()
+    {
         JsonNode nameNode = root.get(NAME_KEY);
-        if (nameNode != null) {
+        if (nameNode != null)
+        {
             name = nameNode.textValue();
             if (name.endsWith(TEMPLATE_EXTENSION))
                 runtime.setTemplate(name, this);
-        } else
+        }
+        else
             name = new Date().toString();
         if (isRunnable())
             runtime.getScripts().put(name, this);
         return;
     }
 
-    public UnRAVL getTemplate() {
+    public UnRAVL getTemplate()
+    {
         if (template == null && !IMPLICIT_TEMPLATE.equals(getName()) // avoid
                                                                      // infinite
                                                                      // recursion
@@ -110,19 +122,22 @@ public class UnRAVL {
                                                                      // implicit.template
                                                                      // gets
                                                                      // itself
-                && runtime.getTemplate(IMPLICIT_TEMPLATE) != null) {
+                && runtime.getTemplate(IMPLICIT_TEMPLATE) != null)
+        {
             return runtime.getTemplate(IMPLICIT_TEMPLATE);
         }
         return template;
     }
 
-    private void setTemplate() throws UnRAVLException {
+    private void setTemplate()
+        throws UnRAVLException
+    {
         JsonNode tempNode = root.get(TEMPLATE_KEY);
-        if (tempNode != null) {
+        if (tempNode != null)
+        {
 
             if (tempNode.isArray())
-                throw new UnRAVLException(
-                        "array template values are not yet supported.");
+                throw new UnRAVLException("array template values are not yet supported.");
             if (!tempNode.isTextual())
                 throw new UnRAVLException("template value must be a text node.");
             String templateName = expand(tempNode.textValue());
@@ -134,48 +149,60 @@ public class UnRAVL {
         }
     }
 
-    public List<Header> getRequestHeaders() {
+    public List<Header> getRequestHeaders()
+    {
         return requestHeaders;
     }
 
-    public Method getMethod() {
+    public Method getMethod()
+    {
         return method;
     }
 
-    public String getURI() {
+    public String getURI()
+    {
         return uri;
     }
 
-    public void setURI(String uri) {
+    public void setURI(String uri)
+    {
         this.uri = uri;
     }
 
-    public List<UnRAVLExtractor> getExtractors() {
+    public List<UnRAVLExtractor> getExtractors()
+    {
         return extractors;
     }
 
-    private void initialize() throws UnRAVLException, IOException {
+    private void initialize()
+        throws UnRAVLException, IOException
+    {
         setName();
         setTemplate();
         defineAPICall();
     }
 
-    private void defineAPICall() throws UnRAVLException, IOException {
+    private void defineAPICall()
+        throws UnRAVLException, IOException
+    {
         defineAPICall(this);
         defineHeaders();
     }
 
-    private void defineAPICall(UnRAVL script) throws UnRAVLException,
-            IOException {
+    private void defineAPICall(UnRAVL script)
+        throws UnRAVLException, IOException
+    {
         if (script == null)
             return;
-        if (script.method != null) {
+        if (script.method != null)
+        {
             this.method = script.method;
             this.uri = script.uri;
             return;
         }
         // Look for a "GET", "HEAD" or other method name in this script
-        for (Map.Entry<String, JsonNode> f : Json.fields(script.root)) {
+        for (Map.Entry<String, JsonNode> f : Json.fields(script.root))
+        {
             String methodName = f.getKey().toUpperCase();
             Method m = httpMethod(methodName);
             if (m == null)
@@ -183,18 +210,17 @@ public class UnRAVL {
             JsonNode node = f.getValue();
             if (node == null)
                 node = script.root.get(m.toString().toLowerCase());
-            if (node != null) {
-                if (method != null) {
-                    logger.warn(String
-                            .format("Warning: HTTP method %s found but method already defined as %s %s",
-                                    m, method, uri));
+            if (node != null)
+            {
+                if (method != null)
+                {
+                    logger.warn(String.format("Warning: HTTP method %s found but method already defined as %s %s",
+                                              m, method, uri));
                 }
                 method = m;
                 if (!node.isTextual())
-                    throw new UnRAVLException(
-                            String.format(
-                                    "URI for method %s must be a string; found %s instead.",
-                                    m, node));
+                    throw new UnRAVLException(String.format("URI for method %s must be a string; found %s instead.",
+                                                            m, node));
                 uri = node.textValue();
             }
         }
@@ -202,27 +228,34 @@ public class UnRAVL {
             defineAPICall(script.getTemplate());
     }
 
-    private static Method httpMethod(String methodName) {
-        for (Method m : Method.values()) {
-            if (m.name().equals(methodName)) {
+    private static Method httpMethod(String methodName)
+    {
+        for (Method m : Method.values())
+        {
+            if (m.name().equals(methodName))
+            {
                 return m;
             }
         }
         return null;
     }
 
-    private void defineHeaders() throws UnRAVLException {
+    private void defineHeaders()
+        throws UnRAVLException
+    {
         ArrayList<Header> headers = new ArrayList<Header>();
         defineHeaders(this, headers);
         this.requestHeaders = headers;
     }
 
-    public void addRequestHeader(Header header) {
+    public void addRequestHeader(Header header)
+    {
         requestHeaders.add(header);
     }
 
     private void defineHeaders(UnRAVL from, List<Header> headers)
-            throws UnRAVLException {
+        throws UnRAVLException
+    {
         if (from == null)
             return;
         UnRAVL template = from.getTemplate();
@@ -230,7 +263,8 @@ public class UnRAVL {
         JsonNode headersNode = from.getRoot().get("headers");
         if (headersNode == null)
             return;
-        for (Map.Entry<String, JsonNode> h : Json.fields(headersNode)) {
+        for (Map.Entry<String, JsonNode> h : Json.fields(headersNode))
+        {
             String string = h.getKey();
             String val = expand(h.getValue().asText());
             BasicHeader header = new BasicHeader(string, val);
@@ -238,24 +272,30 @@ public class UnRAVL {
         }
     }
 
-    public ApiCall run() throws UnRAVLException, IOException {
+    public ApiCall run()
+        throws UnRAVLException, IOException
+    {
         ApiCall apiCall = new ApiCall(this);
         return apiCall.run();
     }
 
-    public void bind(String varName, Object value) {
+    public void bind(String varName, Object value)
+    {
         getRuntime().bind(varName, value);
     }
 
-    public Object binding(String varName) {
+    public Object binding(String varName)
+    {
         return getRuntime().binding(varName);
     }
 
-    public boolean bound(String varName) {
+    public boolean bound(String varName)
+    {
         return getRuntime().bound(varName);
     }
 
-    public boolean bodyIsTextual(Header headers[]) {
+    public boolean bodyIsTextual(Header headers[])
+    {
         for (Header h : headers)
             if (h.getValue().matches(TEXT_MEDIA_TYPES_REGEX))
                 return true;
@@ -263,14 +303,17 @@ public class UnRAVL {
     }
 
     public static ObjectNode statusAssertion(UnRAVL script)
-            throws UnRAVLException {
+        throws UnRAVLException
+    {
         if (script == null)
             return null;
         // really need to use JSONPath ...
         JsonNode node = script.root.get("assert");
         node = ApiCall.assertionArray(node, Stage.ASSERT);
-        if (node != null) {
-            for (JsonNode n : Json.array(node)) {
+        if (node != null)
+        {
+            for (JsonNode n : Json.array(node))
+            {
                 if (n.isObject() && Json.firstFieldName(n).equals("status"))
                     return Json.object(n);
             }
@@ -278,12 +321,38 @@ public class UnRAVL {
         return statusAssertion(script.getTemplate());
     }
 
-    public boolean isRunnable() {
+    public boolean isRunnable()
+    {
         return name != null && !name.endsWith(TEMPLATE_EXTENSION);
     }
 
-    public String expand(String textValue) {
+    public String expand(String textValue)
+    {
         return getRuntime().expand(textValue);
     }
+
+    public Object eval(String expression)
+        throws UnRAVLException
+    {
+       return evalWith(expression, getRuntime().scriptLanguage());
+    }
+
+    public Object evalWith(String expression, String lang)
+        throws UnRAVLException
+    {
+        ScriptEngine engine = getRuntime().interpreter(lang);
+        try
+        {
+            Object result = engine.eval(expression, engine.getContext());
+            return result;
+        }
+        catch (ScriptException e)
+        {
+            logger.error("script '" + expression + "' threw a runtime script exception "
+                    + e.getClass().getName() + ", " + e.getMessage());
+            throw new UnRAVLException(e.getMessage(), e);
+        }
+    }
+
 
 }

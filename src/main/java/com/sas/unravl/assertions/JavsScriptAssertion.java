@@ -1,19 +1,13 @@
 package com.sas.unravl.assertions;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
-import com.sas.unravl.UnRAVLRuntime;
 import com.sas.unravl.annotations.UnRAVLAssertionPlugin;
 import com.sas.unravl.generators.Text;
 import com.sas.unravl.util.Json;
-
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 
 import java.io.IOException;
 
@@ -23,8 +17,6 @@ import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 
 import org.apache.log4j.Logger;
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
 /**
  * Run a JavaScript script, passing the current environment. If the script returns
@@ -57,7 +49,7 @@ public class JavsScriptAssertion extends BaseUnRAVLAssertion {
             g = Json.firstFieldValue(assertion);
             Text t = new Text(script, g);
             jsScript = script.expand(t.text());  
-            ScriptEngine engine = script.getRuntime().getPlugins().interpreter();
+            ScriptEngine engine = script.getRuntime().getPlugins().interpreter(null);
             SimpleBindings bindings = new SimpleBindings(script.getRuntime().getBindings());
             engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
             Object value = engine.eval(jsScript);

@@ -83,11 +83,23 @@ public class UnRAVLRuntime {
      * @throws UnRAVLException if no interpreter exists for the configured script language
      */
     public ScriptEngine interpreter() throws UnRAVLException {
-        ScriptEngine engine = getPlugins().interpreter();
+        return interpreter(null);
+    }
+    
+
+    /**
+     * Return a script engine that can evaluate (interpret) script strings
+     * using the named script language
+     * @param lang the script language, such as "groovy' or "javascript"
+     */
+    public ScriptEngine interpreter(String lang) throws UnRAVLException
+    {
+        ScriptEngine engine = getPlugins().interpreter(lang);
         SimpleBindings bindings = new SimpleBindings(getBindings());
         engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
         return engine;
     }
+
 
     public Map<String, Object> getBindings() {
         return env;

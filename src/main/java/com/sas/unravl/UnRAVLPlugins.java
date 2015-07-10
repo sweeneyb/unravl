@@ -10,9 +10,7 @@ import com.sas.unravl.auth.UnRAVLAuth;
 import com.sas.unravl.extractors.UnRAVLExtractor;
 import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
 
-import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.script.ScriptEngine;
@@ -42,13 +40,14 @@ public class UnRAVLPlugins {
             return scriptLanguage;
     }
 
-    public ScriptEngine interpreter() throws UnRAVLException {
+    public ScriptEngine interpreter(String lang) throws UnRAVLException {
         ScriptEngineManager manager = new ScriptEngineManager();
-        ScriptEngine engine = manager.getEngineByName(scriptLanguage());
+        ScriptEngine engine = manager.getEngineByName(lang == null ? scriptLanguage() : lang);
         if (engine == null) {
             logSupportedScriptEngines();
             throw new UnRAVLException(String.format(
-                    "No script engine available for unravl.script.lanaguge %s",
+                    "No script engine available for %sscript lanaguge %s",
+                    lang == null ? "unravl.script.langauge " : "",
                     scriptLanguage()));
         }
         return engine;
@@ -109,12 +108,13 @@ public class UnRAVLPlugins {
         return auth;
     }
 
-    private final static Logger LOGGER = Logger.getLogger(UnRAVLPlugins.class);
-
-    public static void writeScriptEngineFactoriesToOutputStream(
-            final List<ScriptEngineFactory> scriptEngineFactories) {
+    /**
+     * log availability of scripting engines supported in this environment.
+     */
+    public static void logSupportedScriptEngines() {
+        ScriptEngineManager manager = new ScriptEngineManager();
         logger.error("Available Script Engines:");
-        for (final ScriptEngineFactory scriptEngine : scriptEngineFactories) {
+        for (final ScriptEngineFactory scriptEngine : manager.getEngineFactories()) {
             logger.error(scriptEngine.getEngineName() + " "
                     + scriptEngine.getEngineVersion());
             logger.error("\tLanguage: " + scriptEngine.getLanguageName() + " "
@@ -125,14 +125,6 @@ public class UnRAVLPlugins {
             }
             logger.error("\tAliases: " + es.toString());
         }
-    }
-
-    /**
-     * Show availability of scripting engines supported in this environment.
-     */
-    public static void logSupportedScriptEngines() {
-        ScriptEngineManager manager = new ScriptEngineManager();
-        writeScriptEngineFactoriesToOutputStream(manager.getEngineFactories());
     }
 
 }

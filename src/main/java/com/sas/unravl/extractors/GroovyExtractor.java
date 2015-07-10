@@ -6,12 +6,8 @@ import com.sas.unravl.ApiCall;
 import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.annotations.UnRAVLExtractorPlugin;
-import com.sas.unravl.assertions.GroovyAssertion;
 import com.sas.unravl.generators.Text;
 import com.sas.unravl.util.Json;
-
-import groovy.lang.Binding;
-import groovy.lang.GroovyShell;
 
 import java.io.IOException;
 import java.util.Map;
@@ -84,7 +80,8 @@ public class GroovyExtractor extends BaseUnRAVLExtractor {
                                     + sourceNode);
                 }
                 source = new Text(script, sourceNode).text();
-                Object value = eval(call, source);
+                source = call.getScript().expand(source);
+                Object value = script.evalWith(source, "groovy");
                 script.bind(name, value);
 
             } catch (RuntimeException rte) {
@@ -98,25 +95,5 @@ public class GroovyExtractor extends BaseUnRAVLExtractor {
                 throw new UnRAVLException(ioe.getMessage(), ioe);
             }
         }
-    }
-
-    /**
-     * Evaluate script as a Groovy expression and return the result. Environment
-     * variable expansion is performed on the input before evaluation.
-     *
-     * @param call
-     *            the API call context
-     * @param source
-     *            Groovy script source
-     * @return the value of the expression
-     */
-    public static Object eval(ApiCall call, String source) {
-        String groovy = call.getScript().expand(source);
-        // Create a new shell for each expression, so bindings can build
-        // on previous bindings
-        Binding binding = GroovyAssertion.bindings(call.getScript().getRuntime());
-        GroovyShell shell = new GroovyShell(binding);
-        Object value = shell.evaluate(groovy);
-        return value;
     }
 }

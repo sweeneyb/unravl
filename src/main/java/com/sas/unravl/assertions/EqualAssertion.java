@@ -9,9 +9,8 @@ import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.annotations.UnRAVLAssertionPlugin;
 import com.sas.unravl.util.Json;
 
-import org.junit.Assert;
-
 import org.apache.log4j.Logger;
+import org.junit.Assert;
 
 /**
  * Asserts that two values are equal. There are two possible forms for this
