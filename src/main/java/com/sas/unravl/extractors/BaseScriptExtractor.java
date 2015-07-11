@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
-import com.sas.unravl.annotations.UnRAVLExtractorPlugin;
 import com.sas.unravl.generators.Text;
 import com.sas.unravl.util.Json;
 
