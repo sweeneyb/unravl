@@ -677,10 +677,18 @@ to perform more complex validation and assertions.
 
 ```
     { "groovy" : groovy-script }
-    { "groovy" : [ groovy-script, ..., groovy-script ] }
+    { "groovy" : [ script-line,
+                   ...
+                   script-line,
+                   ] }
 ```
 
-Each Groovy scripts must be a string.
+groovy-script and each script-line script must be a string.
+In the first form, the groovy-script is evaluated as
+a Boolean expression. In the second form, all the lines
+are combined with a newline separator and the resulting
+string is evaluated as a Groovy script; the result
+must also be a Boolean value.
 
 Note that double quote characters in the script must be escaped
 as \", but you can use single quotes to quote strings:
@@ -689,16 +697,17 @@ Also, non-ASCII Unicode characters can be
 expressed as \uxxxx (four hex digits), as per the JSON syntax rules.
 (The entire unRAVL script must be UTF-8.)
 
-If the string starts with @ then the value is assumed to be the name
-of a (relative) file resource or a URL and the Groovy is downloaded
-from there.
+If the string or one of the lines in the array form
+starts with @ then the value is assumed to be the name
+of a (relative) file resource or a URL and the Groovy script or fragment
+is downloaded from there.
 
 Tip: Avoid absolute path names. Use relative path names, and use
 portable path notation, namely forward slashes which work on
 both Linux **and** windows. Make sure the filename case is correct;
 Windows will ignore case differences, but Linux will not.
 
-The values in the current Environment are passed to Groovy scripts.
+The values in the current environment are passed to Groovy scripts.
 Groovy assertions are often used in conjunction with binding
 the JSON result of the API call to a variable using the
 "json" extractor, which will parse the JSON response
@@ -711,22 +720,23 @@ Warning: Other types are ignored.
 
 The Groovy script may also throw an java.lang.AssertionError
 to indicate a failed assertion.
-A {[java api|java.lang.RuntimeException}} results in a failed
+A java.lang.RuntimeException results in a failed
 assertion but also result in test errors.
 
 Note that if you wish to compare *values* in a JSON object,
-you must extract values with .<code>textValue() , .doubleValue(),
+you must extract values with <code>.textValue() , .doubleValue(),
 .longValue(), .intValue(), .booleanValue(),</code> etc.
 
 For example, assuming the response body has been saved in a variable
 named <code>result</code> in the current environment, an assertion such as
- "result[0].type == \"Folder\""
+ "result[0].type == 'Folder'"
 will always be false, even if the *type* field of the 0<sup>th</sup>
 element of the JsonNode *result* has the value <code>"Folder"</code>, because
-this is comparing a <code>JsonNode</code> to a <code>String</code> which is always <code>false</code>.
+the type of <code>JsonNode</code> is a Jackson TextNode, not a <code>String</code>. Thus, the comparison is always false.
+
 Instead, use
 
- "result[0].type.textValue() == \"Folder\""
+ "result[0].type.textValue() == 'Folder'"
 
 In addition, if any element of the "assert" or "preconditions" arrays
 are simple text strings, they are interpreted as groovy assertions.
@@ -737,12 +747,52 @@ Thus,
       "projectId != lastProjectId"
  ]
 ```
-is shorthand for those assertions embedded in a <code>{ "groovy" : [ ... ] }</code> element.
+is shorthand for embedding each of the expression in <code>{ "groovy" : expression}</code> element:
 
-Warning|Unless there is an explicit { "status" : status-code } assertion,
+```JSON
+ "assert" : [
+      { "groovy" : "projectId > 0" },
+      { "groovy" : "projectId != lastProjectId" }
+ ]
+```
+Warning: Unless there is an explicit <code>{ "status" : status-code }</code> assertion,
 UnRAVL will execute and implicit <code>{ "status" : "2.." }</code> assertion.
 Thus, if a test expects a non-2xx status code, use an explicit <code>"status"</code>
 assertion and not a <code>"groovy"</code> assertion such as <code>"status == 404"</code>.
+
+#### javascript ####
+
+The javascript assertion works just like the groovy assertion
+described above, except that the expression is interpeted by
+the JVM's JavaScript (Rhino) interpreter.
+
+```
+    { "groovy" : groovy-script }
+    { "groovy" : [ script-line,
+                   ...
+                   script-line
+                   ] }
+```
+
+Note that there are several differences. Groovy is a scripting
+language designed to interoperate with Java, whereas JavaScript
+is actually a different language. UnRAVL runs in the JVM
+and interprets Java through the Rhino JavaScript engine.
+
+For example, JavaScript strings are not the same as Java strings.
+Thus, while a Groovy assertion
+
+```JSON
+  { "groovy" : "text.endsWith('.html'" }
+```
+may work (because Groovy uses Java's String object API),
+the assertion
+
+```JSON
+  { "javascript" : "text.endsWith('.html'" }
+```
+will not work because the JavaScript String class
+does not have the endsWith method that Java's String class has.
 
 #### true and false ####
 
@@ -1257,6 +1307,17 @@ The resulting text string is subject to environment substitution before
 being interpreted as Groovy. All variables in the current environment are
 available for use as local variables in the Groovy script.
 
+#### javascript ####
+
+Run javascript scripts and bind the results to variables in the environment.
+This works like the "groovy" bind element above but uses JavaScript expressions
+```
+ { "javascript" : { map-of-name-script-pairs } }
+```
+
+See the note under the "javascript" assertion about difference
+between Groovy and JavaScript.
+
 #### jsonPath ####
 
 **TODO**
@@ -1685,6 +1746,50 @@ run the assertions in the template to validate that the response
 body, as JSON, matches the JSON in the file.
 
 ## Miscellaneous ##
+
+### Script language ###
+
+UnRAVL interprets some quoted expressions as Groovy expressions by default.
+For example, the "if" guard for conditional execution of a script is defined as
+
+```
+   "if" : "expression"
+```
+If an element of the "assert" or "preconditions" elements
+is a naked string, it is evaluated using Groovy:
+```
+  "assert" : [ "response != null",
+               "response.size() > 10"
+             ]
+```
+Also, the "links" and "hrefs" extractors in a "bind" element can use
+a Groovy path expression to extract link objects.
+
+You can override the default language (Groovy) by setting the system
+property <code>unravl.script.language</code> to "javascript".
+Java 7 and higher comes with a JavaScript engine. UnRAVL also includes
+groovy-all which includes a Groovy script engine (the default).
+
+The script language must have a corresponding assertion
+class so that "assert" elements can be converted into
+explicit assert objects. The above is converted to the equivalent
+```
+  "assert" : [ { "groovy" : "response != null" },
+               { "groovy" : "response.size() > 10" }
+             ]
+```
+
+If you want all such expressions to use JavaScript instead of
+Groovy, use the setting
+
+```
+  export UNRAVL_OPT=-Dunravl.script.language=javascript
+```
+when you launch UnRAVL with the <code>bin/unravl.sh</code> script.
+
+If you are instantiating an <code>UnRAVLRuntime</code>,
+you can set the script language with
+<code>runtime.setScriptLanguage("javascript");</code>
 
 ### Comments ###
 

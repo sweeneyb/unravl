@@ -334,7 +334,7 @@ public class UnRAVL
     public Object eval(String expression)
         throws UnRAVLException
     {
-       return evalWith(expression, getRuntime().scriptLanguage());
+       return evalWith(expression, getRuntime().getScriptLanguage());
     }
 
     public Object evalWith(String expression, String lang)

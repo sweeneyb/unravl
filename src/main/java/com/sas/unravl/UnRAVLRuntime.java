@@ -50,6 +50,7 @@ public class UnRAVLRuntime {
 
     // used to expand variable references {varName} in strings:
     private VariableResolver variableResolver;
+    private String scriptLanguage;
 
     public UnRAVLRuntime() {
         this(new LinkedHashMap<String, Object>());
@@ -58,14 +59,27 @@ public class UnRAVLRuntime {
     public UnRAVLRuntime(Map<String, Object> environment) {
         configure();
         this.env = environment;
+        setScriptLanguage(getPlugins().scriptLanguage());
         for (Map.Entry<Object, Object> e : System.getProperties().entrySet())
             bind(e.getKey().toString(), e.getValue());
         bind("failedAssertionCount", Integer.valueOf(0));
         resetBindings();
     }
     
-    public String scriptLanguage() {
-        return getPlugins().scriptLanguage();
+    /**
+     * @return this runtime's default script language
+     */
+    public String getScriptLanguage() {
+        return scriptLanguage;
+    }
+    /**
+     * Set this runtime's default script language, used
+     * to evaluate "if" conditions, "links"/"hrefs" from expressions,
+     * and string assertions
+     * @param language the script language, such as "groovy" or "javascript"
+     */
+    public void setScriptLanguage(String language) {
+        this.scriptLanguage = language;
     }
     
     /**

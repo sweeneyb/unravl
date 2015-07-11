@@ -755,7 +755,7 @@ public class ApiCall
                 if (s.isTextual())
                 {
                     ObjectNode o = new ObjectNode(JsonNodeFactory.instance);
-                    o.set(getRuntime().scriptLanguage(), (TextNode)s);
+                    o.set(getRuntime().getScriptLanguage(), (TextNode)s);
                     s = o;
                 }
                 String aName = Json.firstFieldName(s);
