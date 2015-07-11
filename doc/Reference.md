@@ -783,29 +783,16 @@ For example, JavaScript strings are not the same as Java strings.
 Thus, while a Groovy assertion
 
 ```JSON
-  { "groovy" : "text.endsWith('.html'" }
+  { "groovy" : "text.endsWith('.html')" }
 ```
 may work (because Groovy uses Java's String object API),
 the assertion
 
 ```JSON
-  { "javascript" : "text.endsWith('.html'" }
+  { "javascript" : "text.endsWith('.html')" }
 ```
 will not work because the JavaScript String class
-does not have the endsWith method that Java's String class has.
-
-#### true and false ####
-
-The special assertions "true" and "false"
-are shorthand for Groovy expressions which
-*must* evaluate to Boolean values;
-the "true" assertion passes iff the Boolean value is true, and
-the "false" assertion passes iff the Boolean value is false.
-
-```
-    { "true" : groovy-script }
-    { "false" : groovy-script }
-```
+does not have the <code>endsWith</code> method that Java's String class has.
 
 #### equal ####
 
@@ -833,8 +820,8 @@ This is ambiguous right now.
    ]
  }
 ```
-Does this mean I want to assert that the two arrays are equal,
-or that I want to run two sets of equal assertions, each comparing two numbers?
+Does this mean you want to assert that the two arrays are equal,
+or that that tou want to run two sets of equal assertions, each comparing two values?
 
 #### ignore and doc ####
 
