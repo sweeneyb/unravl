@@ -48,6 +48,9 @@ Most are optional.
 1. `bind` for extracting results into the environment and binding values
 1. `assertions`
 
+The order does not matter, as UnRAVL processes each element by keys.
+All elements are optional.
+
 ```
 { "name" : "test name",
   "template" : "template-name",
@@ -63,23 +66,33 @@ Most are optional.
 ```
 
 In addition, a script file maybe a JSON array
-of script objects:
+of script objects, script names, or script resource (file or URLs):
 ```
 [ { "name" : "test1", ... },
-  { "name" : "test1", ... },
+  { "name" : "test2", ... },
+  "test1",
+  "@file-or-url",
   ...
 ]
 ```
 
-If a <code>"@file-or-URL"</code> names a file (not a URL), it is relative to the current directory
+If the element of the array is a simple string, it should be the name of a
+script that has already been executed. If multiple scripts have the same
+name, execution order will replace the previous mapping of name to script
+("last one wins".) If the "name" element is omitted, the script
+is given a name based on the current local date and time.
+
+If a <code>"@file-or-URL"</code> element names a file (not a URL) without an absolute file location,
+it should reside relative to the current directory
 (not the directory where the script was found.)
 
 ### preconditions ###
 
-Preconditions are Boolean expressions which are evaluated before
+Preconditions are Boolean expressions which are evaluated *before*
 the API call. Preconditions must be true in order for the API call to
 occur; if false, they result in assertion errors.
-See assertions below
+See [assert](#assert) below for details on the syntax of preconditions
+and assertions.
 
 ### if ###
 
@@ -87,15 +100,15 @@ The <code>"if"</code> condition is an element which allows you to control
 conditional execution of the script. If the condition is true,
 the script executes; if false, the script is skipped.
 
-The condition is evaluated after the "env" element and after the "preconditions" element are evaluated, but
+The condition is evaluated after the "env" and "preconditions" elements are evaluated (if present), but
 before the <code>"body"</code>,  <code>"headers"</code>,
 <code>"GET"</code>...<code>"DELETE"</code>, <code>"bind"</code> or <code>"assert"</code> elements.
 Thus, the condition expression can use values bound in the <code>"env"</code> element.
 
-If there is no "if" element , the implicit condition is "failedAssertionCount == 0" - that is, the script will not run if any assertions have failed.
+If there is no "if" element , the implicit condition is "failedAssertionCount == 0" - that is, the script will not run if any previous assertions/preconditions have failed.
 
 Unlike preconditions, a false condition does not
-result in an assertion error and script failure;
+result in an assertion error or script failure;
 the script is simply skipped instead.
 
 Format:
@@ -104,8 +117,8 @@ Format:
 ```
 
 Condition may be:
-; true : (the JSON true literal). The script will continue
-; false : (the JSON false literal). The script will stop executing
+; true : (the JSON true literal). The script will continue.
+; false : (the JSON false literal). The script will stop executing.
 ; string: the value can be the name of UnRAVL environment variable which can be a Boolean object or a JSON BooleanNode value; if true, the script executes.
 Else, the value is evaluated as a Groovy expression and if true, the script executes.
 
@@ -138,14 +151,15 @@ by a <code>{ "bind" : { "groovy" : { ... } } }</code> element.
 
 ### method and URI ###
 
-The UnRAVL script specifies the API call with the method name and URL
+The UnRAVL script specifies the API call with the method name and URL.
 
 ```JSON
   method : URI
 ```
 
-the method and URI are strings. The method must be one of
- "GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"
+The method and URI are strings. The *method* must be one of
+<code>"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"</code>.
+The URI is the REST API being tested.
 
 Examples:
 
@@ -154,32 +168,44 @@ Examples:
   "DELETE" : "http://www.example.com/rest/myService/myCollection/xk4783"
 ```
 
-The URI is subject to environment substitution.
+The URI is subject to environment substitution:
 
 ```JSON
   "DELETE" : "{BASE_URL}/rest/myService/myCollection/{itemId}"
 ```
 
-will replace {BASE_URL} and {itemId} with the values of those
-variables in the current environment.
+will replace <code>{BASE_URL}</code> and <code>{itemId}</code> with the values of those
+variables in the current environment. Variables are assigned by
+the <code>"[env](#env)"</code>,
+<code>"[groovy](#groovy)"</code>, or
+<code>"[javascript](#javascript)"</code> elements described below.
 
 ### Request body ###
 
 For "PUT", "POST" and "PATCH" methods, the request body can be passed in  multiple ways.
 
+```
  "body" : { body-specification }
+```
+There are several ways to specify the request body, such as one of the following
 
-There are several ways to specify the request body.
+```
+ "body" : json-request-body }
+ "body" : { "json" : json-request-body } }
+ "body" : { "text" : text-request-body } }
+ "body" : { "binary" : binary-request-body } }
+```
 
 #### json ####
 
 To pass JSON, simply supply the JSON object or array:
 
 ```
-  { "json" : json-object-or-array }
+  { "body" : json-object-or-array }
+  { "body" : { "json" : json-object-or-array } }
 ```
-
-The *json-object-or-array* can contain variable references as per
+The first form is a convenient shortcut for the second more general form.
+The *<code>json-object-or-array</code>* can contain variable references as per
 Environments below.
 
 You can also name a variable that is bound to a JSON object or array:
@@ -200,7 +226,7 @@ You can also name a variable that is bound to a JSON object or array:
 ```
 The referenced JSON resource can contain variable references
 which will be expanded as per
-Environments below.
+[Environments](#Environments) below.
 
 In addition, if the body does not match any other body generator, such as
 : <code>{ "json" : *json-body-specification* }</code>
@@ -257,20 +283,20 @@ literals by mixing plain strings and @ strings in an array.
                "some text",
                "using {variable} {substitution}"
                ...
-               "@{templates}/closing.txt" ]
+               "@{templates}/epilog.txt" ]
    }
 ```
 
 The text can contain variable references as per
-Environments below, including in @paths.
+[Environments](#Environments) below, including in @paths.
 
 At present, the text source is the only way to PUT or POST XML content;
 the JSON notation for UnRAVL scripts does not allow directly embedding raw XML text.
 The text value may contain XML, or an array of strings, or @strings that reference
 external files or URLs that contain XML content.
 
-There is no way to specify that the body is generated by a Groovy
-script, but that would be a natural next step.
+There is no way to specify that the body is generated by Groovy or JavaScript,
+but that would be a future enhancement.
 
 #### binary ####
 
@@ -302,27 +328,49 @@ The values may use environment substitution.
               }
 ```
 
-This shows passing two headers, <strong>`Content-Type`</strong> and <strong>`If-Unmodified-Since`</strong>.
+This shows passing two headers, <strong><code>Content-Type</code></strong> and <strong><code>If-Unmodified-Since</code></strong>.
 The value of the latter is taken from the environment.
 
-Header names are case-insensitive but using Hyphenated-Upper-Camel-Case
+Header names are case-insensitive but using *Hyphenated-Upper-Camel-Case*
 is the convention.
 
 ## assertions ###
 
 Assertions are what test the API.
 There are two sets of supported assertions:
-"preconditions" and "assert". Preconditions
+<code>"preconditions"</code> and <code>"assert"</code>. Preconditions
 are evaluated **before** invoking the API and must
 all pass before running the API. This can be used to
 validate environment variables that may have been set
 from other APIs calls in earlier tests.
-"assert" assertions run after the API call and validate the result.
+<code>"assert"</code> assertions run after the API call and validate the result.
 
 ```JSON
  "preconditions" : array-of-assertions ,
  "assert" : array-of-assertions
 ```
+
+These blocks can contain values in the following form:
+```
+  "assert" : "expression string"
+  "assert" : json-object
+  "assert" : json-array
+```
+
+In the first form, the "<code>code</code>" is converted to
+<code>"assert" : [ { "groovy" : "expression-string" } ]</code>; see the groovy
+assertion element below.
+
+The second form is converted to the general array form,
+<code>"assert" : [ json-object ]</code>
+
+The third form is the most general case: an array of
+assertions, using the forms described below.
+If an element of the array is a string, it is
+assumed to be a Groovy (or JavaScript) assertion.
+
+Each assertion in the array is evaluated in order. Validation stops
+on the first failed assertion in the array.
 
 Below is the set of assertions supported by UnRAVL.
 
@@ -343,8 +391,8 @@ Examples:
  { "status" : "2.." }
 ```
 
-Warning: Unless there is an explicit { "status" : status-code } assertion,
-UnRAVL will execute and implicit <code>{ "status" : "2.." }</code> assertion.
+*Warning*: Unless there is an explicit { "status" : status-code } assertion,
+UnRAVL will execute an implicit <code>{ "status" : "2.." }</code> assertion.
 Thus, if a test expects a non-2xx status code, use an explicit <code>"status"</code>
 assertion and not a <code>"groovy"</code> assertion such as <code>"status == 404"</code>.
 
@@ -372,13 +420,7 @@ to expand into
 because the JSON is parsed *before* the environment is defined,
 and the JSON parser will balk at <code>{longitude}</code> as invalid JSON.
 
-**TODO**: add an option to allow the result to be a subset of the expected
-value, or for the expected value to be a subset of the actual object.
-I'm not sure the best way to express this so that it is clear
-which is which. The current Jackson library does not implement
-a subobject equality test.
-
-**TODO**: add an option to ignore certain fields or JSON Path expressions.
+**TODO**: add an option to test or ignore only certain fields or JSON Path expressions.
 
 #### text ####
 
@@ -391,8 +433,8 @@ Asserts that the response body matches the (usually) plain/text body.
 ```
 
 The text literals are encoded with Unicode and escape characters,
-such as \n for newlines. Or, an array of strings will
-be concatenated. Any string that begins with the '@' character
+such as <code>\n</code> for newlines. An array of strings will
+be concatenated, separated by a newline. Any string that begins with the '@' character
 is assumed to be a file or URL reference and that content
 streamed in.
 
