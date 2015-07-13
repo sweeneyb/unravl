@@ -1,4 +1,4 @@
-UnRAVL is a ***Uniform REST API Validation Language*** - a JSON domain-specific language|domain-specific language (DSL) for validating REST APIs.
+UnRAVL is a ***Uniform REST API Validation Language*** - a JSON domain-specific language (DSL) for validating REST APIs.
 
 UnRAVL is a domain-specific language, coded in JSON, for validating REST APIs.
 UnRAVL scripts consist of a JSON description of a REST API call:
@@ -34,7 +34,6 @@ UnRAVL was designed and implemented by [https://github.com/DavidBiesack David Bi
 ## UnRAVL script syntax ##
 
 An UnRAVL script contains the following elements.
-Most are optional.
 
 1. test name
 1. test doc string; see Comments
@@ -51,8 +50,11 @@ Most are optional.
 The order does not matter, as UnRAVL processes each element by keys.
 All elements are optional.
 
+The JSON syntax is as follows:
+
 ```
 { "name" : "test name",
+  "doc" : "a comment describing this test",
   "template" : "template-name",
   "env" : { env-bindings },
   "preconditions" : [ preconditions ],
@@ -65,10 +67,11 @@ All elements are optional.
 }
 ```
 
-In addition, a script file maybe a JSON array
-of script objects, script names, or script resource (file or URLs):
+In addition, a script file may be a JSON array
+of script objects, script names, or script resource names (file or URLs):
 ```
-[ { "name" : "test1", ... },
+[
+  { "name" : "test1", ... },
   { "name" : "test2", ... },
   "test1",
   "@file-or-url",
@@ -78,13 +81,20 @@ of script objects, script names, or script resource (file or URLs):
 
 If the element of the array is a simple string, it should be the name of a
 script that has already been executed. If multiple scripts have the same
-name, execution order will replace the previous mapping of name to script
+name, sequential execution order will replace the previous mapping of name-to-script
 ("last one wins".) If the "name" element is omitted, the script
 is given a name based on the current local date and time.
 
 If a <code>"@file-or-URL"</code> element names a file (not a URL) without an absolute file location,
 it should reside relative to the current directory
 (not the directory where the script was found.)
+
+UnRAVL scripts also execute with an environment: a set of variable bindings
+which can contain data to pass to API calls, data parsed from API responses,
+and which may be used to perform validations/assertions.
+
+Below are the structural elements of an UnRAVL script,
+with syntax and descriptions.
 
 ### preconditions ###
 
@@ -117,10 +127,10 @@ Format:
 ```
 
 Condition may be:
-; true : (the JSON true literal). The script will continue.
-; false : (the JSON false literal). The script will stop executing.
-; string: the value can be the name of UnRAVL environment variable which can be a Boolean object or a JSON BooleanNode value; if true, the script executes.
-Else, the value is evaluated as a Groovy expression and if true, the script executes.
+* true : (the JSON true literal). The script will continue.
+* false : (the JSON false literal). The script will stop executing.
+* string: the value can be the name of UnRAVL environment variable which can be a Boolean object or a JSON BooleanNode value; if true, the script executes.
+* If none of the above match, the value is evaluated as a Groovy expression and if true, the script executes.
 
 #### Example ####
 
@@ -141,13 +151,37 @@ or preconditions fail in early scripts.
 {
   "if" : "exists",
   "PUT" : "{resourceLocation}",
-   "headers" : { "Accept" : "application/json" },
-  "body" : { "json" : { ... } },
+  "headers" : { "Accept" : "application/json" },
+  "body" : { ... },
 }
 ```
-Call the PUT method API call if the value of the variable <code>exists</code>
+Call the PUT method if the value of the variable <code>exists</code>
 is true. This assumes the variable was previously bound (typically
 by a <code>{ "bind" : { "groovy" : { ... } } }</code> element.
+
+### Request headers ###
+
+Use the <code>headers</code> element to specify
+one or more headers.
+
+```JSON
+  "headers" : headers
+```
+
+The elements is a JSON object consisting of one more more header name and body values.
+The values may use environment substitution.
+
+```JSON
+  "headers" : { "Content-Type" : "application/json",
+                "If-Unmodified-Since" : "{lastMod}" }
+              }
+```
+
+This shows passing two headers, <strong><code>Content-Type</code></strong> and <strong><code>If-Unmodified-Since</code></strong>.
+The value of the latter is taken from the environment.
+
+Header names are case-insensitive but using *Hyphenated-Upper-Camel-Case*
+is the convention.
 
 ### method and URI ###
 
@@ -157,9 +191,9 @@ The UnRAVL script specifies the API call with the method name and URL.
   method : URI
 ```
 
-The method and URI are strings. The *method* must be one of
+The *method* and *URI* are both strings. The *method* must be one of
 <code>"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"</code>.
-The URI is the REST API being tested.
+The *URI* is the REST API being tested.
 
 Examples:
 
@@ -168,8 +202,9 @@ Examples:
   "DELETE" : "http://www.example.com/rest/myService/myCollection/xk4783"
 ```
 
-The URI is subject to environment substitution:
+The *URI* is subject to [environment substitution](#Environments):
 
+For example,
 ```JSON
   "DELETE" : "{BASE_URL}/rest/myService/myCollection/{itemId}"
 ```
@@ -177,41 +212,45 @@ The URI is subject to environment substitution:
 will replace <code>{BASE_URL}</code> and <code>{itemId}</code> with the values of those
 variables in the current environment. Variables are assigned by
 the <code>"[env](#env)"</code>,
-<code>"[groovy](#groovy)"</code>, or
-<code>"[javascript](#javascript)"</code> elements described below.
+<code>"groovy"</code>, or
+<code>"javascript"</code> elements
+or other <code>"[bind](#bind)"</code>
+described below,
 
 ### Request body ###
 
-For "PUT", "POST" and "PATCH" methods, the request body can be passed in  multiple ways.
+For "PUT", "POST" and "PATCH" methods, the request body can be expressed in multiple ways.
 
 ```
- "body" : { body-specification }
+ "body" : body-specification
 ```
-There are several ways to specify the request body, such as one of the following
+The *body-specification* may take one of several forms:
 
 ```
- "body" : json-request-body }
- "body" : { "json" : json-request-body } }
- "body" : { "text" : text-request-body } }
- "body" : { "binary" : binary-request-body } }
+ "body" : json-request-body
+ "body" : { "json" : json-request-body }
+ "body" : { "text" : text-request-body }
+ "body" : { "binary" : binary-request-body }
 ```
+
+Each will be described below.
 
 #### json ####
 
 To pass JSON, simply supply the JSON object or array:
 
 ```
-  { "body" : json-object-or-array }
-  { "body" : { "json" : json-object-or-array } }
+  "body" : { "json" : json-object-or-array }
 ```
-The first form is a convenient shortcut for the second more general form.
-The *<code>json-object-or-array</code>* can contain variable references as per
-Environments below.
+
+The *<code>json-object-or-array</code>* can contain variable references
+inside its string values, as per
+[Environments](#Environments) below.
 
 You can also name a variable that is bound to a JSON object or array:
 
 ```JSON
-  { "json" : "varName" }
+  "body" : { "json" : "varName" }
 ```
 
 Finally, you can read the JSON from a file or URL and
@@ -222,17 +261,20 @@ or cannot be parsed as JSON.)
 You can also name a variable that is bound to a JSON object or array:
 
 ```JSON
-  { "json" : "@file-or-url" }
+  "body" : { "json" : "@file-or-url" }
 ```
 The referenced JSON resource can contain variable references
 which will be expanded as per
 [Environments](#Environments) below.
 
-In addition, if the body does not match any other body generator, such as
-: <code>{ "json" : *json-body-specification* }</code>
-: <code>{ "text" : *text-body-specification* }</code>
-: <code>{ "binary" : *binary-body-specification* }</code>
-then the entire value of the "body" item is used as a JSON body.
+In addition, if the value of <code>"body"</code> does not match any other body generator, such as
+* <code>{ "json" : "varName" }</code>
+* <code>{ "json" : "@file-or-URL" }</code>
+* <code>{ "json" : *json-body-specification* }</code>
+* <code>{ "text" : *text-body-specification* }</code>
+* <code>{ "binary" : *binary-body-specification* }</code>
+then the entire value of the <code>"body"</code> item is used as a JSON body.
+
 For example,
 ```JSON
   "body" : { "x" : 0, "y" : 1, "z" : -1 }
@@ -290,13 +332,10 @@ literals by mixing plain strings and @ strings in an array.
 The text can contain variable references as per
 [Environments](#Environments) below, including in @paths.
 
-At present, the text source is the only way to PUT or POST XML content;
+At present, the text source is the only way to PUT, PATCH or POST XML content;
 the JSON notation for UnRAVL scripts does not allow directly embedding raw XML text.
 The text value may contain XML, or an array of strings, or @strings that reference
 external files or URLs that contain XML content.
-
-There is no way to specify that the body is generated by Groovy or JavaScript,
-but that would be a future enhancement.
 
 #### binary ####
 
@@ -309,30 +348,6 @@ This form is for passing binary data as the request body.
 ```JSON
   "binary" : "@binary-file-or-url"
 ```
-
-### Request headers ###
-
-Use the <code>headers</code> element to specify
-one or more headers.
-
-```JSON
-  "headers" : headers
-```
-
-The elements is a JSON object consisting of one more more header name and body values.
-The values may use environment substitution.
-
-```JSON
-  "headers" : { "Content-Type" : "application/json",
-                "If-Unmodified-Since" : "{lastMod}" }
-              }
-```
-
-This shows passing two headers, <strong><code>Content-Type</code></strong> and <strong><code>If-Unmodified-Since</code></strong>.
-The value of the latter is taken from the environment.
-
-Header names are case-insensitive but using *Hyphenated-Upper-Camel-Case*
-is the convention.
 
 ## assertions ###
 
@@ -594,8 +609,8 @@ Examples:
 Asserts that one or more JSON structures conform to a JSON schema. There are
 several possible forms for this assertion:
 
-: <code>{ "schema" : <var>schema</var> }</code>
-: <code>{ "schema" : <var>schema</var>, "values" : <var>values</var> }</code>
+1. <code>{ "schema" : <var>schema</var> }</code>
+1. <code>{ "schema" : <var>schema</var>, "values" : <var>values</var> }</code>
 
 <var>schema</var> may be:
 1. a JSON object which represents an embedded JSON schema
@@ -603,7 +618,7 @@ several possible forms for this assertion:
 1. a string in the form of <code>"@location"</code> where <var>location</var> is the URI of the JSON schema. (Environment variables are expanded within the <var>location</var> location string.)
 
 <var>values</var> may be
-1. a string containing a single variable (the key <code>"value"</code> may be used instead of <code>"value"</code>)
+1. a string containing a single variable (the key <code>"value"</code> may be used instead of the plural <code>"values"</code>)
 1. an array of variable names
 1. For forms 1 and 2, each such variable must be bound to a JSON object or array. The JSON value of the variable is validated against the above referenced JSON schema.
 
@@ -966,7 +981,9 @@ Tip: In older releases of UnRAVL, authentication was done with "basicAuth" and "
 
 Basic Authentication locates credentials for the REST API call host
 via the .netrc file (see above) and adds an
-: <code>Authentication: Basic *encoded-credentials*</code>
+
+<code>Authentication: Basic *encoded-credentials*</code>
+
 header to the request.
 
 The scriptlet form is
@@ -1038,23 +1055,23 @@ is <code><nowiki>{undefinedVariable}</nowiki></code>.
 
 #### Automatically bound variables ####
 
-; system properties
-: at startup, all Java system properties (including values passed via <code>-Dprop=value</code>) are bound
-; operating system environment variables
-: at startup, all operating system environment variables are bound
-; <code>name</code>
-: the name of the currently executing script (from the <code>"name"</code> element of the script)
-; <code>unravlScript</code>
-: the UnRAVL script object currently executing
-; <code>status</code>
-: is always bound to the HTTP status of the latest API call.
-; <code>responseBody</code>
-: is bound to the response body for the <code>"json"</code>, <code>"text"</code>, and <code>"binary"</code> extractors (the JSON value, text response as a single <code>String</code>, or the bytes of the response as a <code>byte[]</code>, respectively)
-; Unicode characters
-: The special notation {U+nnnn} may be used to insert Unicode characters into text anywhere variable expansion is allowed.  You must supply four hex digits. For example,
-:* <code>{U+002D}</code> will be replaced with the right curly (close) brace, <code>}</code>,
-:* <code>{U+03C0}</code> will be replaced with the Unicode GREEK SMALL LETTER PI, &#x3c0;
-: UnRAVL does not allow rebinding these values.
+* system properties
+  * at startup, all Java system properties (including values passed via <code>-Dprop=value</code>) are bound
+* operating system environment variables
+  * at startup, all operating system environment variables are bound
+* <code>name</code>
+  * the name of the currently executing script (from the <code>"name"</code> element of the script)
+* <code>unravlScript</code>
+  * the UnRAVL script object currently executing
+* <code>status</code>
+  * is always bound to the HTTP status of the latest API call.
+* <code>responseBody</code>
+  * is bound to the response body for the <code>"json"</code>, <code>"text"</code>, and <code>"binary"</code> extractors (the JSON value, text response as a single <code>String</code>, or the bytes of the response as a <code>byte[]</code>, respectively)
+* Unicode characters
+  * The special notation {U+nnnn} may be used to insert Unicode characters into text anywhere variable expansion is allowed.  You must supply four hex digits. For example,
+  * <code>{U+002D}</code> will be replaced with the right curly (close) brace, <code>}</code>,
+  * <code>{U+03C0}</code> will be replaced with the Unicode GREEK SMALL LETTER PI, &#x3c0;
+  * UnRAVL does not allow rebinding these values.
 
 #### Alternate text for unbound variables ####
 
@@ -1070,11 +1087,11 @@ contain nested variable references. (Left and right curly braces must match insi
 
 Processing of *<code>alt text</code>* is only supported for variable names
 that consist of the following characters
-: alphanumeric characters <code>a-Z A-Z 0-9</code>,
-: '<code>.</code>' (period)
-: '<code>_</code>' (underscore)
-: '<code>$</code>' (dollar sign)
-: '<code>-</code>' (dash)
+* alphanumeric characters <code>a-Z A-Z 0-9</code>,
+* '<code>.</code>' (period)
+* '<code>_</code>' (underscore)
+* '<code>$</code>' (dollar sign)
+* '<code>-</code>' (dash)
 
 This syntax restriction on names is so that other syntax using braces and vertical bars can pass
 through directly. For example, an UnRAVL script may contain text such as
@@ -1085,24 +1102,31 @@ the following
 
 UnRAVL should not process this like a <code>{varName|*alt text*}</code>
 expression. If it did, it would parse this as
-: <code>varName == " next = state"</code>
-: <code>*alt text* == "ACTIVE ? active : inactive; "</code>
+
+<code>varName == " next = state"</code>
+<code>*alt text* == "ACTIVE ? active : inactive; "</code>
+
 Since there is no UnRAVL variable binding for a variable with the name <code> next = state</code>,
 the result would be the <code>*alt text*, "ACTIVE ? active : inactive; "</code>
 Thus, the net result would be the unexpected
 
-   if (pending)
-      ACTIVE ? active : inactive;
-
+```
+    if (pending)
+       ACTIVE ? active : inactive;
+```
 Warning: because of this *alt text* processing, some text may
 be replaced even if you do not intend it to be interpreted as
 variable references. For example, if A and D are not bound, the input text
 
-   {A|B|C} | {D|E} is the same as {A|B|C|D|E}
+```
+    {A|B|C} | {D|E} is the same as {A|B|C|D|E}
+````
 
 will result in the text
 
-   B|C | E is the same as B|C|D|E
+```
+    B|C | E is the same as B|C|D|E
+```
 
 Note: If you wish to include unbalanced left and right braces in <code>*alt text*</code>,
 you may use Unicode replacement.  For example, if you want the value
@@ -1114,7 +1138,9 @@ and if <code>end</code> is not bound, the result will be <code>}</code>,
 neither of which is not desired.)
 
 Instead, use
+```
     {end|%{U+002D}}
+````
 Here, the <code>*alt text*</code> is <code>%{U+002D}</code> which will expand to the desired <code>%}</code>.
 
 #### Examples ####
@@ -1577,10 +1603,10 @@ The general form of the links (or hrefs) extractor is
 
 ```
 "var1" through "varn" are environment variable names which will be bound to the links to their corresponding selectors. Selectors may be:
-; a string
-: the string is the link relation
-; a JSON object
-: the link which matches all the members of this object (as regular expressions) will be selected. The values in the selector must be strings. This allows you to match on the link relation, method, type, and/or uri instead of just the link relation.
+* a string
+  * the string is the link relation
+* a JSON object
+  * the link which matches all the members of this object (as regular expressions) will be selected. The values in the selector must be strings. This allows you to match on the link relation, method, type, and/or uri instead of just the link relation.
 
 Instead of a JSON object, the value can be an array of strings, in which case each string is used as both the variable name and the link relation (selector) name. Thus,
 
