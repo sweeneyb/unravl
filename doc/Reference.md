@@ -123,6 +123,8 @@ You can reuse an existing template by naming it:
    "template" : "myTemplate",
    "GET" : "http://www.example.com/api"
 }
+```
+
 The operations (preconditions, assertions, environment, etc.)
 defined by the template are inherited by the current test.
 
@@ -173,7 +175,7 @@ Syntax:
   "preconditions" : array-of-precondition
 ```
 
-See [Assertsion](#Assertions.md) for details on the syntax of preconditions
+See [Assertions](Assertions.md) for details on the syntax of preconditions
 and assertions.
 
 ### if ###
@@ -269,7 +271,7 @@ and Central Authentication Service authentication:
 Credentials may be supplied in a credentials file (recommended), passed
 in the environment, in stored directly the script (discouraged).
 
-See [Authentication](#Authentication.md) for details.
+See [Authentication](Authentication.md) for details.
 
 ### body ###
 

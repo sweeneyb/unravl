@@ -12,7 +12,7 @@ for a JSON request body:
 
 * <code>["body" : json-request-body](#json)</code>
 
-## json## 
+## json ## 
 
 To pass JSON, simply supply the JSON object or array:
 
@@ -25,7 +25,7 @@ To pass JSON, simply supply the JSON object or array:
 
 The *<code>json-request-body</code>* can contain variable references
 inside its string values, as per
-[Environments](#Environments) below.
+[Environment](Reference.md#Environment).
 
 You can also name a variable that is bound to a JSON object or array:
 
@@ -45,7 +45,7 @@ You can also name a variable that is bound to a JSON object or array:
 ```
 The referenced JSON resource can contain variable references
 which will be expanded as per
-[Environments](#Environments) below.
+[Environment](Reference.md#Environment).
 
 In addition, if the value of <code>"body"</code> does not match any other body generator, such as
 * <code>{ "json" : "varName" }</code>
@@ -110,7 +110,7 @@ literals by mixing plain strings and @ strings in an array.
 ```
 
 The text can contain variable references as per
-[Environments](#Environments) below, including in @paths.
+[Environment](Reference.md#Environment), including in @paths.
 
 At present, the text source is the only way to PUT, PATCH or POST XML content;
 the JSON notation for UnRAVL scripts does not allow directly embedding raw XML text.

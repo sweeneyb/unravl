@@ -49,8 +49,20 @@ Each assertion in the array is evaluated in order. Validation stops
 on the first failed assertion in the array.
 
 Below is the set of assertions supported by UnRAVL.
+Reminder: all the precondition/assertion forms described below are embedded within a
+```JSON
+"preconditions" : assertion
+"precondition" : [ array of assertions ]
+```
+```JSON
+"assert" : assertion
+"assert" : [ array of assertions ]
+```
+element. Note however that some only make sense
+inside <code>"assert"</code> since they make assertions about
+the result of the API call.
 
-#### status ####
+## status ##
 
 Checks that the HTTP status code matches the expected response.
 
@@ -72,7 +84,7 @@ UnRAVL will execute an implicit <code>{ "status" : "2.." }</code> assertion.
 Thus, if a test expects a non-2xx status code, use an explicit <code>"status"</code>
 assertion and not a <code>"groovy"</code> assertion such as <code>"status == 404"</code>.
 
-#### json ####
+## json ##
 
 Asserts that the response body matches the JSON value
 
@@ -98,7 +110,7 @@ and the JSON parser will balk at <code>{longitude}</code> as invalid JSON.
 
 **TODO**: add an option to test or ignore only certain fields or JSON Path expressions.
 
-#### text ####
+## text ##
 
 Asserts that the response body matches the (usually) plain/text body.
 
@@ -129,59 +141,27 @@ Initially, only UTF-8 text would be allowed.
 
 **TODO**: add diagnostic to indicate where the text differs.
 
-**TODO**: add a <code>"literal" : true</code> or other option to suppress environment substitution
+**TODO**: add a <code>"literal" : true</code> or other option to suppress environment substitution.
 
-**TODO**: add a <code>"charset" : "charset-name"</code> option to use another character set.
+**TODO**: add a <code>"charset" : "charset-name"</code> option to use another character set
 in external resources.
 
-#### xml ####
+## binary ##
 
-**TODO**
-
-Asserts that the response body matches an XML.
-
-Since UnRAVL is encoded as JSON, there is no way to embed
-native XML text in an UnRAVL script as there is with a JSON body.
-Validating an XML response
-is done by encoding the XML body in a String (awkward for XML).
-or with a @ reference to a file or URL. The <code>"xml"</code> body
-spec operates just like <code>"text"</code> but the net result must be
-valid XML.
+Asserts that the response body matches the (usually) binary body.
 
 ```
- { "xml" : "xml-body-encoded-as-a-string"
- { "xml" : "@file-or-url" }
- { "xml" : array-of-strings
+ { "binary" : [ array of expected binary byte values ] }
+ { "binary" : "@file-or-url" }
 ```
 
-Examples:
+For example to assert that a response matches the content of a file, use
 
 ```JSON
- { "xml" : "<myResource x='an attribute' y=100><data>foo</data></myResource>" }
+{ "binary" : "@Un.png" }
 ```
 
-or using environment substitution:
-
-```JSON
- { "xml" : "<myResource x='an attribute' y=100><data>{variableData}</data></myResource>" }
-```
-
-```JSON
- { "xml" : [ "<myResource an attribute' y=100>",
-                "<data>",
-                "@foo.data.txt",
-                "</data>",
-              "</myResource>"
-              ]
-```
-
-as with "text",  environment substitution is also performed on string
-literals and content read from files.
-
-**TODO**: add a <code>"literal" : true</code> or other option to suppress environment substitution
-in external resources.
-
-#### bound ####
+## bound ##
 
 Asserts that one or more variables are bound in the environment.
 This is a "safety valve" for a script, especially those which
@@ -192,51 +172,7 @@ expect variables to be defined via system properties.
     { "bound" : [ "var-name1", ..., "var-namen" ] }
 ```
 
-#### jsonPath ####
-
-Asserts that a value matches the JSON value identified by a JSONPath expression,
-which refers to a value in the JSON response body.
-
-```
-    { "jsonPath" :
-       { jsonPathExpression : value,
-         jsonPathExpression : value,
-         ...
-         jsonPathExpression : value,
-       }
-     }
-```
-
-Assert that the values at one or more <code>*jsonPathExpressions*</code>
-matches a <code>*value*</code>. The <code>*value*</code> may be any JSON value. Strings in the value expression
-are subject to  environment substitution.
-
-The value could be a JSON number, string, boolean, array, or object.
-
-**TODO**: augment to allow environment substitution for numbers,
-booleans, etc.
-
-**TODO**: add a "source" : value
-attribute to allow testing another JSON object instead of the response body.
-
-#### jsonPathMatch ####
-
-**TODO**
-
-```
-    { "jsonPathMatch" :
-       { jsonPathExpression : pattern,
-         jsonPathExpression : pattern,
-         ...
-         jsonPathExpression : pattern,
-       }
-     }
-```
-Asserts that one or more values named by JSONPath expressions
-(which must resolve to string values or an array of strings)
-matches the given java.util.regex.Pattern patterns.
-
-#### headers ####
+## headers ##
 
 Assert that one or more headers exist and have the
 specified value matching a regular expression
@@ -265,7 +201,7 @@ Examples:
     }
 ```
 
-#### schema ####
+## schema ##
 
 Asserts that one or more JSON structures conform to a JSON schema. There are
 several possible forms for this assertion:
@@ -291,7 +227,7 @@ conform to the JSON schema, or if
 the elements do not have the forms described above
 or if the referenced JSON schema is not a valid schema.
 
-##### Examples #####
+### Examples ###
 
 This example will invoke GET to fetch a Swagger document and validate it against
 the Swagger 2.0 schema.
@@ -371,24 +307,10 @@ processing the JSON schema only once.
 ]
 ```
 
-----
-
 **TODO**: add a member to the "schema" element to save the parsed/loaded
 JSON schema object in the environment, for later use.
 
-#### XML schema ####
-
-**TODO**
-
-Assert that the body or variable is XML and that it conforms to the specified
-XML schema
-
-This will reuse the "schema" assertion defined
-above but will auto detect if the referenced schema is an
-XML schema (i.e. the location is .xsd or the value is
-a compiled XML schema object, not an JSON schema object).
-
-#### groovy ####
+## groovy ##
 
 This assertion allows you to execute Groovy script code
 to perform more complex validation and assertions.
@@ -478,7 +400,7 @@ UnRAVL will execute and implicit <code>{ "status" : "2.." }</code> assertion.
 Thus, if a test expects a non-2xx status code, use an explicit <code>"status"</code>
 assertion and not a <code>"groovy"</code> assertion such as <code>"status == 404"</code>.
 
-#### javascript ####
+## javascript ##
 
 The javascript assertion works just like the groovy assertion
 described above, except that the expression is interpeted by
@@ -515,38 +437,11 @@ the assertion
 will not work because the JavaScript String class
 does not have the <code>endsWith</code> method that Java's String class has.
 
-#### equal ####
 
-<strong>Warning</strong> The equals assertion is deprecated due to some ugly
-issues with it.
+## ignore and doc ##
 
-Asserts that two values are equal. There are two possible forms for this assertion:
-
-```
- { "equal" : [ lhs, rhs ] }
- { "equal" : [ lhs, rhs, epsilon ] }
-```
-
-The lhs and rhs values are compared and if not equal, the assertion throws an UnRAVLAssertionException. The values may be JSON null, booleans, integers, strings, doubles, JSON arrays, or JSON objects. The values should be the same type. Environment expansion is performed on all string values (top-level or nested inside JSON arrays or objects), with the exception of JSON field names which are not expanded. Note that this means the string value of variables will be compared.
-
-If the optional *epsilon* value exists, it should be a floating point value and the lhs and rhs values are compared as doubles and must be within epsilon of each other. If the lhs or rhs values (after environment expansion) are string values, the value is converted to a double via <code>Double.valueOf(String)</code>
-
-**TODO**: Allow passing multiple equality tests.
-This is ambiguous right now.
-
-```
-{ "equal" : [
-              [ expectedA, actualA ],
-              [ expectedB, actualB ]
-   ]
- }
-```
-Does this mean you want to assert that the two arrays are equal,
-or that that tou want to run two sets of equal assertions, each comparing two values?
-
-#### ignore and doc ####
-
-Useful to "comment out" an existing assertion in an UnRAVL, since JSON does not support comment syntax. For example, if you have the assertion
+Useful to "comment out" an existing assertion in an UnRAVL, since JSON does not support comment syntax.
+For example, if you have the assertion
 ```JSON
  "assert" : [
      { "json" : "@benchmark.json" },
@@ -567,3 +462,9 @@ This may also be used as a "doc" element, to allow arbitrary JSON documentation 
      { "status" : 201 }
      ]
 ```
+
+## To do ##
+
+See [Assertsions to do](Assertions-to-do.md) for some possible
+new assertion elements.
+
