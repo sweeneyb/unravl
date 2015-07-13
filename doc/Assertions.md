@@ -50,11 +50,11 @@ on the first failed assertion in the array.
 
 Below is the set of assertions supported by UnRAVL.
 Reminder: all the precondition/assertion forms described below are embedded within a
-```JSON
+```
 "preconditions" : assertion
 "precondition" : [ array-of-assertions ]
 ```
-```JSON
+```
 "assert" : assertion
 "assert" : [ array-of-assertions ]
 ```
