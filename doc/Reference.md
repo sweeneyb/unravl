@@ -824,14 +824,17 @@ described above, except that the expression is interpeted by
 the JVM's JavaScript (Rhino) interpreter.
 
 ```
-    { "groovy" : groovy-script }
-    { "groovy" : [ script-line,
-                   ...
-                   script-line
-                   ] }
+    { "javascript" : javascript-script }
+    { "javascript" : [
+                       script-line,
+                       ...
+                       script-line
+                     ] }
 ```
 
-Note that there are several differences. Groovy is a scripting
+Note that there are several differences between
+the <code>"groovy"</code> and <code>"javascript"</code> assertions.
+Groovy is a scripting
 language designed to interoperate with Java, whereas JavaScript
 is actually a different language. UnRAVL runs in the JVM
 and interprets Java through the Rhino JavaScript engine.
@@ -842,7 +845,7 @@ Thus, while a Groovy assertion
 ```JSON
   { "groovy" : "text.endsWith('.html')" }
 ```
-may work (because Groovy uses Java's String object API),
+may work (because Groovy uses Java's String objects),
 the assertion
 
 ```JSON
