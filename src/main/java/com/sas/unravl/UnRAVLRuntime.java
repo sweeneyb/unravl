@@ -11,8 +11,6 @@ import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
 import com.sas.unravl.util.Json;
 import com.sas.unravl.util.VariableResolver;
 
-import groovy.lang.Binding;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -21,6 +19,10 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.SimpleBindings;
 
 import org.apache.log4j.Logger;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -39,7 +41,7 @@ import org.springframework.stereotype.Component;
 public class UnRAVLRuntime {
 
     private static final Logger logger = Logger.getLogger(UnRAVLRuntime.class);
-    private Binding env; // script variables
+    private Map<String, Object> env; // script variables
     private Map<String, UnRAVL> scripts = new LinkedHashMap<String, UnRAVL>();
     private Map<String, UnRAVL> templates = new LinkedHashMap<String, UnRAVL>();
     // a history of the API calls we've made in this runtime
@@ -48,28 +50,69 @@ public class UnRAVLRuntime {
 
     // used to expand variable references {varName} in strings:
     private VariableResolver variableResolver;
+    private String scriptLanguage;
 
     public UnRAVLRuntime() {
-        this(new Binding());
+        this(new LinkedHashMap<String, Object>());
     }
 
     public UnRAVLRuntime(Map<String, Object> environment) {
-        this(new Binding(environment));
-    }
-
-    private UnRAVLRuntime(Binding environment) {
         configure();
         this.env = environment;
-        // dont't pass System.getProperies() directly to the Binding(Map)
-        // constructor;
-        // see http://gitlab.sas.com/sasdjb/unravl/issues/13
+        setScriptLanguage(getPlugins().scriptLanguage());
         for (Map.Entry<Object, Object> e : System.getProperties().entrySet())
             bind(e.getKey().toString(), e.getValue());
         bind("failedAssertionCount", Integer.valueOf(0));
         resetBindings();
     }
+    
+    /**
+     * @return this runtime's default script language
+     */
+    public String getScriptLanguage() {
+        return scriptLanguage;
+    }
+    /**
+     * Set this runtime's default script language, used
+     * to evaluate "if" conditions, "links"/"hrefs" from expressions,
+     * and string assertions
+     * @param language the script language, such as "groovy" or "javascript"
+     */
+    public void setScriptLanguage(String language) {
+        this.scriptLanguage = language;
+    }
+    
+    /**
+     * Return a script engine that can evaluate (interpret) script strings.
+     * The returned engine is determined by the UnRAVLPlugins;
+     * the default is a Groovy engine if Groovy is available.
+     * The system property unravl.script.language may be set to 
+     * a valid engine such as JavaScript; the default is "Groovy".
+     * Run with -Dunravl.script.language=<em>language</em> such as
+     * -Dunravl.script.language=JavaScript to choose an alternate language
+     * @return a script engine
+     * @throws UnRAVLException if no interpreter exists for the configured script language
+     */
+    public ScriptEngine interpreter() throws UnRAVLException {
+        return interpreter(null);
+    }
+    
 
-    public Binding getBindings() {
+    /**
+     * Return a script engine that can evaluate (interpret) script strings
+     * using the named script language
+     * @param lang the script language, such as "groovy' or "javascript"
+     */
+    public ScriptEngine interpreter(String lang) throws UnRAVLException
+    {
+        ScriptEngine engine = getPlugins().interpreter(lang);
+        SimpleBindings bindings = new SimpleBindings(getBindings());
+        engine.setBindings(bindings, ScriptContext.ENGINE_SCOPE);
+        return engine;
+    }
+
+
+    public Map<String, Object> getBindings() {
         return env;
     }
 
@@ -80,11 +123,6 @@ public class UnRAVLRuntime {
     public void incrementFailedAssertionCount() {
         failedAssertionCount++;
         bind("failedAssertionCount", Integer.valueOf(failedAssertionCount));
-    }
-
-    @SuppressWarnings("unchecked")
-    public Map<String, ?> getEnv() {
-        return env.getVariables();
     }
 
     public Map<String, UnRAVL> getScripts() {
@@ -232,19 +270,9 @@ public class UnRAVLRuntime {
      */
     public String expand(String text) {
         if (variableResolver == null) {
-            prepareEnvironmentExpansion();
+            variableResolver = new VariableResolver(getBindings());
         }
         return variableResolver.expand(text);
-    }
-
-    // The contract for Bindings is not clear. We perhaps do not
-    // have to reset the variable resolver when Bindings have changed,
-    // as the current implementation returns the internal LinkedHashMap.
-    // But we reconstruct the VariableResolver to be safe.
-    private void prepareEnvironmentExpansion() {
-        @SuppressWarnings("unchecked")
-        Map<String, Object> substitutions = getBindings().getVariables();
-        variableResolver = new VariableResolver(substitutions);
     }
 
     public void bind(String varName, Object value) {
@@ -253,29 +281,32 @@ public class UnRAVLRuntime {
                     "Cannot rebind special Unicode variable %s", varName));
             throw new RuntimeException(ue);
         }
-        getBindings().setVariable(varName, value);
+        env.put(varName, value);
         logger.trace("bind(" + varName + "," + value + ")");
-        // reset the pattern so it gets rebuilt on demand
-        // in expand(String)
         resetBindings();
     }
 
     public boolean bound(String varName) {
-        return getBindings().hasVariable(varName);
+        return env.containsKey(varName);
     }
 
     public Object binding(String varName) {
-        return getBindings().getVariable(varName);
+        return env.get(varName);
     }
 
     /**
      * Call this when bindings have changed.
      */
     public void resetBindings() {
-        // null signals that we need to recreate the resolver since
-        // the Bindings object has changed.
-        // this gets bound again if needed in expand(String)
-        variableResolver = null;
+        // null signals that we need to recreate the resolver after
+        // the bindings have changed.
+        // if null, variableResolver gets recreated if needed in expand(String).
+        // 
+        // We no longer need to reset the resolver instance
+        // since we do not copy the environment.
+        // This used to do:
+
+        /* variableResolver = null; */
     }
 
     public List<JsonNode> read(String scriptFile)
@@ -383,6 +414,10 @@ public class UnRAVLRuntime {
 
     public boolean hasTemplate(String name) {
         return getTemplates().containsKey(name);
+    }
+
+    public void unbind(String key) {
+        env.remove(key);
     }
 
 }

@@ -43,7 +43,7 @@ public class BoundAssertion extends BaseUnRAVLAssertion {
     private void check(JsonNode j) throws UnRAVLException {
         if (j.isTextual()) {
             String name = j.textValue();
-            if (!getCall().isBound(name))
+            if (!getCall().bound(name))
                 throw new UnRAVLException("Value '" + name
                         + "' is not bound in the current script environment.");
         } else

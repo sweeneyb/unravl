@@ -437,7 +437,7 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
                                         from, key(root)));
                     }
                 } else {
-                    Object o = GroovyExtractor.eval(call, where);
+                    Object o = call.getScript().eval(where);
                     if (o instanceof ObjectNode) {
                         from = (ObjectNode) o;
                     } else

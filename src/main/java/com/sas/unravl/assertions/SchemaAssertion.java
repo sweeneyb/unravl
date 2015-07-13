@@ -118,7 +118,7 @@ public class SchemaAssertion extends BaseUnRAVLAssertion {
                             schemaRef.textValue()), e);
                 }
             } else {
-                Object val = current.getEnv().getVariable(request);
+                Object val = current.binding(request);
                 if (val instanceof JsonNode) {
                     jsonSchema = (JsonNode) val;
                 }
@@ -159,7 +159,7 @@ public class SchemaAssertion extends BaseUnRAVLAssertion {
 
     private void validateVarAgainstSchema(ApiCall call, String varName,
             JsonSchema jsonSchema) throws UnRAVLException {
-        Object value = call.getEnv().getVariable(varName);
+        Object value = call.getScript().binding(varName);
         if (value == null || !(value instanceof JsonNode)) {
             throw new UnRAVLException(
                     "responseBody is not a JSON value in schema assertion");

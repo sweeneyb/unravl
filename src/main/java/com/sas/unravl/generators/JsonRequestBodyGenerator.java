@@ -51,7 +51,7 @@ public class JsonRequestBodyGenerator extends BaseUnRAVLRequestBodyGenerator {
                 json = Json.parse(request.text());
                 body = Json.expand(json, script);
             } else {
-                Object ref = script.getEnv().getVariable(val);
+                Object ref = script.binding(val); 
                 if (ref instanceof JsonNode) {
                     body = Json.expand((JsonNode) ref, script);
                 } else {

@@ -1,0 +1,30 @@
+
+  {
+    "name" : "javasctipt bind and assert",
+    "env" : { "objWithNull" : { "nestedValue" : null },
+              "arrayWithNull" : [ null ],
+              "nullValue" : null,
+              "a" : "A",
+              "b" : "B",
+              "x" : 100,
+              "y" : 531.7771 },
+    "bind" : [ { "javascript" : { "iAmNull" : "null" } } ],
+    "assert": [
+        { "javascript" : "iAmNull == null" },
+        { "javascript" : "nullValue == null" },
+        { "javascript" : "a == 'A'" },
+        { "javascript" : "b != 'A'" },
+        { "javascript" : "x >= 100" },
+        { "javascript" : "y > 531 && y < 532" },
+        
+        { "javascript" : "arrayWithNull.get(0).isNull()" },
+        { "ignore" : [ 
+        "The following does not work with JavaScript. I get an error:",
+        "sun.org.mozilla.javascript.internal.EcmaError: TypeError: Cannot call method 'isNull' of undefined (<Unknown source>#1) in <Unknown source> at line number 1",
+  
+        { "javascript" : "objWithNull.nestedValue.isNull()" }
+  
+        ] }
+        ]
+     }
+  }

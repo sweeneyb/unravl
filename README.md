@@ -170,6 +170,7 @@ For example, the above binds the JSON response body to a JsonNode (using the Jac
 library for JSON) named <code>response</code>. This variable may be used to compare nested
 values, as seen in the <code>assert</code> array. Each assertion string is a Groovy
 expression that must evaluate to true for the test to pass.
+(You can also use JavaScript.)
 Many string values in UnRAVL scripts are subject to environment substitution
 which replaces substrings of the form <code>{varName}</code> with the value
 of the named variable from the environment.
