@@ -52,11 +52,11 @@ Below is the set of assertions supported by UnRAVL.
 Reminder: all the precondition/assertion forms described below are embedded within a
 ```JSON
 "preconditions" : assertion
-"precondition" : [ array of assertions ]
+"precondition" : [ array-of-assertions ]
 ```
 ```JSON
 "assert" : assertion
-"assert" : [ array of assertions ]
+"assert" : [ array-of-assertions ]
 ```
 element. Note however that some only make sense
 inside <code>"assert"</code> since they make assertions about
