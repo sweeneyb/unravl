@@ -1014,7 +1014,7 @@ The form is
 Example:
 
 ```JSON
-  "auth" : "cas" : "http://{sas.logon.host}:7980/SASLogon/rest/v1/tickets",
+  "auth" : { "cas" : "http://{sas.logon.host}:7980/SASLogon/rest/v1/tickets" },
   "GET" : "http://{my.app.host}/SASMyApi/rest/myEndpoint/myResource"
 ```
 
@@ -1422,7 +1422,7 @@ TODO: Decide if we need this or if using "groovy" will be sufficient.
 
 TODO
 
-Binds values from the XL response by extracting data via their XPath.
+Binds values from the XML response by extracting data via their XPath.
 
 #### text ####
 
@@ -1440,10 +1440,9 @@ denotes standard output.
 ##### To do #####
 
 If pretty is true, then the output will be pretty printed.
-The Content-Type will be used to determine how to pretty print
-If the content matches ".*[/+]json", it is pretty printed as JSON.
-If the content matches ".*[/+]xml", it is pretty printed as XML.
-<!-- If the content matches ".*[/+]x?html", it is pretty printed as HTML/XML. -->
+The value of the Content-Type header will be used to determine how to pretty print.
+If the content type matches ".*[/+]json", it is pretty printed as JSON.
+If the content type matches ".*[/+]xml", it is pretty printed as XML.
 
 #### json ####
 
@@ -1457,7 +1456,7 @@ Parses the response body as a JSON object or JSON array.
 
 It is an error if the response body cannot be parsed as JSON.
 
-using the Jackson 2.2 JSON parser and the result is bound to a
+Using the Jackson 2.x JSON parser and the result is bound to a
 [<code>org.fasterxml.jackson.databins.JsonNode</code>](http://fasterxml.github.io/jackson-databind/javadoc/2.2.0/com/fasterxml/jackson/databind/JsonNode.html) as a variable in the current
 Environment.
 
@@ -1476,7 +1475,7 @@ TODO
  { "xml" : XPath, "class" : array-of-classNames }
 ```
 
-The xml binder will bind (a fragment of) the XML response body to a Java object,
+The <code>"xml"</code> binder will bind (a fragment of) the XML response body to a Java object,
 identified via an XPath expression, using JAXB and place it in the environment.
 Use the JSONPath "/" for the entire body.
 
