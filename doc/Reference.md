@@ -1097,8 +1097,10 @@ This syntax restriction on names is so that other syntax using braces and vertic
 through directly. For example, an UnRAVL script may contain text such as
 the following
 
+```
    if (pending)
       { next = state|ACTIVE ? active : inactive; }
+```
 
 UnRAVL should not process this like a <code>{varName|*alt text*}</code>
 expression. If it did, it would parse this as
