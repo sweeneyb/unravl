@@ -137,6 +137,10 @@ See [template](Templates.md) for more details.
 ```
 
 This is a collection of `"name" : *value*` pairs (a Map, if you will).
+Each `*value*` is bound to an variable named "name" in the current
+environment. These values may later be used by referencing
+them as `{name}` inside String values, or as values bound
+when Groovy or JavaScript expressions are run.
 
 Example:
 
@@ -149,11 +153,11 @@ Example:
           }
 ```
 
-Values may be any valid JSON type. The values are Jackson `com.fasterxml.jackson.databind.node.JsonNode`
-instances: `BooleanNode`, `TextNode`, `DoubleNode`, `IntNode`, `LongNode`, `ObjectNode`, `ArrayNode`,
-`NullNode`, etc.
+Values may be any valid JSON type. For scalar types (integers, long, doubles, strings, booleans, null),
+the corresponding `java.lanag.{Integer, Long, Double, String, Boolean}` or `null` value
+is assigned to the variable. For JSON Objects and Arrays, the values are Jackson `com.fasterxml.jackson.databind.node.{ObjectNode, ArrayNode}`.
 
-UnRAVL will also bind the values in the test's template, if one is named.
+UnRAVL will also bind the values in the test's template `"env"` block, if one is named.
 
 Variables bound in the environment may be used elsewhere in UnRAVL
 scripts: for building inputs or request headers or request bodies, or for validating the API
