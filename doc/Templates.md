@@ -1,13 +1,13 @@
 ## Templates ##
 
-If a test name ends with <code>.template</code> then it is assumed to be a *template*.
+If a test name ends with `.template` then it is assumed to be a *template*.
 Templates are not executed but saved. Other tests can reuse saved templates
 by specifying a `"template" : "template-name"` attribute.
-The template name is subject to environment substitution},
+The template name is subject to [environment substitution](Reference.md#Environment)
 so you can choose preconditions and assertions by dynamically
 loading templates based on a variable binding.
 
-The ".template" suffix is assumed if omitted.
+The "`.template`" suffix is assumed if omitted if omitted from *`template-name`*.
 
 All the environment settings, if conditions, request body and headers, API calls, bindings, and assertions
 of the template are added to a test.  A test or template will evaluated these template
@@ -16,8 +16,8 @@ overwrite variable bindings.
 
 Templates can also refer to other templates, so you can chain capabilities.
 
-The special template <code>implicit.template</code>, if defined, is applied to all
-tests or templates which do not have a <code>"template"</code> element.
+The special template `implicit.template`, if defined, is applied to all
+tests or templates which do not have a `"template"` element.
 It can be used to define global assertions or defaults for the
 entire test suite without having to repeatedly name the template
 in each test.
@@ -32,48 +32,50 @@ to assert the same response each time:
 [
 
   {
-    "name" : "GoogleEverestElevationEnv",
-    "doc" : "Define the target URL for GET calls",
+    "name" : "Google Everest Elevation setup",
     "env" : { "url" : "http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false" }
+    "doc" : "Save the response to GoogleEverestElevation.json",
+    "GET" : "{url}",
+    "bind" : { "json" : "@GoogleEverestElevation.json" }
   },
 
   {
     "name" : "GoogleEverestElevation.template",
     "doc" : "Template which invokes the GET and asserts the response equals the contents of GoogleEverestElevation.json",
     "GET" : "{url}",
-    "assert" : [
-       { "json" :  "@GoogleEverestElevation.json" }
-    ]
+    "assert" : { "json" :  "@GoogleEverestElevation.json" }
   },
 
   {
-    "name" : "GoogleEverestElevationBenchmark",
-    "doc" : "Template which invokes the GET and saves the response body to GoogleEverestElevation.json",
+    "name" : "GoogleEverestElevation GET 1",
     "template" : "GoogleEverestElevation.template"
   },
 
-  "GoogleEverestElevationBenchmark",
-  "GoogleEverestElevationBenchmark",
-  "GoogleEverestElevationBenchmark",
+  {
+    "name" : "GoogleEverestElevation GET 2",
+    "template" : "GoogleEverestElevation.template"
+  },
+
+  {
+    "name" : "GoogleEverestElevation GET 3",
+    "template" : "GoogleEverestElevation.template"
+  },
 
 ]
 ```
 
-The first test binds <code>url</code> in the environment; the remaining tests use that
-binding.
-The second test is a template which performs a GET and asserts the
-response body matches the JSON in the file <code>"@GoogleEverestElevation.json"</code>
-(which will be created by the next text)
+The first test binds `url` in the environment; performs a GET
+on the target API and stores the JSON result in a file.
+the remaining tests use that result.
 
-The third test calls the GET the first time (the method call is defined
-in the template), also saves the response
-body into the file <code>"@GoogleEverestElevation.json"</code>.
-This test will also run the assertion (which will be true because
-it is comparing the response body to the file it just created
-from that response body.)
+The second test is a *template* which performs a GET and asserts the
+response body matches the JSON in the file `"@GoogleEverestElevation.json"`
+which was created by the previous test.
 
-The next three tests simply repeat the previous test (by name) , each of which will
-also use the template. Each will call the API,
-check for a 2xx HTTP status (the default behavior), and then
-run the assertions in the template to validate that the response
-body, as JSON, matches the JSON in the file.
+The third through fifth test calls the GET API as defined
+in the template and asserts the response matches the saved response.
+Each of these calls will also verify the HTTP status code is
+200 because of the implicit status assertion.
+
+Templates can also include other templates, creating a chain.
+It is invalid to define a cycle.

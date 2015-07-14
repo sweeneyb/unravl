@@ -121,7 +121,7 @@ The implementation of such benchmark comparison assertions would perform a struc
 need support for some annotations, such as ignoring the values of certain fields
 like date/time values, which may vary across test invocations.
 Note that the numeric floating point comparisons should use fuzzy comparisons using an ''epsilon'' value
-(for example, note that the <code>lng</code> 86.92527800000001 value is not exactly equal to
+(for example, note that the `lng` 86.92527800000001 value is not exactly equal to
 86.925278.)
 
 Another form of response assertion would allow comparing the received body to the contents of a benchmark file
@@ -141,10 +141,10 @@ rather than literal JSON in the file.
 
 The @ notation indicates the JSON is located at a file or URL, not in line.
 This example expects two variables to be bound in the UnRAVL environment:
-<code>benchmarks</code> is the name of a directory containing JSON files.
-name is the current test name (set by the <code>"name"</code> element of the script),
-with the value <code>"GoogleEverestElevation"</code> in this case. The
-<code>{varName}</code> notation is used to evaluate the value of an environment
+`benchmarks` is the name of a directory containing JSON files.
+name is the current test name (set by the `"name"` element of the script),
+with the value `"GoogleEverestElevation"` in this case. The
+`{varName}` notation is used to evaluate the value of an environment
 variable. More on this later.
 
 However, because representation assertions are fragile,
@@ -167,12 +167,12 @@ an alternate approach would be to perform more specific assertions for data elem
 UnRAVL scripts also have an Environment, which is a set of name/value pairs or variables.
 You can set variables explicitly, or bind them based on the result of API calls.
 For example, the above binds the JSON response body to a JsonNode (using the Jackson
-library for JSON) named <code>response</code>. This variable may be used to compare nested
-values, as seen in the <code>assert</code> array. Each assertion string is a Groovy
+library for JSON) named `response`. This variable may be used to compare nested
+values, as seen in the `assert` array. Each assertion string is a Groovy
 expression that must evaluate to true for the test to pass.
 (You can also use JavaScript.)
 Many string values in UnRAVL scripts are subject to environment substitution
-which replaces substrings of the form <code>{varName}</code> with the value
+which replaces substrings of the form `{varName}` with the value
 of the named variable from the environment.
 
 ## Syntax and reference

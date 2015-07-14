@@ -2,9 +2,9 @@ This page describes the *assertions* supported in [UnRAVL](Reference.md) scripts
 
 Assertions are what test the API.
 There are two sets of supported assertions:
-<code>"preconditions"</code> and <code>"assert"</code>.
+`"preconditions"` and `"assert"`.
 
-<code>"preconditions"</code>
+`"preconditions"`
 are evaluated *before* invoking the API and must
 all pass before calling the API. This can be used to
 validate environment variables that may have been set
@@ -14,15 +14,15 @@ from other APIs calls in earlier tests.
  "preconditions" : assertions
 ```
 
-<code>"assert"</code> assertions run after the API call and validate the result.
+`"assert"` assertions run after the API call and validate the result.
 
 ```JSON
  "assert" : assertions
 ```
 
-<code>"preconditions"</code> and <code>"assert"</code> blocks are very similar, differing
+`"preconditions"` and `"assert"` blocks are very similar, differing
 only in when they are executed. In the description below,
-descriptions of <code>"assert"</code> also applies to <code>"preconditions"</code>.
+descriptions of `"assert"` also applies to `"preconditions"`.
 
 Assertions can take following form:
 
@@ -32,13 +32,13 @@ Assertions can take following form:
   "assert" : json-array
 ```
 
-In the first form, the "<code>expession-string</code>" is converted to
-<code>"assert" : [ { "groovy" : "expression-string" } ]</code>;
-see the <code>"[groovy](#groovy)"</code>
+In the first form, the "`expession-string`" is converted to
+`"assert" : [ { "groovy" : "expression-string" } ]`;
+see the `"[groovy](#groovy)"`
 assertion element below.
 
 The second form is converted to the general array form,
-<code>"assert" : [ json-object ]</code>
+`"assert" : [ json-object ]`
 
 The third form is the most general case: an array of
 assertions, using the forms described below.
@@ -59,10 +59,10 @@ Reminder: all the precondition/assertion forms described below are embedded with
 "assert" : [ array-of-assertions ]
 ```
 element. Note however that some only make sense
-inside <code>"assert"</code> since they make assertions about
+inside `"assert"` since they make assertions about
 the result of the API call.
 
-## status ##
+## status
 
 Checks that the HTTP status code matches the expected response.
 
@@ -80,11 +80,11 @@ Examples:
 ```
 
 *Warning*: Unless there is an explicit { "status" : status-code } assertion,
-UnRAVL will execute an implicit <code>{ "status" : "2.." }</code> assertion.
-Thus, if a test expects a non-2xx status code, use an explicit <code>"status"</code>
-assertion and not a <code>"groovy"</code> assertion such as <code>"status == 404"</code>.
+UnRAVL will execute an implicit `{ "status" : "2.." }` assertion.
+Thus, if a test expects a non-2xx status code, use an explicit `"status"`
+assertion and not a `"groovy"` assertion such as `"status == 404"`.
 
-## json ##
+## json
 
 Asserts that the response body matches the JSON value
 
@@ -106,11 +106,11 @@ to expand into
  { "longitude" : 89.392 }
 
 because the JSON is parsed *before* the environment is defined,
-and the JSON parser will balk at <code>{longitude}</code> as invalid JSON.
+and the JSON parser will balk at `{longitude}` as invalid JSON.
 
 **TODO**: add an option to test or ignore only certain fields or JSON Path expressions.
 
-## text ##
+## text
 
 Asserts that the response body matches the (usually) plain/text body.
 
@@ -121,7 +121,7 @@ Asserts that the response body matches the (usually) plain/text body.
 ```
 
 The text literals are encoded with Unicode and escape characters,
-such as <code>\n</code> for newlines. An array of strings will
+such as `\n` for newlines. An array of strings will
 be concatenated, separated by a newline. Any string that begins with the '@' character
 is assumed to be a file or URL reference and that content
 streamed in.
@@ -141,12 +141,12 @@ Initially, only UTF-8 text would be allowed.
 
 **TODO**: add diagnostic to indicate where the text differs.
 
-**TODO**: add a <code>"literal" : true</code> or other option to suppress environment substitution.
+**TODO**: add a `"literal" : true` or other option to suppress environment substitution.
 
-**TODO**: add a <code>"charset" : "charset-name"</code> option to use another character set
+**TODO**: add a `"charset" : "charset-name"` option to use another character set
 in external resources.
 
-## binary ##
+## binary
 
 Asserts that the response body matches the (usually) binary body.
 
@@ -161,7 +161,7 @@ For example to assert that a response matches the content of a file, use
 { "binary" : "@Un.png" }
 ```
 
-## bound ##
+## bound
 
 Asserts that one or more variables are bound in the environment.
 This is a "safety valve" for a script, especially those which
@@ -172,7 +172,7 @@ expect variables to be defined via system properties.
     { "bound" : [ "var-name1", ..., "var-namen" ] }
 ```
 
-## headers ##
+## headers
 
 Assert that one or more headers exist and have the
 specified value matching a regular expression
@@ -201,25 +201,25 @@ Examples:
     }
 ```
 
-## schema ##
+## schema
 
 Asserts that one or more JSON structures conform to a JSON schema. There are
 several possible forms for this assertion:
 
-1. <code>{ "schema" : <var>schema</var> }</code>
-1. <code>{ "schema" : <var>schema</var>, "values" : <var>values</var> }</code>
+1. `{ "schema" : <var>schema</var> }`
+1. `{ "schema" : <var>schema</var>, "values" : <var>values</var> }`
 
 <var>schema</var> may be:
 1. a JSON object which represents an embedded JSON schema
 1. the name of a variable that contains a JSON object
-1. a string in the form of <code>"@location"</code> where <var>location</var> is the URI of the JSON schema. (Environment variables are expanded within the <var>location</var> location string.)
+1. a string in the form of `"@location"` where <var>location</var> is the URI of the JSON schema. (Environment variables are expanded within the <var>location</var> location string.)
 
 <var>values</var> may be
-1. a string containing a single variable (the key <code>"value"</code> may be used instead of the plural <code>"values"</code>)
+1. a string containing a single variable (the key `"value"` may be used instead of the plural `"values"`)
 1. an array of variable names
 1. For forms 1 and 2, each such variable must be bound to a JSON object or array. The JSON value of the variable is validated against the above referenced JSON schema.
 
-If <code>"values"</code> is omitted, the the current response
+If `"values"` is omitted, the the current response
 body will be validated against the schema.
 
 The assertion fails if any value does not
@@ -227,7 +227,7 @@ conform to the JSON schema, or if
 the elements do not have the forms described above
 or if the referenced JSON schema is not a valid schema.
 
-### Examples ###
+### Examples
 
 This example will invoke GET to fetch a Swagger document and validate it against
 the Swagger 2.0 schema.
@@ -310,7 +310,7 @@ processing the JSON schema only once.
 **TODO**: add a member to the "schema" element to save the parsed/loaded
 JSON schema object in the environment, for later use.
 
-## groovy ##
+## groovy
 
 This assertion allows you to execute Groovy script code
 to perform more complex validation and assertions.
@@ -352,7 +352,7 @@ Groovy assertions are often used in conjunction with binding
 the JSON result of the API call to a variable using the
 "json" extractor, which will parse the JSON response
 and put it in a
-[<code>org.fasterxml.jackson.databins.JsonNode</code>](http://fasterxml.github.io/jackson-databind/javadoc/2.2.0/com/fasterxml/jackson/databind/JsonNode.html) (using the Jackson JSON parser).
+[`org.fasterxml.jackson.databins.JsonNode`](http://fasterxml.github.io/jackson-databind/javadoc/2.2.0/com/fasterxml/jackson/databind/JsonNode.html) (using the Jackson JSON parser).
 
 The Groovy is evaluated and if the result is a Boolean,
 the assertion is true iff the Boolean value is true.
@@ -364,15 +364,15 @@ A java.lang.RuntimeException results in a failed
 assertion but also result in test errors.
 
 Note that if you wish to compare *values* in a JSON object,
-you must extract values with <code>.textValue() , .doubleValue(),
-.longValue(), .intValue(), .booleanValue(),</code> etc.
+you must extract values with `.textValue() , .doubleValue(),
+.longValue(), .intValue(), .booleanValue(),` etc.
 
 For example, assuming the response body has been saved in a variable
-named <code>result</code> in the current environment, an assertion such as
+named `result` in the current environment, an assertion such as
  "result[0].type == 'Folder'"
 will always be false, even if the *type* field of the 0<sup>th</sup>
-element of the JsonNode *result* has the value <code>"Folder"</code>, because
-the type of <code>JsonNode</code> is a Jackson TextNode, not a <code>String</code>. Thus, the comparison is always false.
+element of the JsonNode *result* has the value `"Folder"`, because
+the type of `JsonNode` is a Jackson TextNode, not a `String`. Thus, the comparison is always false.
 
 Instead, use
 
@@ -387,7 +387,7 @@ Thus,
       "projectId != lastProjectId"
  ]
 ```
-is shorthand for embedding each of the expression in <code>{ "groovy" : expression}</code> element:
+is shorthand for embedding each of the expression in `{ "groovy" : expression}` element:
 
 ```JSON
  "assert" : [
@@ -395,12 +395,12 @@ is shorthand for embedding each of the expression in <code>{ "groovy" : expressi
       { "groovy" : "projectId != lastProjectId" }
  ]
 ```
-Warning: Unless there is an explicit <code>{ "status" : status-code }</code> assertion,
-UnRAVL will execute and implicit <code>{ "status" : "2.." }</code> assertion.
-Thus, if a test expects a non-2xx status code, use an explicit <code>"status"</code>
-assertion and not a <code>"groovy"</code> assertion such as <code>"status == 404"</code>.
+Warning: Unless there is an explicit `{ "status" : status-code }` assertion,
+UnRAVL will execute and implicit `{ "status" : "2.." }` assertion.
+Thus, if a test expects a non-2xx status code, use an explicit `"status"`
+assertion and not a `"groovy"` assertion such as `"status == 404"`.
 
-## javascript ##
+## javascript
 
 The javascript assertion works just like the groovy assertion
 described above, except that the expression is interpeted by
@@ -416,7 +416,7 @@ the JVM's JavaScript (Rhino) interpreter.
 ```
 
 Note that there are several differences between
-the <code>"groovy"</code> and <code>"javascript"</code> assertions.
+the `"groovy"` and `"javascript"` assertions.
 Groovy is a scripting
 language designed to interoperate with Java, whereas JavaScript
 is actually a different language. UnRAVL runs in the JVM
@@ -435,10 +435,10 @@ the assertion
   { "javascript" : "text.endsWith('.html')" }
 ```
 will not work because the JavaScript String class
-does not have the <code>endsWith</code> method that Java's String class has.
+does not have the `endsWith` method that Java's String class has.
 
 
-## ignore and doc ##
+## ignore and doc
 
 Useful to "comment out" an existing assertion in an UnRAVL, since JSON does not support comment syntax.
 For example, if you have the assertion
@@ -463,7 +463,7 @@ This may also be used as a "doc" element, to allow arbitrary JSON documentation 
      ]
 ```
 
-## To do ##
+## To do
 
 See [Assertsions to do](Assertions-to-do.md) for some possible
 new assertion elements.

@@ -3,16 +3,16 @@ body in [UnRAVL](Reference.md) scripts.
 
 There are three different forms for creating the request body within a script:
 
-* <code>["body" : { "json" : json-request-body }](#json)</code>
-* <code>["body" : { "text" : text-request-body }](#text)</code>
-* <code>["body" : { "binary" : binary-request-body }](#binary)</code>
+* `["body" : { "json" : json-request-body }](#json)`
+* `["body" : { "text" : text-request-body }](#text)`
+* `["body" : { "binary" : binary-request-body }](#binary)`
 
 As a convenience, you can also use the shortcut form
 for a JSON request body:
 
-* <code>["body" : json-request-body](#json)</code>
+* `["body" : json-request-body](#json)`
 
-## json ## 
+## json
 
 To pass JSON, simply supply the JSON object or array:
 
@@ -23,7 +23,7 @@ To pass JSON, simply supply the JSON object or array:
 }
 ```
 
-The *<code>json-request-body</code>* can contain variable references
+The *`json-request-body`* can contain variable references
 inside its string values, as per
 [Environment](Reference.md#Environment).
 
@@ -47,13 +47,13 @@ The referenced JSON resource can contain variable references
 which will be expanded as per
 [Environment](Reference.md#Environment).
 
-In addition, if the value of <code>"body"</code> does not match any other body generator, such as
-* <code>{ "json" : "varName" }</code>
-* <code>{ "json" : "@file-or-URL" }</code>
-* <code>{ "json" : *json-body-specification* }</code>
-* <code>{ "text" : *text-body-specification* }</code>
-* <code>{ "binary" : *binary-body-specification* }</code>
-then the entire value of the <code>"body"</code> item is used as a JSON body.
+In addition, if the value of `"body"` does not match any other body generator, such as
+* `{ "json" : "varName" }`
+* `{ "json" : "@file-or-URL" }`
+* `{ "json" : *json-body-specification* }`
+* `{ "text" : *text-body-specification* }`
+* `{ "binary" : *binary-body-specification* }`
+then the entire value of the `"body"` item is used as a JSON body.
 
 === Examples ===
 ```JSON
@@ -62,11 +62,11 @@ then the entire value of the <code>"body"</code> item is used as a JSON body.
 ```JSON
   "body" : { "json": { "x" : 0, "y" : 1, "z" : -1 } }
 ```
-Using <code>{ "json" : *json-body-specification* }</code> is safer since it avoid conflict with body generator
+Using `{ "json" : *json-body-specification* }` is safer since it avoid conflict with body generator
 names that may be added in the future, but the direct JSON body
 is more concise and easier to use.
 
-## text ##
+## text
 
 To pass plain text, supply a string or an array of strings:
 
@@ -117,7 +117,7 @@ the JSON notation for UnRAVL scripts does not allow directly embedding raw XML t
 The text value may contain XML, or an array of strings, or @strings that reference
 external files or URLs that contain XML content.
 
-## binary ##
+## binary
 
 This form is for passing binary data as the request body.
 

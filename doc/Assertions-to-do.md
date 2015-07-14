@@ -1,6 +1,6 @@
 The following are possible fture [assertion](Assertions.md) elements:
 
-### xml ###
+### xml
 
 **TODO**
 
@@ -10,8 +10,8 @@ Since UnRAVL is encoded as JSON, there is no way to embed
 native XML text in an UnRAVL script as there is with a JSON body.
 Validating an XML response
 is done by encoding the XML body in a String (awkward for XML).
-or with a @ reference to a file or URL. The <code>"xml"</code> body
-spec operates just like <code>"text"</code> but the net result must be
+or with a @ reference to a file or URL. The `"xml"` body
+spec operates just like `"text"` but the net result must be
 valid XML.
 
 ```
@@ -44,10 +44,10 @@ or using environment substitution:
 as with "text",  environment substitution is also performed on string
 literals and content read from files.
 
-**TODO**: add a <code>"literal" : true</code> or other option to suppress environment substitution
+**TODO**: add a `"literal" : true` or other option to suppress environment substitution
 in external resources.
 
-### XML schema ###
+### XML schema
 
 **TODO**
 
@@ -59,7 +59,7 @@ above but will auto detect if the referenced schema is an
 XML schema (i.e. the location is .xsd or the value is
 a compiled XML schema object, not an JSON schema object).
 
-### jsonPath ###
+### jsonPath
 
 Asserts that a value matches the JSON value identified by a JSONPath expression,
 which refers to a value in the JSON response body.
@@ -74,8 +74,8 @@ which refers to a value in the JSON response body.
      }
 ```
 
-Assert that the values at one or more <code>*jsonPathExpressions*</code>
-matches a <code>*value*</code>. The <code>*value*</code> may be any JSON value. Strings in the value expression
+Assert that the values at one or more `*jsonPathExpressions*`
+matches a `*value*`. The `*value*` may be any JSON value. Strings in the value expression
 are subject to  environment substitution.
 
 The value could be a JSON number, string, boolean, array, or object.
@@ -86,7 +86,7 @@ booleans, etc.
 **TODO**: add a "source" : value
 attribute to allow testing another JSON object instead of the response body.
 
-### jsonPathMatch ###
+### jsonPathMatch
 
 **TODO**
 
@@ -103,12 +103,12 @@ Asserts that one or more values named by JSONPath expressions
 (which must resolve to string values or an array of strings)
 matches the given java.util.regex.Pattern patterns.
 
-## equal ##
+## equal
 
-<strong>Warning</strong> The <code>"equal"</code> assertion is deprecated due to some ugly
+<strong>Warning</strong> The `"equal"` assertion is deprecated due to some ugly
 issues with it. It will probably be removed before the 1.0.0 release of UnRAVL.
 It is of less value since it is faily easy to do similar (and more precise) comparisons with
-the <code>"groovy"</code> or <code>"javascript"</code> assertions.
+the `"groovy"` or `"javascript"` assertions.
 
 Asserts that two values are equal. There are two possible forms for this assertion:
 
@@ -119,7 +119,7 @@ Asserts that two values are equal. There are two possible forms for this asserti
 
 The lhs and rhs values are compared and if not equal, the assertion throws an UnRAVLAssertionException. The values may be JSON null, booleans, integers, strings, doubles, JSON arrays, or JSON objects. The values should be the same type. Environment expansion is performed on all string values (top-level or nested inside JSON arrays or objects), with the exception of JSON field names which are not expanded. Note that this means the string value of variables will be compared.
 
-If the optional *epsilon* value exists, it should be a floating point value and the lhs and rhs values are compared as doubles and must be within epsilon of each other. If the lhs or rhs values (after environment expansion) are string values, the value is converted to a double via <code>Double.valueOf(String)</code>
+If the optional *epsilon* value exists, it should be a floating point value and the lhs and rhs values are compared as doubles and must be within epsilon of each other. If the lhs or rhs values (after environment expansion) are string values, the value is converted to a double via `Double.valueOf(String)`
 
 **TODO**: Allow passing multiple equality tests.
 This is ambiguous right now.

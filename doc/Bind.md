@@ -1,6 +1,6 @@
-#### headers ####
+#### Headers
 
-The <code>headers</code> element is used to extract text from response headers
+The `headers` element is used to extract text from response headers
 into environment variables. The simplest form consists of a
 JSON object of one or more name/header strings:
 
@@ -30,11 +30,11 @@ For example, the header binding
   { "header" : { "loc" : [ "Location", "{API_ROOT}/folder/(\\w+)/resources/(\\w+)", "folderId", "resourceId" ] } }
 ```
 
-will save the <code>Location</code> header in the variable <code>loc</code>, then
+will save the `Location` header in the variable `loc`, then
 matches a regular expression (which is first expanded with environment substitution for {API_ROOT})
-and stores the first matching group to <code>folderId</code> and the second matching group to <code>resourceId</code>.
+and stores the first matching group to `folderId` and the second matching group to `resourceId`.
 
-Note: The backslash character \ must be escaped in JSON: use <code>\\w+</code> if you want the regex pattern <code>\w+</code>, etc.
+Note: The backslash character \ must be escaped in JSON: use `\\w+` if you want the regex pattern `\w+`, etc.
 
 Thus, the format of the headers extractor is an array of arrays.
 
@@ -50,10 +50,10 @@ is allowed:
 ```
 
 **TODO**: Populate the default environment with some reusable
-regular expression patterns, such as <code>{iso8601}</code> which is the pattern for an
-ISO 8601 date/time value such as <code>2014-07-16T19:20:30.45+01:00</code>
-and <code>{httpDate}</code> which is the pattern
-for HTTP header date/time values such as <code>Fri, 01 Aug 2014 15:16:47 GMT</code>.
+regular expression patterns, such as `{iso8601}` which is the pattern for an
+ISO 8601 date/time value such as `2014-07-16T19:20:30.45+01:00`
+and `{httpDate}` which is the pattern
+for HTTP header date/time values such as `Fri, 01 Aug 2014 15:16:47 GMT`.
 Each of these have one group for each element of the timestamp.
 
 ```JSON
@@ -62,7 +62,7 @@ Each of these have one group for each element of the timestamp.
 
 Tip: Do not use other matcher groups in the regular expression. Where necessary escape special regular expression characters like *, ?, and .
 
-#### pattern ####
+#### pattern
 
 Matches text against grouping regular expressions and binds the substrings
 into constituent variable bindings in the current UnRAVL script environment. The extractor form is
@@ -74,23 +74,23 @@ such as
 ```
  { "pattern" : [ "{responseType}", "^(.*)\\s*;\\s*charset=(.*)$", "mediaType", "charset" ] }
 ```
-This will match the value of the environment expansion of "{responseType}" to the given regular expression pattern <code>^(.*)\s*;\s*charset=(.*)$</code>, and bind the media type and the encoding character set  substrings to the variables <code>mediaType</code> and <code>charset</code>. (Note that a per the JSON grammar,
-backslash (<code>\\</code>) characters in a JSON string must be escaped, so the regular expression notation <code>\s</code> is coded in the JSON string as <code>\\\\s</code>.)
-For example, if the <code>responseType</code> binding in the environment was
+This will match the value of the environment expansion of "{responseType}" to the given regular expression pattern `^(.*)\s*;\s*charset=(.*)$`, and bind the media type and the encoding character set  substrings to the variables `mediaType` and `charset`. (Note that a per the JSON grammar,
+backslash (`\\`) characters in a JSON string must be escaped, so the regular expression notation `\s` is coded in the JSON string as `\\\\s`.)
+For example, if the `responseType` binding in the environment was
 
  application/json; charset=UTF-8
 
 this pattern specification will bind the variables:
-<code>mediaType</code> to "<code>application/json</code>", and
+`mediaType` to "`application/json`", and
 charset to "UTF-8".
-If the regular expression does not match, this extractor will throw an <code>UnRAVLAssertionException</code>
+If the regular expression does not match, this extractor will throw an `UnRAVLAssertionException`
 
 This extractor will unbind all the variables before testing the regular expression, so that bindings left from other tests won't persist and leave a false positive. See also the bound assertion to test if values are bound.
 
-#### groovy ####
+#### groovy
 
 Run Groovy scripts and bind the results to variables in the environment.
-This is like <code>"env"</code> extractor, but the values are not just JSON elements,
+This is like `"env"` extractor, but the values are not just JSON elements,
 but Groovy scripts (encoded as strings).
 
 ```
@@ -117,7 +117,7 @@ The resulting text string is subject to environment substitution before
 being interpreted as Groovy. All variables in the current environment are
 available for use as local variables in the Groovy script.
 
-#### javascript ####
+#### javascript
 
 Run javascript scripts and bind the results to variables in the environment.
 This works like the "groovy" bind element above but uses JavaScript expressions
@@ -128,7 +128,7 @@ This works like the "groovy" bind element above but uses JavaScript expressions
 See the note under the "javascript" assertion about difference
 between Groovy and JavaScript.
 
-#### jsonPath ####
+#### jsonPath
 
 **TODO**
 
@@ -168,13 +168,13 @@ Note that many JSONPath expressions result in arrays of values
 that match the path.
 TODO: Decide if we need this or if using "groovy" will be sufficient.
 
-#### xPath ####
+#### xPath
 
 TODO
 
 Binds values from the XML response by extracting data via their XPath.
 
-#### text ####
+#### text
 
 This binds the response body to a variable or writes it to a file.
 
@@ -184,17 +184,17 @@ This binds the response body to a variable or writes it to a file.
 ```
 
 The file name "-", as in
-<code>{ "body" : "@-" }</code>,
+`{ "body" : "@-" }`,
 denotes standard output.
 
-##### To do #####
+##### To do
 
 If pretty is true, then the output will be pretty printed.
 The value of the Content-Type header will be used to determine how to pretty print.
 If the content type matches ".*[/+]json", it is pretty printed as JSON.
 If the content type matches ".*[/+]xml", it is pretty printed as XML.
 
-#### json ####
+#### json
 
 ```
  { "json" : "@file-name" }
@@ -207,16 +207,16 @@ Parses the response body as a JSON object or JSON array.
 It is an error if the response body cannot be parsed as JSON.
 
 Using the Jackson 2.x JSON parser and the result is bound to a
-[<code>org.fasterxml.jackson.databins.JsonNode</code>](http://fasterxml.github.io/jackson-databind/javadoc/2.2.0/com/fasterxml/jackson/databind/JsonNode.html) as a variable in the current
+[`org.fasterxml.jackson.databins.JsonNode`](http://fasterxml.github.io/jackson-databind/javadoc/2.2.0/com/fasterxml/jackson/databind/JsonNode.html) as a variable in the current
 Environment.
 
-TODO: If the target <code>class</code> or class array is present,
+TODO: If the target `class` or class array is present,
 Jackson will be used to bind the result to an instance of that class,
 and the resulting Java object will be stored in the variable.
 The class must be accessible in the current classpath.
 This may not be used with the "@file-name" target.
 
-#### xml ####
+#### xml
 
 TODO
 
@@ -225,13 +225,13 @@ TODO
  { "xml" : XPath, "class" : array-of-classNames }
 ```
 
-The <code>"xml"</code> binder will bind (a fragment of) the XML response body to a Java object,
+The `"xml"` binder will bind (a fragment of) the XML response body to a Java object,
 identified via an XPath expression, using JAXB and place it in the environment.
 Use the JSONPath "/" for the entire body.
 
 If the target class or class array is omitted, the XML org.w3c.dom.Node will be stored.
 
-#### binary ####
+#### binary
 
 This binds the response body to a variable as a byte[] array,
 or writes it to a file.
@@ -245,7 +245,7 @@ The content is copied exactly as 8-bit binary bytes, with no default encoding.
 As binary content, the output cannot be streamed to stdout with "@-"
 as with the "text" extractor.
 
-#### links and hrefs ####
+#### links and hrefs
 
 Extract links via link relation names or link matchers.
 
@@ -260,7 +260,7 @@ Each *matcher* can be either a string (find the corresponding link with that lin
 an array of strings (bind multiple variables via multiple link relation names),
 or a JSON object with pairs of link relation names/matchers.
 
-Here's an example. GET a resource at URL stored in the var <code>{location}</code>, extract the hrefs for the links with the link relations `"rel' : "self"`, `"rel":"update"` and `"rel": "delete"` from that JSON response body's <code>"links"</code> array, and assert the location matches the <code>"href"</code> values of those three links:
+Here's an example. GET a resource at URL stored in the var `{location}`, extract the hrefs for the links with the link relations `"rel' : "self"`, `"rel":"update"` and `"rel": "delete"` from that JSON response body's `"links"` array, and assert the location matches the `"href"` values of those three links:
 
 ```JSON
    { "name" : "Extract just the self URL",
@@ -276,7 +276,7 @@ Here's an example. GET a resource at URL stored in the var <code>{location}</cod
    }
 ```
 
-The following will extract the <code>"self"</code>, <code>"update"</code>, and <code>"delete"</code>
+The following will extract the `"self"`, `"update"`, and `"delete"`
 links as link objects. Instead of extracting from the default variable "responseBody",
 this extracts from the JSON object stored in "resource".
 
@@ -298,14 +298,14 @@ this extracts from the JSON object stored in "resource".
 
 Note that when using link objects (the "links" form),
 you can access fields of the link objects with
-Groovy expressions such as <code>self.href.textValue()</code>
-and <code>self.method.textValue()</code>.
+Groovy expressions such as `self.href.textValue()`
+and `self.method.textValue()`.
 
 By default, <br />
-"links" extracts links from the current JSON object stored in <code>responseBody</code>,
-which is normally defined when using the <code>"json"</code> extractor.
-You may use <code>"from"</code> to specify an alternate object that contains links,
-such as <code>"from" : "responseBody.items[0]"</code>
+"links" extracts links from the current JSON object stored in `responseBody`,
+which is normally defined when using the `"json"` extractor.
+You may use `"from"` to specify an alternate object that contains links,
+such as `"from" : "responseBody.items[0]"`
 
 These extractors work with
 JSON responses that contain [atom:link](http://tools.ietf.org/html/rfc4287#section-4.2.7) representations. This is also compatible with [Collection+JSON](http://amundsen.com/media-types/collection/) format.
@@ -389,7 +389,7 @@ is equivalent to
 
 (Note that "link" may be used instead of "links"; this is clearer for extracting a single link.)
 
-##### Example: Extracting multiple links #####
+##### Example: Extracting multiple links
 
 Consider two different JSON responses, the atom:link response and the HAL response, as described above. The UnRAVL "bind" element
 
@@ -415,7 +415,7 @@ When used with the HAL response, this will bind "self" to the link object
   { "href": "/orders" }
 ```
 
-##### Example: Extracting from other sources #####
+##### Example: Extracting from other sources
 
 By default, this extractor works on the variable named "responseBody" which is bound when using the "json" extractor. However, you can use the optional "from" member to name another variable that is bound, or you can use a Groovy expression that returns a JsonNode. This is useful if you want to extract the links of nested objects. It is required for Collection+JSON nodes to select from the "collection" element inside the response, for example.
 ```JSON
@@ -435,7 +435,7 @@ By default, this extractor works on the variable named "responseBody" which is b
 
 this will extract the href from the link to the collection as well as the the href values from the "self" and "delete" links in the first and last element of the nested items array, respectively. Environment variable substitution is performed on the string before evaluating it as a Groovy expression.
 
-##### Example: Complex matching #####
+##### Example: Complex matching
 
 By default, if the selector is a string, this extractor only matches the link relation ("rel" value for atom:link content or the key for HAL content). This is also the only option for HAL. For atom:link, you may specify multiple matching criteria, using regular expression matches for one or more members of the link. For example, to match a link that has a "rel" value of "update" and a "method" value of "PUT" and a "href" label that contains "models", use
 
@@ -448,9 +448,9 @@ By default, if the selector is a string, this extractor only matches the link re
             }
 ```
 
-#### ignore and doc ####
+#### ignore and doc
 
-Use this to comment out an extractor in a "bind" element, or to add documentation to the "bind" element. For example, to cause the <code>"json"</code> extractor to be ignore (not create out.json), change
+Use this to comment out an extractor in a "bind" element, or to add documentation to the "bind" element. For example, to cause the `"json"` extractor to be ignore (not create out.json), change
 
 ```JSON
  "bind" : [
