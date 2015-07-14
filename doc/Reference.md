@@ -1,9 +1,9 @@
 UnRAVL is a domain-specific language, coded in JSON, for validating REST APIs.
-UnRAVL scripts consist of a JSON description of a REST API call:
+UnRAVL scripts consist of a JSON description of an HTTP REST API call:
 
 1. HTTP headers (optional)
 1. Request body (optional)
-1. HTTP method (<strong>`GET, POST, PUT, DELETE, HEAD, PATCH`</strong>)
+1. HTTP method (**`GET, POST, PUT, DELETE, HEAD, PATCH`**)
 1. URI
 1. Authentication (optional)
 
@@ -14,16 +14,15 @@ making the API call. You can assert:
 1. The result body matches expected JSON, text or other data
 1. Specific headers exist with specific values
 1. HTTP status code is a specific value or is in a specific set
-1. Response body matches benchmarks
 1. A groovy expression, testing elements of the response or environment, is true
-1. A value in the environment is assigned
+1. others
 
 UnRAVL also supports extracting data from a REST API call's results,
 binding those values to variables in the environment,
 and using those values for future API call validations.
-For example, you can save the <strong>`Location`</strong> header
-from a <strong>`POST`</strong> call that creates a resource
-and use that URL in a future <strong>`GET`</strong>, <strong>`PUT`</strong>, or <strong>`DELETE`</strong>.
+For example, you can save the **`Location`** header
+from a **`POST`** call that creates a resource
+and use that URL in a future **`GET`**, **`PUT`**, or **`DELETE`**.
 
 A template facility provides reusable API validation constructs.
 
@@ -31,43 +30,33 @@ UnRAVL was designed and implemented by [David Biesack](https://github.com/DavidB
 
 ## UnRAVL script syntax
 
-An UnRAVL script contains the following elements.
+The JSON syntax for an UnRAVL test script is as follows:
 
-1. test name
-1. test doc string; see Comments
-1. template name
-1. `env` block for setting variables in the environment
-1. `preconditions`
-1. `if` conditional execution
-1. request `headers`
-1. methodnd URI
-1. request `body`
-1. `bind` for extracting results into the environment and binding values
-1. `assertions`
+Syntax element.                                  | Description
+-------------------------------------------------|------------
+{                                                | An UnRAVL test script is a JSON object which begins with an open brace
+  `"name" : "test name",`                        | The [name](#name) of this test
+  `"doc" : "a comment",`                         | More detailed description
+  `"template" : "template-name",`                | Test inheritance via [template](#template)
+  `"env" : {env-bindings},`                      | Assign variables in the [environment](#env)
+  `"preconditions" : [assertions],`              | Assert [preconditions](#preconditions) are true before calling the API
+  `"if" : condition,`                            | Conditionally execute the test [if](#if) `condition` is true 
+  `"headers" : {request-headers}`                | Names/values of request [headers](#headers) to pass to the API
+  `"auth" : {authentication},`                   | Use [authentication](auth) to call the API
+  `method : "URI",`                              | The HTTP method **`GET, POST, PUT, DELETE, HEAD, PATCH`** and target URL
+  `"body" : {body-specification}`                | The request [body](#body) (text, JSON, binary)
+  `"bind" : [api-bindings]`                      | [Bind](#bind) (extract) values from the response
+  `"assert: [assertions]`                        | Validate the response with [assertions](#assert)
+}                                                | End of the JSON object
 
-The order does not matter, as UnRAVL processes each element by keys.
+In the first column, `{ }` denotes a JSON object; `[ ]` denotes a JSON array.
+
+The order of items in a test does not matter, as UnRAVL processes each element by keys.
 All elements are optional.
-
-The JSON syntax is as follows:
-
-```
-{ "name" : "test name",
-  "doc" : "a comment describing this test",
-  "template" : "template-name",
-  "env" : { env-bindings },
-  "preconditions" : [ preconditions ],
-  "if" : condition,
-  "headers" : { request-headers }
-  method : URI
-  "body" : { body-specification }
-  "bind" : [ api-bindings ]
-  "assert: [ assertions ]
-}
-```
 
 In addition, a script file may be a JSON array
 of script objects, script names, or script resource names (file or URLs):
-```
+```JSON
 [
   { "name" : "test1", ... },
   { "name" : "test2", ... },
@@ -80,8 +69,7 @@ of script objects, script names, or script resource names (file or URLs):
 If the element of the array is a simple string, it should be the name of a
 script that has already been executed. If multiple scripts have the same
 name, sequential execution order will replace the previous mapping of name-to-script
-("last one wins".) If the "name" element is omitted, the script
-is given a name based on the current local date and time.
+("last one wins".) 
 
 If a `"@file-or-URL"` element names a file (not a URL) without an absolute file location,
 it should reside relative to the current directory
@@ -107,9 +95,13 @@ You may use the name to invoke the test again.
 }
 ```
 
-If a test name ends with `.template` then it is assumed to be a
+If the `"name"` element is omitted, the test
+is given a name based on the current local date and time.
+
+If a test name ends with `.template`, it becomes a
 **[template](Templates.md)**. It is not executed at the point it occurs,
-but define reusable test structures.
+but defines reusable test structures that can be included
+in other tests via `"template"`; see below.
 
 ### template
 
@@ -123,8 +115,9 @@ You can reuse an existing template by naming it:
 }
 ```
 
-The operations (preconditions, assertions, environment, etc.)
-defined by the template are inherited by the current test.
+The operations (preconditions, assertions, environment, method/URI, etc.)
+defined by the template (and any templates that they include)
+are inherited by the current test.
 
 See [template](Templates.md) for more details.
 
@@ -253,7 +246,7 @@ The values may use environment substitution.
               }
 ```
 
-This shows passing two headers, <strong>`Content-Type`</strong> and <strong>`If-Unmodified-Since`</strong>.
+This shows passing two headers, **`Content-Type`** and **`If-Unmodified-Since`**.
 The value of the latter is taken from the environment.
 
 Header names are case-insensitive but using *Hyphenated-Upper-Camel-Case*
@@ -330,7 +323,7 @@ described below,
 
 ### bind
 
-The "bind" element extract data from an API response body and headers
+The `"bind"` elements extract data from an API response body and headers
 and store the values in variables that may be used to test the response.
 Some bind elements also validate data, acting as implicit assertions.
 
@@ -344,6 +337,9 @@ Some bind elements also validate data, acting as implicit assertions.
 If you only have one extractor, you do not need to embed it in an array:
 
   "bind" : extractor_0
+
+See [Bind](Bind.md) for details of the various ways to extract
+and bind values from an API response.
 
 ### assert
 
@@ -374,15 +370,15 @@ operating system environmentvariables, so some environment variables
 may exist with names such as `os.name`, `user.name` and `user.dir`. Hwoever,
 such variables are not available in Groovy scripts (but Groovy can directly access Java system properties via `System.getProperty(name)`.
 
-An environment binding is *referenced* by using the `<nowiki>{varName}</nowiki>`
+An environment binding is *referenced* by using the `{varName}`
 notation. (Do not use leading or trailing whitespace.)
 The value of that binding is substituted.
 (However, Groovy scripts do not need the braces as the environment bindings
 are made directly available as Groovy variables.)
 
 If a variable is not bound, this notation passes through; that is
-the value of `<nowiki>{undefinedVariable}</nowiki>`
-is `<nowiki>{undefinedVariable}</nowiki>`.
+the value of `{undefinedVariable}`
+is `{undefinedVariable}`.
 
 #### Automatically bound variables
 
@@ -550,12 +546,14 @@ Also, the "links" and "hrefs" extractors in a "bind" element can use
 a Groovy path expression to extract link objects.
 
 You can override the default language (Groovy) by setting the system
-property `unravl.script.language` to "javascript".
+property `unravl.script.language` to `javascript`.
 Java 7 and higher comes with a JavaScript engine. UnRAVL also includes
-groovy-all which includes a Groovy script engine (the default).
+[`groovy-all`](http://www.groovy-lang.org/download.html) which includes a Groovy script engine (the default).
+Thus, the valid values for 
+`unravl.script.language` are `groovy` and `javascript`.
 
 The script language must have a corresponding assertion
-class so that "assert" elements can be converted into
+class so that `"assert"` elements can be converted into
 explicit assert objects. The above is converted to the equivalent
 ```
   "assert" : [ { "groovy" : "response != null" },
@@ -571,30 +569,35 @@ Groovy, use the setting
 ```
 when you launch UnRAVL with the `bin/unravl.sh` script.
 
-If you are instantiating an `UnRAVLRuntime`,
-you can set the script language with
-`runtime.setScriptLanguage("javascript");`
+If you are running UnRVL from Java (or Groovy....) and instantiating an `UnRAVLRuntime` instance,
+you can set the script language with `runtime.setScriptLanguage("javascript");`
 
 ### Comments
 
 Unfortunately, JSON does not provide any syntax for enclosing comments.
 
-Although the Jackson parser has an option to enable Java-style /* ... */ and //
+Although the Jackson parser has an option to enable Java-style `/* ... */` and `//`
 comments, not all JSON tools support this, so UnRAVL does not allow them.
-Instead, each test (or template) may have "doc" elements which may be a string
+Instead, each test (or template) may have `"doc"` elements which may be a string
 or an array of strings, or actually any valid JSON. (This also allows
 you to comment out a block of JSON UnRAVL script by wrapping it in a
 `{ "doc" : argitrary-JSON-to-be-commented-out }` block
 
-The UnRAVL script may have a "doc" comment string.
-Many of the assertions and extractors also allow a "doc" string,
-such as
+The `"assert"` and `"bind"` elements also allow a nested `"doc"` or `"ignore"` element , such as
 
 ```JSON
-    { "jsonPath" : "status",
-      "value" : "OK",
-      "doc" : "assert that the response contains a 'status' with the value 'OK'"
-    }
+{
+  "GET" : "http://www.example.com/api",
+  "doc" : "assert that the response code is 200 OK",
+  "bind" : [
+        { "json" : "jsonValue" },
+        { "ignore" : { "text" : "textValue" } }
+  ],
+  "assert" : [
+    { "status" : 200 },
+    { "ignore" : { "status" : [201, 204] } }
+  ]
+}
 ```
 
 ### Redirection

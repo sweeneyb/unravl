@@ -1,4 +1,42 @@
-#### Headers
+This page describes the *assertions* supported in [UnRAVL](Reference.md) scripts.
+
+The `"bind"` elements extract data from an API response body and headers
+and store the values in variables that may be used to test the response.
+Some bind elements also validate data, acting as implicit assertions.
+
+```JSON
+"bind" : [
+           extractor_0,
+           extractor_1,
+           ...
+           extractor_n
+         ]
+```
+If you only have one extractor, you do not need to embed it in an array:
+
+```
+"bind" : extractor
+```
+Each extractor has a name and a value. For example,
+the following bind element invokes three extractors.
+The first is a headers extractor which binds variables
+to the values of the API's response headers.
+The second writes the response body as text to the
+file `response.txt`. The third extractor will
+parse the response as JSON and store it in
+the environment in the variable named `jsonResponse`.
+
+```JSON
+"bind" : [
+           { "headers" : { "ct" : "Content-Type", "cl" : "Content-Length" } }
+           { "text" : "@response.txt" }
+           { "json" : "jsonResponse" },
+         ]
+```
+
+Below are the UnRAVL extractors listed by name.
+
+## headers
 
 The `headers` element is used to extract text from response headers
 into environment variables. The simplest form consists of a
@@ -62,7 +100,7 @@ Each of these have one group for each element of the timestamp.
 
 Tip: Do not use other matcher groups in the regular expression. Where necessary escape special regular expression characters like *, ?, and .
 
-#### pattern
+## pattern
 
 Matches text against grouping regular expressions and binds the substrings
 into constituent variable bindings in the current UnRAVL script environment. The extractor form is
@@ -87,7 +125,7 @@ If the regular expression does not match, this extractor will throw an `UnRAVLAs
 
 This extractor will unbind all the variables before testing the regular expression, so that bindings left from other tests won't persist and leave a false positive. See also the bound assertion to test if values are bound.
 
-#### groovy
+## groovy
 
 Run Groovy scripts and bind the results to variables in the environment.
 This is like `"env"` extractor, but the values are not just JSON elements,
@@ -117,7 +155,7 @@ The resulting text string is subject to environment substitution before
 being interpreted as Groovy. All variables in the current environment are
 available for use as local variables in the Groovy script.
 
-#### javascript
+## javascript
 
 Run javascript scripts and bind the results to variables in the environment.
 This works like the "groovy" bind element above but uses JavaScript expressions
@@ -128,53 +166,7 @@ This works like the "groovy" bind element above but uses JavaScript expressions
 See the note under the "javascript" assertion about difference
 between Groovy and JavaScript.
 
-#### jsonPath
-
-**TODO**
-
-Binds values from the JSON response by extracting data via their JSONPath.
-
-```
- { "jsonPath" : { map-of-var-path-pairs } }
- { "jsonPath" : { map-of-var-path-pairs }, "from" : json }
- { "jsonPath" : { map-of-var-path-pairs }, "from" : "varname" }
-```
-
-The first form binds from the JSON response.
-The second form may be used to name a variable in the environment.
-
-```JSON
-{ "jsonPath" : {
-     "actualLat" : "results[0].location.lat",
-     "actualLng" : "results[0].location.lng",
-     "actualElevation" : "results[0].elevation"
-     }
-}
-```
-
-```JSON
-{ "jsonPath" : {
-     "actualLat" : "results[0].location.lat",
-     "actualLng" : "results..lng",
-     "actualElevation" : "results..elevation"
-     },
-   "from" : "jsonVarName"
-}
-```
-
-The JSONPath strings are subject to environment substitution.
-
-Note that many JSONPath expressions result in arrays of values
-that match the path.
-TODO: Decide if we need this or if using "groovy" will be sufficient.
-
-#### xPath
-
-TODO
-
-Binds values from the XML response by extracting data via their XPath.
-
-#### text
+## text
 
 This binds the response body to a variable or writes it to a file.
 
@@ -216,22 +208,7 @@ and the resulting Java object will be stored in the variable.
 The class must be accessible in the current classpath.
 This may not be used with the "@file-name" target.
 
-#### xml
-
-TODO
-
-```
- { "xml" : XPath, "class" : className }
- { "xml" : XPath, "class" : array-of-classNames }
-```
-
-The `"xml"` binder will bind (a fragment of) the XML response body to a Java object,
-identified via an XPath expression, using JAXB and place it in the environment.
-Use the JSONPath "/" for the entire body.
-
-If the target class or class array is omitted, the XML org.w3c.dom.Node will be stored.
-
-#### binary
+## binary
 
 This binds the response body to a variable as a byte[] array,
 or writes it to a file.
@@ -245,7 +222,7 @@ The content is copied exactly as 8-bit binary bytes, with no default encoding.
 As binary content, the output cannot be streamed to stdout with "@-"
 as with the "text" extractor.
 
-#### links and hrefs
+## links and hrefs
 
 Extract links via link relation names or link matchers.
 
@@ -389,7 +366,7 @@ is equivalent to
 
 (Note that "link" may be used instead of "links"; this is clearer for extracting a single link.)
 
-##### Example: Extracting multiple links
+### Example: Extracting multiple links
 
 Consider two different JSON responses, the atom:link response and the HAL response, as described above. The UnRAVL "bind" element
 
@@ -415,7 +392,7 @@ When used with the HAL response, this will bind "self" to the link object
   { "href": "/orders" }
 ```
 
-##### Example: Extracting from other sources
+### Example: Extracting from other sources
 
 By default, this extractor works on the variable named "responseBody" which is bound when using the "json" extractor. However, you can use the optional "from" member to name another variable that is bound, or you can use a Groovy expression that returns a JsonNode. This is useful if you want to extract the links of nested objects. It is required for Collection+JSON nodes to select from the "collection" element inside the response, for example.
 ```JSON
@@ -435,7 +412,7 @@ By default, this extractor works on the variable named "responseBody" which is b
 
 this will extract the href from the link to the collection as well as the the href values from the "self" and "delete" links in the first and last element of the nested items array, respectively. Environment variable substitution is performed on the string before evaluating it as a Groovy expression.
 
-##### Example: Complex matching
+### Example: Complex matching
 
 By default, if the selector is a string, this extractor only matches the link relation ("rel" value for atom:link content or the key for HAL content). This is also the only option for HAL. For atom:link, you may specify multiple matching criteria, using regular expression matches for one or more members of the link. For example, to match a link that has a "rel" value of "update" and a "method" value of "PUT" and a "href" label that contains "models", use
 
@@ -448,7 +425,7 @@ By default, if the selector is a string, this extractor only matches the link re
             }
 ```
 
-#### ignore and doc
+## ignore and doc
 
 Use this to comment out an extractor in a "bind" element, or to add documentation to the "bind" element. For example, to cause the `"json"` extractor to be ignore (not create out.json), change
 
@@ -473,4 +450,69 @@ or, to add a comment:
             { "json" : "@out.json" }
           ]
 ```
+
+## To do
+
+Below are some future enhancements
+
+### jsonPath
+
+**TODO**
+
+Binds values from the JSON response by extracting data via their JSONPath.
+
+```
+ { "jsonPath" : { map-of-var-path-pairs } }
+ { "jsonPath" : { map-of-var-path-pairs }, "from" : json }
+ { "jsonPath" : { map-of-var-path-pairs }, "from" : "varname" }
+```
+
+The first form binds from the JSON response.
+The second form may be used to name a variable in the environment.
+
+```JSON
+{ "jsonPath" : {
+     "actualLat" : "results[0].location.lat",
+     "actualLng" : "results[0].location.lng",
+     "actualElevation" : "results[0].elevation"
+     }
+}
+```
+
+```JSON
+{ "jsonPath" : {
+     "actualLat" : "results[0].location.lat",
+     "actualLng" : "results..lng",
+     "actualElevation" : "results..elevation"
+     },
+   "from" : "jsonVarName"
+}
+```
+
+The JSONPath strings are subject to environment substitution.
+
+Note that many JSONPath expressions result in arrays of values
+that match the path.
+TODO: Decide if we need this or if using "groovy" will be sufficient.
+
+## xml
+
+TODO
+
+```
+ { "xml" : XPath, "class" : className }
+ { "xml" : XPath, "class" : array-of-classNames }
+```
+
+The `"xml"` binder will bind (a fragment of) the XML response body to a Java object,
+identified via an XPath expression, using JAXB and place it in the environment.
+Use the JSONPath "/" for the entire body.
+
+If the target class or class array is omitted, the XML org.w3c.dom.Node will be stored.
+
+## xPath
+
+TODO
+
+Binds values from the XML response by extracting data via their XPath.
 
