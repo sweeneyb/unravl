@@ -30,14 +30,15 @@ UnRAVL was designed and implemented by [David Biesack](https://github.com/DavidB
 
 ## UnRAVL script syntax
 
-The JSON syntax for an UnRAVL test script is as follows:
+The JSON syntax for an UnRAVL test script is as follows. Follow links in the Description to read more
+about each test element.
 
 Syntax element.                                  | Description
 -------------------------------------------------|------------
 {                                                | An UnRAVL test script is a JSON object which begins with an open brace
   `"name" : "test name",`                        | The [name](#name) of this test
-  `"doc" : "a comment",`                         | More detailed description
-  `"template" : "template-name",`                | Test inheritance via [template](#template)
+  `"doc" : "a comment",`                         | More detailed [comments](#Comments)/description
+  `"template" : "template-name",`                | Inheritance of tests via [templates](#template)
   `"env" : {env-bindings},`                      | Assign variables in the [environment](#env)
   `"preconditions" : [assertions],`              | Assert [preconditions](#preconditions) are true before calling the API
   `"if" : condition,`                            | Conditionally execute the test [if](#if) `condition` is true 
@@ -49,13 +50,15 @@ Syntax element.                                  | Description
   `"assert: [assertions]`                        | Validate the response with [assertions](#assert)
 }                                                | End of the JSON object
 
-In the first column, `{ }` denotes a JSON object; `[ ]` denotes a JSON array.
+This defines a *test*.
 
-The order of items in a test does not matter, as UnRAVL processes each element by keys.
-All elements are optional.
+In the first column, `{ }` indicates that the value is a JSON object; `[ ]` indicates the value is a JSON array.
 
-In addition, a script file may be a JSON array
-of script objects, script names, or script resource names (file or URLs):
+The order of items in a test does not matter, as UnRAVL processes each element by keys
+(but in the order shown above.) All elements are optional.
+
+An UnRAVL script may also be a JSON array
+of test objects, test names, or test resource names (file or URLs):
 ```JSON
 [
   { "name" : "test1", ... },
@@ -67,20 +70,22 @@ of script objects, script names, or script resource names (file or URLs):
 ```
 
 If the element of the array is a simple string, it should be the name of a
-script that has already been executed. If multiple scripts have the same
-name, sequential execution order will replace the previous mapping of name-to-script
-("last one wins".) 
+test that has already been executed. If multiple tests have the same
+name, sequential execution order will replace the previous name-to-test mapping
+(thus, "last one wins".) 
 
 If a `"@file-or-URL"` element names a file (not a URL) without an absolute file location,
 it should reside relative to the current directory
-(not the directory where the script was found.)
+(not the directory where the test was found.)
 
-UnRAVL scripts also execute with an environment: a set of variable bindings
+UnRAVL test also execute with an environment: a set of variable bindings
 which can contain data to pass to API calls, data parsed from API responses,
 and which may be used to perform validations/assertions.
 
-Below are the structural elements of an UnRAVL script,
-with syntax and descriptions.
+Below are the structural elements of an UnRAVL test,
+with syntax and descriptions. Some elements can have
+complex or varied bodies which are explained in separate 
+documentaton.
 
 ### name
 
@@ -153,7 +158,7 @@ is assigned to the variable. For JSON Objects and Arrays, the values are Jackson
 UnRAVL will also bind the values in the test's template `"env"` block, if one is named.
 
 Variables bound in the environment may be used elsewhere in UnRAVL
-scripts: for building inputs or request headers or request bodies, or for validating the API
+tests: for building inputs or request headers or request bodies, or for validating the API
 with assertions. See [Environment](#Environment) below for details on how variables
 may be used.
 
@@ -176,19 +181,19 @@ and assertions.
 ### if
 
 The `"if"` condition is an element which allows you to control
-conditional execution of the script. If the condition is true,
-the script executes; if false, the script is skipped.
+conditional execution of the test. If the condition is true,
+the test executes; if false, the test is skipped.
 
 The condition is evaluated after the "env" and "preconditions" elements are evaluated (if present), but
 before the `"body"`,  `"headers"`,
 `"GET"`...`"DELETE"`, `"bind"` or `"assert"` elements.
 Thus, the condition expression can use values bound in the `"env"` element.
 
-If there is no "if" element , the implicit condition is "failedAssertionCount == 0" - that is, the script will not run if any previous assertions/preconditions have failed.
+If there is no "if" element , the implicit condition is "failedAssertionCount == 0" - that is, the test will not run if any previous assertions/preconditions have failed.
 
 Unlike preconditions, a false condition does not
-result in an assertion error or script failure;
-the script is simply skipped instead.
+result in an assertion error or test failure;
+the test is simply skipped instead.
 
 Format:
 ```JSON
@@ -196,49 +201,53 @@ Format:
 ```
 
 Condition may be:
-* true : (the JSON true literal). The script will continue.
-* false : (the JSON false literal). The script will stop executing.
-* string: the value can be the name of UnRAVL environment variable which can be a Boolean object or a JSON BooleanNode value; if true, the script executes.
-* If none of the above match, the value is evaluated as a Groovy expression and if true, the script executes.
+* true : (the JSON true literal). The test will continue.
+* false : (the JSON false literal). The test will stop executing.
+* string: the value can be the name of UnRAVL environment variable which can be a Boolean object or a JSON BooleanNode value; if true, the test executes.
+* If none of the above match, the value is evaluated as a Groovy expression and if true, the test executes.
 
-For example:
 
-```JSON
-{
-  "if" : true,
-  "DELETE" : "{resourceLocation}"
-}
-```
-
-Execute the script unconditionally.
-You can use this to force execution of a script.
-For example, if a compound script creates a resource that should be deleted,
-you can use this to ensure the resource is deleted even if other assertion
-or preconditions fail in early scripts.
+Execute the test unconditionally.
+You can use this to force execution of a test.
+For example, an UnRAVL test can be structured as an array of tests, `[ test1, test2, ... ]`.
+test1 may create a resource that should be deleted.
+A test can use conditional execution to ensure the resource is deleted even if other assertion
+or preconditions fail in earlier scripts. For example, test1 might create a resource
+and set the value `"exists"` to true in the environment;
+test2 can then conditionally delete that resource to clean up:
 
 ```
-{
-  "if" : "exists",
-  "PUT" : "{resourceLocation}",
-  "headers" : { "Accept" : "application/json" },
-  "body" : { ... },
-}
+[
+   {
+     "name" : "create resource",
+     "env" : { "resourceLocation" : "" },
+     "POST" : "http://www.example.com/api/resources",
+     "body" : { ... },
+     "bind" : { "headers" : { "resourceLocation" : "Location" },
+     "assert" : [ .... ]
+   } ,
+
+   { "doc" : "...other tests here which may have failures ... " },
+
+   {
+     "test" : "cleanup",
+     "doc" : "Delete the resource if the POST above created it. If the location is empty, the POST failed.",
+     "if" : "!resourceLocation.isEmpty()",
+     "DELETE" : "{resourceLocation}"
+   }
+]
 ```
-Call the PUT method if the value of the variable `exists`
-is true. This assumes the variable was previously bound (typically
-by a `{ "bind" : { "groovy" : { ... } } }` element.
 
 ### headers
 
-Use the `headers` element to specify
-one or more request headers.
+Use the `headers` element to specify one or more request headers.
 
 ```JSON
-  "headers" : headers
+  "headers" : { request-headers }
 ```
 
-The elements is a JSON object consisting of one more more header name and body values.
-The values may use environment substitution.
+The `{ *request-headers* }` is a JSON object consisting one more more header name and value pairs.
+The values may use [environment](*Environment) substitution.
 
 ```JSON
   "headers" : { "Content-Type" : "application/json",
@@ -266,14 +275,15 @@ and Central Authentication Service authentication:
 Credentials may be supplied in a credentials file (recommended), passed
 in the environment, in stored directly the script (discouraged).
 
-See [Authentication](Authentication.md) for details.
+See [Authentication](Authentication.md) for details and a list
+of the different forms of authentication.
 
 ### body
 
 For "PUT", "POST" and "PATCH" methods, the request body can be expressed in multiple ways.
 
 ```
- "body" : body-specification
+ "body" : *body-specification*
 ```
 The *body-specification* may take one of several forms:
 
@@ -297,12 +307,16 @@ The UnRAVL script specifies the API call with the method name and URL.
 The *method* and *URI* are both strings. The *method* must be one of
 `"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"`.
 The *URI* is the REST API being tested.
+Onlye one `*method* : *URI*` pair is allowed per test object.
+Use an array of test objects to perform multiple API calls.
 
 Examples:
 
 ```JSON
-  "GET" : "http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false"
-  "DELETE" : "http://www.example.com/rest/myService/myCollection/xk4783"
+[
+  { "GET" : "http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false" },
+  { "DELETE" : "http://www.example.com/rest/myService/myCollection/xk4783" }
+]
 ```
 
 The *URI* is subject to [environment substitution](#Environment):
@@ -314,18 +328,18 @@ For example,
 
 will replace `{BASE_URL}` and `{itemId}` with the values of those
 variables in the current environment. Variables are assigned by
-the `"[env](#env)"`,
+the [`"env"`](#env),
 `"groovy"`, or
-`"javascript"` elements
-or other `"[bind](#bind)"`
-described below,
-
+`"javascript"` or other [`"bind"`](#bind)
+elements described below.
 
 ### bind
 
 The `"bind"` elements extract data from an API response body and headers
 and store the values in variables that may be used to test the response.
 Some bind elements also validate data, acting as implicit assertions.
+
+The general form is
 
   "bind" : [
       extractor_0,
@@ -350,8 +364,8 @@ the status code, the response headers, and the response body.
 Syntax:
 
 ```JSON
-  "preconditions" : precondition
-  "preconditions" : array-of-precondition
+  "assert" : assertsion
+  "assert" : [ assertions ]
 ```
 
 See [Assertions](Assertions.md) for full details.
@@ -625,19 +639,19 @@ the UnRAVL source folder, `src/test/scripts` (but not in subdirectories)
 
 ### Plugins
 
-The framework can support custom assertions, body generators,
+The UnRAVL implementation can support custom assertions, body generators,
 and extractors by defining Java classes which implement the appropriate
 interfaces or inherit from the base classes.
-These are loaded via Spring component-scan and
-dependency injection of an UnRAVLRuntime instance
+These are loaded via Spring component-scan (of the `com.sas` packages) and
+dependency injection of an `UnRALPlugins` instance
 through which the plug-in can register the plug-in
 class.
 
 Each such class use an annotation to define it's
-shortcut code (such as "json" or "headers"
+shortcut code (such as `"json"` or `"headers"`
 as used in the other assert objects above.)
 
-For example, the "bound" assertion is defined as:
+For example, the `"bound"` assertion is defined as:
 
 ```Java
 import com.sas.unravl.annotations.Assertion;
@@ -645,30 +659,22 @@ import com.sas.unravl.annotations.Assertion;
 public class BoundAssertion extends BaseAssertion {
 ```
 
-By convention, tag names should use lowerCamelCase.
+By convention, tag names should use *lowerCamelCase*.
 
 Be careful to not use names that are already in use
 or which could be confused with attributes of other assertions.
 
-Plugins register themselves via the following called from the inherited
+Plugins register themselves via the following method in the inherited
+base class, such as from com.sas.unravl.assertions.BaseAssertion:
 ```Java
- @Autowired
- public void setRuntime(UnRAVLRuntime runtime)
-```
 
-metod in the base class. For example, BaseAssertion does:
-
-```Java
-    /**
-     * Used to register the assertion class with the UnRAVLRuntime.
-     * This is called from Spring when the UnRAVLRuntime class is loaded.
-     * @param runtime a runtime instance
-     */
-	@Autowired
-	public void setRuntime(UnRAVLRuntime runtime) {
-		runtime.addAssertion(this.getClass());
-	}
+    @Autowired
+    public void setPluginManager(UnRAVLPlugins plugins) {
+        plugins.addAssertion(this.getClass());
+    }
 ```
+Spring creates the UnRAVLPlugins instance and autowires
+to all the discoved plugin components.
 
 If you implement a plugin, inherit from the base class,
 or else use the `@Autowired` annotation, implement this setter,
