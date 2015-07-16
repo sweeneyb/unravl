@@ -43,8 +43,8 @@ Syntax element.                                  | Description
   `"preconditions" : [assertions],`              | Assert [preconditions](#preconditions) are true before calling the API
   `"if" : condition,`                            | Conditionally execute the test [if](#if) `condition` is true 
   `"headers" : {request-headers}`                | Names/values of request [headers](#headers) to pass to the API
-  `"auth" : {authentication},`                   | Use [authentication](auth) to call the API
-  `method : "URI",`                              | The HTTP method **`GET, POST, PUT, DELETE, HEAD, PATCH`** and target URL
+  `"auth" : {authentication},`                   | Use [authentication](#auth) to call the API
+  `method : "URL",`                              | The HTTP method **`GET, POST, PUT, DELETE, HEAD, PATCH`** and target URL
   `"body" : {body-specification}`                | The request [body](#body) (text, JSON, binary)
   `"bind" : [api-bindings]`                      | [Bind](#bind) (extract) values from the response
   `"assert: [assertions]`                        | Validate the response with [assertions](#assert)
@@ -59,7 +59,7 @@ The order of items in a test does not matter, as UnRAVL processes each element b
 
 An UnRAVL script may also be a JSON array
 of test objects, test names, or test resource names (file or URLs):
-```JSON
+```
 [
   { "name" : "test1", ... },
   { "name" : "test2", ... },
@@ -242,7 +242,7 @@ test2 can then conditionally delete that resource to clean up:
 
 Use the `headers` element to specify one or more request headers.
 
-```JSON
+```
   "headers" : { request-headers }
 ```
 
@@ -296,18 +296,18 @@ The *body-specification* may take one of several forms:
 
 The different forms are described in [Body](Body.md).
 
-### Method and URI
+### Method and UR:
 
 The UnRAVL script specifies the API call with the method name and URL.
 
 ```JSON
-  method : URI
+  method : UR:
 ```
 
-The *method* and *URI* are both strings. The *method* must be one of
+The *`method`* and *`URL`* are both strings. The *method* must be one of
 `"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"`.
-The *URI* is the REST API being tested.
-Onlye one `*method* : *URI*` pair is allowed per test object.
+The *`URL`* is the REST API being tested.
+Onlye one `*method* : *URL*` pair is allowed per test object.
 Use an array of test objects to perform multiple API calls.
 
 Examples:
@@ -319,7 +319,7 @@ Examples:
 ]
 ```
 
-The *URI* is subject to [environment substitution](#Environment):
+The *`URL`* is subject to [environment substitution](#Environment):
 
 For example,
 ```JSON
@@ -363,7 +363,7 @@ the status code, the response headers, and the response body.
 
 Syntax:
 
-```JSON
+```
   "assert" : assertsion
   "assert" : [ assertions ]
 ```

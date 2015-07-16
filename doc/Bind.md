@@ -4,7 +4,7 @@ The `"bind"` elements extract data from an API response body and headers
 and store the values in variables that may be used to test the response.
 Some bind elements also validate data, acting as implicit assertions.
 
-```JSON
+```
 "bind" : [
            extractor_0,
            extractor_1,
@@ -112,15 +112,12 @@ such as
 ```
  { "pattern" : [ "{responseType}", "^(.*)\\s*;\\s*charset=(.*)$", "mediaType", "charset" ] }
 ```
-This will match the value of the environment expansion of "{responseType}" to the given regular expression pattern `^(.*)\s*;\s*charset=(.*)$`, and bind the media type and the encoding character set  substrings to the variables `mediaType` and `charset`. (Note that a per the JSON grammar,
+This will match the value of the environment expansion of `"{responseType}"` to the given regular expression pattern `^(.*)\s*;\s*charset=(.*)$`, and bind the media type and the encoding character set substrings to the variables `mediaType` and `charset`. (Note that a per the JSON grammar,
 backslash (`\\`) characters in a JSON string must be escaped, so the regular expression notation `\s` is coded in the JSON string as `\\\\s`.)
-For example, if the `responseType` binding in the environment was
-
- application/json; charset=UTF-8
-
+For example, if the `responseType` binding in the environment was `application/json; charset=UTF-8`, 
 this pattern specification will bind the variables:
-`mediaType` to "`application/json`", and
-charset to "UTF-8".
+`mediaType` to `application/json`, and
+charset to `UTF-8`.
 If the regular expression does not match, this extractor will throw an `UnRAVLAssertionException`
 
 This extractor will unbind all the variables before testing the regular expression, so that bindings left from other tests won't persist and leave a false positive. See also the bound assertion to test if values are bound.
@@ -453,66 +450,4 @@ or, to add a comment:
 
 ## To do
 
-Below are some future enhancements
-
-### jsonPath
-
-**TODO**
-
-Binds values from the JSON response by extracting data via their JSONPath.
-
-```
- { "jsonPath" : { map-of-var-path-pairs } }
- { "jsonPath" : { map-of-var-path-pairs }, "from" : json }
- { "jsonPath" : { map-of-var-path-pairs }, "from" : "varname" }
-```
-
-The first form binds from the JSON response.
-The second form may be used to name a variable in the environment.
-
-```JSON
-{ "jsonPath" : {
-     "actualLat" : "results[0].location.lat",
-     "actualLng" : "results[0].location.lng",
-     "actualElevation" : "results[0].elevation"
-     }
-}
-```
-
-```JSON
-{ "jsonPath" : {
-     "actualLat" : "results[0].location.lat",
-     "actualLng" : "results..lng",
-     "actualElevation" : "results..elevation"
-     },
-   "from" : "jsonVarName"
-}
-```
-
-The JSONPath strings are subject to environment substitution.
-
-Note that many JSONPath expressions result in arrays of values
-that match the path.
-TODO: Decide if we need this or if using "groovy" will be sufficient.
-
-## xml
-
-TODO
-
-```
- { "xml" : XPath, "class" : className }
- { "xml" : XPath, "class" : array-of-classNames }
-```
-
-The `"xml"` binder will bind (a fragment of) the XML response body to a Java object,
-identified via an XPath expression, using JAXB and place it in the environment.
-Use the JSONPath "/" for the entire body.
-
-If the target class or class array is omitted, the XML org.w3c.dom.Node will be stored.
-
-## xPath
-
-TODO
-
-Binds values from the XML response by extracting data via their XPath.
-
+See [Bind to do](Bind-to-do.md) for some possible new `"bind"` elements.

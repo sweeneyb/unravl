@@ -1,11 +1,11 @@
 This page describes the "auth" element of [UnRAVL scripts](Reference.md).
 
 The scriptlet form is
-```JSON
-  "auth" : { name : value, options }
+```
+  "auth" : { name : value, options... }
 ```
 the *`name`* determines what type of authentication,
-and the value and options are used to configure that authentication.
+and the *`value`* and *`options`* are used to configure that authentication.
 Credentials can be included in the options, or stored
 separately from the script; see [Credentials](#Credentials) below.
 
@@ -15,39 +15,40 @@ UnRAVL supports two authentication models,
 
 Tip: You can put the `"auth"` member in a template and all scripts which inherit from that template will use that authentication method.
 
-## basic authentication
+## basic
 
 Basic Authentication locates credentials for the REST API call host
-via the .netrc file (see above) and adds an
+via the `.netrc` file (see above) and adds an
 
 `Authentication: Basic *encoded-credentials*`
 
 header to the request.
 
-The scriptlet form is
+The basic auth syntax is
 ```JSON
   "auth" : { "basic" : true }
   "auth" : { "basic" : true, "login" : "testuserid" }
   "auth" : { "basic" : true, "login" : "testuserid", "password" : "testSecret" }
 ```
 
-If the password or login id are omitted, they are obtained
+If the *`"password"`* or *`"login"`* id are omitted, they are obtained
 from the credentials file, described below, based on the host
 name of the API call.
 
-## cas authentication
+## cas
 
 Central Authentication Service authentication will
-login and acquire a Ticket Granting Ticket. For each API call
-in an UnRAVL script, UnRAVL will request a Service Ticket
-for that URL and append the Service Ticket to
-the request URI.
+use a login URL to autheticate the user credentials
+and acquire a *Ticket Granting Ticket* (TGT). For each API call
+in an UnRAVL script, UnRAVL will use the TGT to request a *Service Ticket*
+for that API URL and append the Service Ticket to
+the request URL.
 
 The form is
 ```JSON
-  "auth" : { "cas" : "logon-URL" }
-  "auth" : { "cas" : "logon-URL", "login" : "testuserid" }
-  "auth" : { "cas" : "logon-URL", "login" : "testuserid", "password" : "testSecret" }
+  "auth" : { "cas" : "login-Url" }
+  "auth" : { "cas" : "login-Url", "login" : "testuserid" }
+  "auth" : { "cas" : "login-Url", "login" : "testuserid", "password" : "testSecret" }
 ```
 
 Example:
@@ -68,7 +69,7 @@ like
  GET http://www.example.com/SASMyApi/rest/myEndpoint/myResource?ticket=ST-188763-kEcYVdVfAVYdmEyyfZWg-cas
 
 The TGT is stored in the environment using `&lt;<em>hostname</em>&gt;.TGT`,
-where `&lt;<em>hostname</em>&gt;` is taken from the `logon-URL`. The TGT
+where `&lt;<em>hostname</em>&gt;` is taken from the `login-Url`. The TGT
 will be resused in other scripts that call the same host.
 
 ## Credentials
@@ -87,8 +88,9 @@ will not allow others users to read or write the `.netrc` file.
 The format of the file is a simplified version of the standard
 [Unix netrc file format](http://www.lehman.cuny.edu/cgi-bin/man-cgi?netrc+4).
 
-Warning: The [`*default*` entry](http://www.lehman.cuny.edu/cgi-bin/man-cgi?netrc+4) and
-[`*macdef*`](http://www.lehman.cuny.edu/cgi-bin/man-cgi?netrc+4) are not supported.
+Warning: The *`default`* entry and
+*`macdef`* in the `[.netrc](http://www.lehman.cuny.edu/cgi-bin/man-cgi?netrc+4)` spec are not supported.
+
 Credentials must be specified entirely on one line:
 
 `machine` *`hostname`* `login` *`userid`* `password` *`password`*
@@ -138,7 +140,7 @@ or
 ```
 
 If the `"login"` is embedded but no `"password"`,
-UnRAVL will look up the password for that host/login pair in the `.netrc` file.
+UnRAVL will look up the password for that host/login pair in the `.netrc` file.
 
 Tip: In older releases of UnRAVL, authentication was done with "basicAuth" and "casAuth" members in preconditions. This format is still supported but deprecated and will be removed in the future.
 
