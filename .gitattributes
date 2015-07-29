@@ -1,0 +1,11 @@
+# Use Unix line endings
+*.sh text eol=lf
+*.bat text eol=crlf
+# set line ending on B.txt ; TextTest assumes Unix line endings
+src/test/java/B.txt text eol=lf
+
+*.json text
+*.md text
+*.txt text
+*.unravl text
+*.xml text

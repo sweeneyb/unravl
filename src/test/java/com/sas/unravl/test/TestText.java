@@ -37,6 +37,8 @@ public class TestText extends TestBase {
         UnRAVL script = new UnRAVL(new UnRAVLRuntime());
         Text t = new Text(script, node, "text");
         // B.txt has a new line also, and newlines between elements
+        // /.gitattributes sets B.txt line endings to Unix \n
+        // not Windows CRLF
         assertEquals("A\nB\n\nC", t.text());
     }
 
