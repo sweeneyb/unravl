@@ -32,6 +32,11 @@ import org.apache.log4j.Logger;
  * possible value bindings (called @link UnRAVLExtractor s) and the set of possible
  * {@link UnRAVLAssertion}s.
  * <p>
+ * To execute an UnRAVL script, create an UnRAVLRuntime and invoke
+ * one of its execute methods.
+ * <p>
+ * This class only executes a single UnRAVL test, represented by a JSON object.
+ * It does not execute a JSON array of scripts; use UnRAVLRuntime
  * TODO: This class is too large and does too much. Refactor.
  * 
  * @author David.Biesack@sas.com
@@ -46,7 +51,7 @@ public class UnRAVL
     private static final String TEXT_MEDIA_TYPES_REGEX = "^(text/.*|.*/.*(xml|json)).*$";
     public static final String REDIRECT_PREFIX = "@";
     private UnRAVLRuntime runtime;
-    private JsonNode root;
+    private ObjectNode root;
     private String name;
     private UnRAVL template;
     private List<Header> requestHeaders;
@@ -60,16 +65,46 @@ public class UnRAVL
         this.runtime = runtime;
     }
 
-    public UnRAVL(UnRAVLRuntime runtime, JsonNode root)
+    /**
+     * Create an instance
+     * @param runtime the runtime environment; this may not be null
+     * @param script The UnRAVL test object. To run an ArrayNode,
+     *        use the execute method in UnRAVLRuntime
+     * @throws JsonProcessingException
+     * @throws IllegalArgumentException if the arguments are null or if the node is not an ObjectNode
+     * @throws UnRAVLException
+     */
+    public UnRAVL(UnRAVLRuntime runtime, ObjectNode script)
         throws JsonProcessingException, IOException, UnRAVLException
     {
         // TODO: create a new transient env for this test?
         // this.env = new Binding(env.getVariables());
         // Unfortunately, unlike java.util.Properties,
         // Binding does not support dynamic parent bindings
+
+        if (script == null || runtime== null)
+            throw new IllegalArgumentException("the runtime and script objects may not be null.");
         this.runtime = runtime;
-        this.root = root;
+        this.root = script;
         initialize();
+    }
+
+    /**
+     * Create an instance
+     * @param runtime the runtime environment; this may not be null
+     * @param script The UnRAVL test object; this may not be null. To run an ArrayNode,
+     *        use the {@link UnRAVLRuntime#execute(JsonNode...)} method in {@link UnRAVLRuntime}.
+     * @throws JsonProcessingException
+     * @throws IOException
+     * @throws IllegalArgumentException if the arguments are null or if the node is not an ObjectNode
+     * @throws UnRAVLException
+     * @deprecated use {@link #UnRAVL(UnRAVLRuntime, ObjectNode)}
+     */
+    @Deprecated
+    public UnRAVL(UnRAVLRuntime runtime, JsonNode script)
+        throws JsonProcessingException, IOException, UnRAVLException
+    {
+        this(runtime, (ObjectNode) script);
     }
 
     @Override

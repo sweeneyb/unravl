@@ -3,6 +3,7 @@ package com.sas.unravl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sas.unravl.annotations.UnRAVLAssertionPlugin;
 import com.sas.unravl.annotations.UnRAVLExtractorPlugin;
 import com.sas.unravl.assertions.UnRAVLAssertion;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -179,6 +181,11 @@ public class UnRAVLRuntime {
         return this;
     }
 
+    public void execute(JsonNode... roots) throws JsonProcessingException,
+            IOException, UnRAVLException {
+        execute(Arrays.asList(roots));
+    }
+
     public void execute(List<JsonNode> roots) throws JsonProcessingException,
             IOException, UnRAVLException {
 
@@ -206,7 +213,7 @@ public class UnRAVLRuntime {
                                 "No such UnRAVL script named '%s'", name));
                     }
                 } else
-                    u = new UnRAVL(this, root);
+                    u = new UnRAVL(this, (ObjectNode) root);
                 label = u.getName();
                 u.run();
             } catch (UnRAVLAssertionException e) {
