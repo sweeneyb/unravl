@@ -122,6 +122,10 @@ public class ApiCall
         return this;
     }
 
+    private boolean isCanceled() {
+        return getScript().getRuntime().isCanceled();
+    }
+
     private boolean conditionalExecution()
         throws UnRAVLException
     {
@@ -220,7 +224,7 @@ public class ApiCall
     private void defineBody(UnRAVL script)
         throws UnRAVLException, IOException
     {
-        if (script == null)
+        if (isCanceled() || script == null)
             return;
         JsonNode body = script.getRoot().get("body");
 
@@ -314,7 +318,7 @@ public class ApiCall
     {
         try
         {
-            if (script == null)
+            if (isCanceled() || script == null)
                 return;
             extract(script.getTemplate());
             JsonNode bind = script.getRoot().get("bind");
@@ -326,6 +330,8 @@ public class ApiCall
             }
             for (JsonNode j : Json.array(bind))
             {
+                if (isCanceled())
+                    return;
                 ObjectNode ob = Json.object(j);
                 Map.Entry<String, JsonNode> first = Json.firstField(ob);
                 String key = first.getKey();
@@ -515,6 +521,8 @@ public class ApiCall
     public void executeAPI()
         throws UnRAVLException
     {
+        if (isCanceled())
+            return;
         if (script.getMethod() == null || script.getURI() == null)
         {
             logger.warn("Warning: Non-template script " + script.getName()
@@ -536,6 +544,8 @@ public class ApiCall
             if (script.getRequestHeaders() != null)
                 request.setHeaders(script.getRequestHeaders().toArray((new Header[script.getRequestHeaders().size()])));
             log(request, request.getURI());
+            if (isCanceled())
+                return;
             ResponseHandler<HttpResponse> responseHandler = new UnravlResponseHandler();
             HttpResponse response = httpclient.execute(request, responseHandler);
             long end = System.currentTimeMillis();
@@ -736,15 +746,17 @@ public class ApiCall
     private boolean runAssertions(UnRAVL unravl, Stage stage)
         throws UnRAVLException
     {
-        if (unravl == null)
+        if (isCanceled() || unravl == null)
             return true;
         if (!runAssertions(unravl.getTemplate(), stage))
             return false;
+        if (isCanceled())
+            return true;
         JsonNode assertionNode = unravl.getRoot().get(stage.getName());
         if (assertionNode == null)
             return true;
         ArrayNode assertions = assertionArray(assertionNode, stage);
-        for (int i = 0; i < assertions.size(); i++)
+        for (int i = 0; !isCanceled() && i < assertions.size(); i++)
         {
             JsonNode s = assertions.get(i);
             ObjectNode assertionScriptlet = null;

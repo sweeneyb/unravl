@@ -278,6 +278,12 @@ public class UnRAVL
         ApiCall apiCall = new ApiCall(this);
         return apiCall.run();
     }
+    
+
+    /** Stop execution. */
+    public void cancel() {
+        getRuntime().cancel();
+    }
 
     public void bind(String varName, Object value)
     {
