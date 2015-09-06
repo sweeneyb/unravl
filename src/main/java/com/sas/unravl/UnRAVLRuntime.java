@@ -3,6 +3,7 @@ package com.sas.unravl;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sas.unravl.annotations.UnRAVLAssertionPlugin;
 import com.sas.unravl.annotations.UnRAVLExtractorPlugin;
 import com.sas.unravl.assertions.UnRAVLAssertion;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -51,7 +53,8 @@ public class UnRAVLRuntime {
     // used to expand variable references {varName} in strings:
     private VariableResolver variableResolver;
     private String scriptLanguage;
-
+    private boolean canceled;
+    
     public UnRAVLRuntime() {
         this(new LinkedHashMap<String, Object>());
     }
@@ -157,9 +160,12 @@ public class UnRAVLRuntime {
 
     public UnRAVLRuntime execute(String[] argv) throws UnRAVLException {
         // for now, assume each command line arg is an UnRAVL script
+        canceled = false;
         for (String scriptFile : argv) {
             try {
                 List<JsonNode> roots = read(scriptFile);
+                if (isCanceled())
+                    break;
                 execute(roots);
             } catch (IOException e) {
                 logger.error(e.getMessage() + " while running UnRAVL script "
@@ -171,13 +177,19 @@ public class UnRAVLRuntime {
                 throw (e);
             }
         }
+        canceled = false;
         return this;
     }
 
-    private void execute(List<JsonNode> roots) throws JsonProcessingException,
+    public void execute(JsonNode... roots) throws JsonProcessingException,
+            IOException, UnRAVLException {
+        execute(Arrays.asList(roots));
+    }
+
+    public void execute(List<JsonNode> roots) throws JsonProcessingException,
             IOException, UnRAVLException {
 
-        for (int i = 0; i < roots.size(); i++) {
+        for (int i = 0; !isCanceled() && i < roots.size(); i++) {
             JsonNode root = roots.get(i);
             if (root.isTextual()) {
                 String ref = root.textValue();
@@ -201,7 +213,7 @@ public class UnRAVLRuntime {
                                 "No such UnRAVL script named '%s'", name));
                     }
                 } else
-                    u = new UnRAVL(this, root);
+                    u = new UnRAVL(this, (ObjectNode) root);
                 label = u.getName();
                 u.run();
             } catch (UnRAVLAssertionException e) {
@@ -221,6 +233,7 @@ public class UnRAVLRuntime {
     }
 
     public UnRAVLRuntime execute(String scriptFile) throws UnRAVLException {
+        canceled = false;
         // for now, assume each command line arg is an UnRAVL script
         try {
             List<JsonNode> roots = read(scriptFile);
@@ -233,6 +246,15 @@ public class UnRAVLRuntime {
             throw (e);
         }
         return this;
+    }
+
+    public boolean isCanceled() {
+        return canceled;
+    }
+
+    /** Stop execution. */
+    public void cancel() {
+        this.canceled = true;
     }
 
     /**
@@ -366,6 +388,8 @@ public class UnRAVLRuntime {
             report(call.getSkippedAssertions(), "Skipped");
             separator = System.getProperty("line.separator").toString();
         }
+        if (canceled)
+            System.out.println("UnRAVL script execution was canceled.");
         return failed;
     }
 

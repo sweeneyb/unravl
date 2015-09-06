@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
@@ -244,7 +244,7 @@ public class TestSimplifyJsonBody {
     private ApiCall createApiCall(String input) throws UnRAVLException,
             IOException, JsonProcessingException {
         UnRAVLRuntime r = new UnRAVLRuntime();
-        JsonNode root = Json.parse(input);
+        ObjectNode root = Json.object(Json.parse(input));
         UnRAVL script = new UnRAVL(r, root);
         ApiCall apiCall = new ApiCall(script);
         return apiCall;
