@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
  * expansion of strings. The runtime also contains the global mappings of
  * assertions, extractors, and request body generators, and a map of scripts and
  * templates
- * 
+ *
  * @author DavidBiesack@sas.com
  */
 @Component
@@ -54,7 +54,7 @@ public class UnRAVLRuntime {
     private VariableResolver variableResolver;
     private String scriptLanguage;
     private boolean canceled;
-    
+
     public UnRAVLRuntime() {
         this(new LinkedHashMap<String, Object>());
     }
@@ -68,7 +68,7 @@ public class UnRAVLRuntime {
         bind("failedAssertionCount", Integer.valueOf(0));
         resetBindings();
     }
-    
+
     /**
      * @return this runtime's default script language
      */
@@ -84,12 +84,12 @@ public class UnRAVLRuntime {
     public void setScriptLanguage(String language) {
         this.scriptLanguage = language;
     }
-    
+
     /**
      * Return a script engine that can evaluate (interpret) script strings.
      * The returned engine is determined by the UnRAVLPlugins;
      * the default is a Groovy engine if Groovy is available.
-     * The system property unravl.script.language may be set to 
+     * The system property unravl.script.language may be set to
      * a valid engine such as JavaScript; the default is "Groovy".
      * Run with -Dunravl.script.language=<em>language</em> such as
      * -Dunravl.script.language=JavaScript to choose an alternate language
@@ -99,7 +99,7 @@ public class UnRAVLRuntime {
     public ScriptEngine interpreter() throws UnRAVLException {
         return interpreter(null);
     }
-    
+
 
     /**
      * Return a script engine that can evaluate (interpret) script strings
@@ -177,7 +177,6 @@ public class UnRAVLRuntime {
                 throw (e);
             }
         }
-        canceled = false;
         return this;
     }
 
@@ -188,7 +187,7 @@ public class UnRAVLRuntime {
 
     public void execute(List<JsonNode> roots) throws JsonProcessingException,
             IOException, UnRAVLException {
-
+        canceled = false;
         for (int i = 0; !isCanceled() && i < roots.size(); i++) {
             JsonNode root = roots.get(i);
             if (root.isTextual()) {
@@ -259,33 +258,33 @@ public class UnRAVLRuntime {
 
     /**
      * Expand environment variables in a string. For example, if string is
-     * 
+     *
      * <pre>
      * &quot;{time} is the time for {which} {who} to come to the aid of their {where}&quot;
      * </pre>
-     * 
+     *
      * and the environment contains the bindings
-     * 
+     *
      * <pre>
      * time = "Mon, Aug 4, 2014"
      * which = 16
      * who = "hackers
      * where = "API"
      * </pre>
-     * 
+     *
      * the result will be
-     * 
+     *
      * <pre>
      * &quot;Mon, Aug 4, 2014 is the time for 16 hackers to come to the aid of their API&quot;
      * </pre>
-     * 
+     *
      * The toString() value of each binding in the environment is substituted.
-     * 
+     *
      * An optional notation is allowed to provide a default value if a variable
      * is not bound. <code>{varName|alt text}</code> will resolve to the value
      * of varName if it is bound, or to alt text if varName is not bound. The
      * alt text may also contain embedded variable expansions.
-     * 
+     *
      * @param text
      *            an input string
      * @return the string, with environment variables replaced.
@@ -323,7 +322,7 @@ public class UnRAVLRuntime {
         // null signals that we need to recreate the resolver after
         // the bindings have changed.
         // if null, variableResolver gets recreated if needed in expand(String).
-        // 
+        //
         // We no longer need to reset the resolver instance
         // since we do not copy the environment.
         // This used to do:
