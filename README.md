@@ -21,7 +21,17 @@ and using those values for future API calls and validations.
 
 A template facility provides reusable API call and validation constructs.
 
-UnRAVL was designed and initially implemented and is patent pending by David Biesack @sasdjb
+Although initially conceived as as a REST validation too, UnRAVL 
+is also well-suited for use as a REST scripting language, for 
+stringing together a set of interrelated REST calls, extracting
+results and headers from early calls to be used when making
+subsequent calls. Users may find it useful to associate `.unravl`
+files with the UnRAVL jar file via the batch scripts in the
+[`bin`](https://github.com/sassoftware/unravl/tree/master/bin) directory
+so you can run scripts from your file explorer.
+
+UnRAVL was designed and initially implemented and is patent pending by David Biesack [@DavidBiesack](https://github.com/DavidBiesack) (GitHub) 
+[@DavidBiesack](https://twitter.com/DavidBiesack) (Twitter).
 
 ## A basic REST validation
 
