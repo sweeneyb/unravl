@@ -1,7 +1,5 @@
 package com.sas.unravl.assertions;
 
-import static org.junit.Assert.assertArrayEquals;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sas.unravl.ApiCall;
@@ -33,15 +31,27 @@ public class BinaryBodyAssertion extends BaseUnRAVLAssertion implements
             Binary binary = new Binary(current, value);
             byte[] expected = binary.bytes();
             byte[] actual = call.getResponseBody().toByteArray();
-            try {
-                assertArrayEquals(expected, actual);
-            } catch (AssertionError a) {
-                throw new UnRAVLAssertionException(a.getMessage(), a);
-            }
+            assertArrayEquals(expected, actual);
         } catch (IOException e1) {
             throw new UnRAVLException(e1.getMessage(), e1);
         }
 
+    }
+
+    private void assertArrayEquals(byte[] expected, byte[] actual)
+            throws UnRAVLAssertionException {
+        if (expected.length != actual.length)
+            throw new UnRAVLAssertionException(
+                    String.format(
+                            "binary array contents not equal: length %d not equal to expected length %d",
+                            actual.length, expected.length));
+        for (int i = 0; i < actual.length; i++) {
+            if (actual[i] != expected[i])
+                throw new UnRAVLAssertionException(
+                        String.format(
+                                "binary array contents not equal at byte %d: found %d, expected %d",
+                                i, actual[i], expected[i]));
+        }
     }
 
 }

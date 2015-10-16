@@ -22,11 +22,6 @@
 		"response.results[0].location.lat.doubleValue() == lat",
 		"response.results[0].location.lng.doubleValue() == lng",
 		"mediaType == 'application/json'",
-		"charset = 'UTF-8'",
-		{
-			"doc":"Below are alternative ways of asserting equality."
-		},
-		{ "equal":	[ "application/json", "{mediaType}"] },
-		{ "equal":	[ "UTF-8", "{charset}"  ] }
+		"charset == 'UTF-8'"
 		]
 	}
