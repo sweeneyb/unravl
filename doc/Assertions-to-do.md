@@ -103,33 +103,4 @@ Asserts that one or more values named by JSONPath expressions
 (which must resolve to string values or an array of strings)
 matches the given java.util.regex.Pattern patterns.
 
-## equal
-
-<strong>Warning</strong> The `"equal"` assertion is deprecated due to some ugly
-issues with it. It will probably be removed before the 1.0.0 release of UnRAVL.
-It is of less value since it is faily easy to do similar (and more precise) comparisons with
-the `"groovy"` or `"javascript"` assertions.
-
-Asserts that two values are equal. There are two possible forms for this assertion:
-
-```
- { "equal" : [ lhs, rhs ] }
- { "equal" : [ lhs, rhs, epsilon ] }
-```
-
-The lhs and rhs values are compared and if not equal, the assertion throws an UnRAVLAssertionException. The values may be JSON null, booleans, integers, strings, doubles, JSON arrays, or JSON objects. The values should be the same type. Environment expansion is performed on all string values (top-level or nested inside JSON arrays or objects), with the exception of JSON field names which are not expanded. Note that this means the string value of variables will be compared.
-
-If the optional *epsilon* value exists, it should be a floating point value and the lhs and rhs values are compared as doubles and must be within epsilon of each other. If the lhs or rhs values (after environment expansion) are string values, the value is converted to a double via `Double.valueOf(String)`
-
-**TODO**: Allow passing multiple equality tests.
-This is ambiguous right now.
-
-```
-{ "equal" : [
-              [ expectedA, actualA ],
-              [ expectedB, actualB ]
-   ]
- }
-```
-Does this mean you want to assert that the two arrays are equal,
-or that that tou want to run two sets of equal assertions, each comparing two values?
+#

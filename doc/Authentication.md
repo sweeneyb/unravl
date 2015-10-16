@@ -142,6 +142,3 @@ or
 If the `"login"` is embedded but no `"password"`,
 UnRAVL will look up the password for that host/login pair in the `.netrc` file.
 
-Tip: In older releases of UnRAVL, authentication was done with "basicAuth" and "casAuth" members in preconditions. This format is still supported but deprecated and will be removed in the future.
-
-
