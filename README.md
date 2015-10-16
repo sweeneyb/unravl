@@ -21,8 +21,8 @@ and using those values for future API calls and validations.
 
 A template facility provides reusable API call and validation constructs.
 
-Although initially conceived as as a REST validation too, UnRAVL 
-is also well-suited for use as a REST scripting language, for 
+Although initially conceived as as a REST validation too, UnRAVL
+is also well-suited for use as a REST scripting language, for
 stringing together a set of interrelated REST calls, extracting
 results and headers from early calls to be used when making
 subsequent calls. Users may find it useful to associate `.unravl`
@@ -30,7 +30,7 @@ files with the UnRAVL jar file via the batch scripts in the
 [`bin`](https://github.com/sassoftware/unravl/tree/master/bin) directory
 so you can run scripts from your file explorer.
 
-UnRAVL was designed and initially implemented and is patent pending by David Biesack [@DavidBiesack](https://github.com/DavidBiesack) (GitHub) 
+UnRAVL was designed and initially implemented and is patent pending by David Biesack [@DavidBiesack](https://github.com/DavidBiesack) (GitHub)
 [@DavidBiesack](https://twitter.com/DavidBiesack) (Twitter).
 
 ## A basic REST validation
@@ -187,11 +187,16 @@ of the named variable from the environment.
 
 ## Syntax and reference
 
-To see the full syntax for UnRAVL scripts, refer to [Reference](doc/Reference.md)
+To see the full syntax for UnRAVL scripts, refer to [Reference](doc/Reference.md).
 
 ## Releases
 
-[Release v0.2.0](https://github.com/sassoftware/unravl/releases/tag/v0.2.0) is the first public release of UnRAVL
+* [Release v0.2.1](https://github.com/sassoftware/unravl/releases/tag/v0.2.1)
+is the current release of UnRAVL.
+  * Added cancel() support for test scripts and runtime
+  * Added execute() method to allow running multiple JsonObject scripts
+
+[Release v0.2.0](https://github.com/sassoftware/unravl/releases/tag/v0.2.0) is the first public release of UnRAVL.
 
 ## Running UnRAVL
 
@@ -207,12 +212,12 @@ Run UnRAVL as:
 
 Alternatively, you can download the binary release.
 Create a directory `unravl` for your local copy of UnRAVL, `cd unravl` to that directory,
-then download the release [unravl-0.2.0.zip](https://github.com/sassoftware/unravl/releases/download/v0.2.0/unravl-0.2.0.zip). Unzip the release file in the `unravl` directory.
+then download the release [unravl-0.2.1.zip](https://github.com/sassoftware/unravl/releases/download/v0.2.1/unravl-0.2.1.zip). Unzip the release file in the `unravl` directory.
 Then run UnRAVL using the scripts in the `bin` directory, as described above.
 
 ## Contributing
 
-See [ContributorAgreement.txt](ContributorAgreement.txt)
+See [ContributorAgreement.txt](ContributorAgreement.txt).
 
 Contributions should use the Eclipse format configuration in `eclipse-java-format.xml`
 and organize imports in com, java, javax, org order (alphabetical, with grouping)
