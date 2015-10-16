@@ -3,7 +3,7 @@ apply plugin: 'maven'
 apply plugin: 'eclipse' // run './gradlew eclipse' to update Eclipse .classpath, then refresh Eclipse project
 
 group = 'com.sas'
-version = '0.2.1'
+version = '1.0.0-SNAPSHOT'
 
 description = "Uniform REST API Validation Language"
 
@@ -36,7 +36,6 @@ dependencies {
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: jacksonVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: jacksonVersion
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
-    testCompile group: 'com.fasterxml.jackson.module', name: 'jackson-module-jaxb-annotations', version: jacksonVersion
     compile group: 'org.codehaus.groovy', name: 'groovy-all', version: groovyVersion
     compile group: 'org.springframework', name: 'spring-core', version: springVersion
     compile group: 'org.springframework', name: 'spring-web', version: springVersion
@@ -45,11 +44,11 @@ dependencies {
     compile group: 'commons-codec', name: 'commons-codec', version: commonsCodecVersion
     compile group: 'log4j', name: 'log4j', version: log4jVersion
     compile group: 'com.google.guava', name: 'guava', version: guavaVersion
-    // Note: junit is an intentional runtime dependency, not just testCompile
-    compile group: 'junit', name: 'junit', version: junitVersion
     compile group: 'com.github.fge', name: 'json-schema-validator', version: jsonSchemaValidatorVersion
     compile group: 'com.github.fge', name: 'json-schema-core', version: jsonSchemaCoreVersion
     compile group: 'com.github.fge', name: 'jackson-coreutils', version: jacksonCoreUtilsVersion
+    testCompile group: 'com.fasterxml.jackson.module', name: 'jackson-module-jaxb-annotations', version: jacksonVersion
+    testCompile group: 'junit', name: 'junit', version: junitVersion
 }
 
 task copyDeps(type: Copy) {

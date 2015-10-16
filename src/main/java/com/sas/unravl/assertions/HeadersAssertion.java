@@ -43,15 +43,7 @@ public class HeadersAssertion extends BaseUnRAVLAssertion {
         super.check(current, assertion, when, call);
         Header headers[] = call.getResponseHeaders();
         JsonNode spec = assertion.get("headers");
-        if (spec.isArray()) {
-            logger.warn("The \"headers\" assertion should be a JSON object. The array form is deprecated.");
-            JsonNode assertions = Json.array(assertion.get("headers"));
-            for (JsonNode headerAssertion : Json.array(assertions)) {
-                check(headerAssertion, headers, current);
-            }
-        } else if (spec.isObject()) {
-            check(spec, headers, current);
-        }
+        check(spec, headers, current);
         return;
     }
 

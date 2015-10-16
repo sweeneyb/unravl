@@ -80,42 +80,15 @@ import org.apache.log4j.Logger;
  * expression, so that bindings left from other tests won't persist and leave a
  * false positive.
  * <p>
- * The (deprecated) format is
- *
- * <pre>
- * { "headers" : array-of-matchers  }
- * </pre>
- *
- * where each element of the array is a subarray of strings, in the form
- *
- * <pre>
- * [ header, var ]
- * </pre>
- *
- * such as
- *
- * <pre>
- * [ "Content-Type", "responseType" ]
- * </pre>
- *
- * which will bind the value of the Content-Type header into the environment
- * variable named "responseType".
- * <p>
  * The more advanced form works like the {@link PatternExtractor} and binds
- * regular expression grouping values into additional environment variable
- * bindings. in the form
- *
- * <pre>
- * [ header, var ]
- * </pre>
- *
- * such as
+ * regular expression grouping values into additional environment variables.
+ * For example, 
  *
  * <pre>
  * [ "Content-Type", "responseType", "^(.*)\\s*;\\s*charset=(.*)$", "mediaType", "charset" ]
  * </pre>
  *
- * which will bind the value of the Content-Type header into the environment
+ * will bind the value of the Content-Type header into the environment
  * variable named "responseType", then perform pattern matching to extract the
  * media type and the encoding character set into the variables mediaType and
  * charset.

@@ -89,24 +89,6 @@ public class UnRAVL
         initialize();
     }
 
-    /**
-     * Create an instance
-     * @param runtime the runtime environment; this may not be null
-     * @param script The UnRAVL test object; this may not be null. To run an ArrayNode,
-     *        use the {@link UnRAVLRuntime#execute(JsonNode...)} method in {@link UnRAVLRuntime}.
-     * @throws JsonProcessingException
-     * @throws IOException
-     * @throws IllegalArgumentException if the arguments are null or if the node is not an ObjectNode
-     * @throws UnRAVLException
-     * @deprecated use {@link #UnRAVL(UnRAVLRuntime, ObjectNode)}
-     */
-    @Deprecated
-    public UnRAVL(UnRAVLRuntime runtime, JsonNode script)
-        throws JsonProcessingException, IOException, UnRAVLException
-    {
-        this(runtime, (ObjectNode) script);
-    }
-
     @Override
     public String toString()
     {

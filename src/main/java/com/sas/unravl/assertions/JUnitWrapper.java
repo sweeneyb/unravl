@@ -1,8 +1,6 @@
 // Copyright (c) 2014, SAS Institute Inc., Cary, NC, USA, All Rights Reserved
 package com.sas.unravl.assertions;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import com.google.common.io.PatternFilenameFilter;
 import com.sas.unravl.ApiCall;
@@ -111,9 +109,9 @@ public class JUnitWrapper {
                 System.out.println("Run UnRAVL script " + scriptFile);
                 runtime.execute(scriptFile);
                 for (ApiCall call : runtime.getApiCalls()) {
-                    assertEquals("script " + scriptFile
-                            + " should have had 0 assertion failures.", 0, call
-                            .getFailedAssertions().size());
+                    if (call.getFailedAssertions().size() > 0)
+                    throw new AssertionError("script " + scriptFile
+                            + " should have had 0 assertion failures.");
                 }
             } catch (Throwable t) {
                 logger.error(t.getMessage());
@@ -122,7 +120,7 @@ public class JUnitWrapper {
         }
         if (caught != null) {
             caught.printStackTrace(System.err);
-            fail(caught.getMessage());
+            throw new AssertionError(caught.getMessage());
         }
         return count;
     }
@@ -195,18 +193,13 @@ public class JUnitWrapper {
                 if (runtime.getFailedAssertionCount() > 0) {
                     logger.info("UnRAVL script file " + scriptFile
                             + " failed when expected.");
-                    continue;
                 } else
-                    fail("UnRAVL script was expected to fail but did not: "
+                    throw new AssertionError("UnRAVL script was expected to fail but did not: "
                             + scriptFile);
             } catch (UnRAVLException e) {
-
                 logger.info("UnRAVL script file " + scriptFile
                         + " failed when expected.");
-                continue;
             }
-            fail("UnRAVL script was expected to fail but did not: "
-                    + scriptFile);
         }
         return count;
     }

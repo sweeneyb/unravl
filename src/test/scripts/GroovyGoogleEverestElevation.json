@@ -13,11 +13,12 @@
     { "status" : 200 },
     { "groovy" : "status == 200" },
     { "ignore" : { "json" : "@benchmark.json" } },
-    { "equal" : [ "{lat}", 27.988056, 0.0001 ] },
-    { "equal" : [ "{lng}", 86.925278, 0.0001 ] },
-    { "equal" : [ "{elevation}", 8815.7158203125, 0.0001 ] },
-    { "headers" : { "Content-Type" : "application/json; *charset=UTF-8" } },
-    { "doc" : "following array form is deprecated" },
-    { "headers" : [ { "content-type" : "application/json; *charset=UTF-8" } ]}
+    { "doc" :  ["use UnRAVL var notation such as {lat} to inject the value of lat  (which is a string, not a double).",
+                "If we just called assertEquals(lat, ...), Groovy would be unable to find a method match for assertEquals(String,BigDecimal,BigDecimal)",
+                "By using {lat} the Groovy expression has the double literal assertEquals(27.988056, ...) and can match the method" ] },
+    "org.junit.Assert.assertEquals({lat}, 27.988056, 0.0001)",
+    "org.junit.Assert.assertEquals({lng}, 86.925278, 0.0001)",
+    "org.junit.Assert.assertEquals({elevation}, 8815.7158203125, 0.0001)",
+    { "headers" : { "Content-Type" : "application/json; *charset=UTF-8" } }
     ]
 }

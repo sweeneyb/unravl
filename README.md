@@ -191,32 +191,38 @@ To see the full syntax for UnRAVL scripts, refer to [Reference](doc/Reference.md
 
 ## Releases
 
-* [Release v0.2.1](https://github.com/sassoftware/unravl/releases/tag/v0.2.1)
-is the current release of UnRAVL.
-  * Added cancel() support for test scripts and runtime
-  * Added execute() method to allow running multiple JsonObject scripts
-
-[Release v0.2.0](https://github.com/sassoftware/unravl/releases/tag/v0.2.0) is the first public release of UnRAVL.
+* [Release v1.0.0](https://github.com/sassoftware/unravl/releases/tag/v1.0.0)
+  * Currently this is the 1.0.0-SNAPSHOT release. 1.0.0 is pending
+  * Removed deprecated features (equals assertion)
+  * Reduced dependency on JUnit. All behaviors, assertions, etc. do not depend on JUnit.
+* [Release v0.2.1](https://github.com/sassoftware/unravl/releases/tag/v0.2.1) is the current release of UnRAVL.
+  * Added UnRVAL.cancel() support for test scripts and runtime
+  * Added UnRAVL.execute() method to allow running multiple JsonObject scripts
+* [Release v0.2.0](https://github.com/sassoftware/unravl/releases/tag/v0.2.0) is the first public release of UnRAVL.
 
 ## Running UnRAVL
 
 You can download the source from this repo and run
 ```
+    git clone git@github.com:sassoftware/unravl.git
+    cd unravl
     ./gradlew clean build copyDeps
 ```
 Run UnRAVL as:
 ```bash
-    bin/unravl.sh src/test/scripts/hello.json  # from Linux
+    bin/unravl.sh src/test/scripts/hello.json  # from Linux or Mac OS X
     bin\unravl.bat src/test/scripts/hello.json # from Windows
 ```
 
 Alternatively, you can download the binary release.
 Create a directory `unravl` for your local copy of UnRAVL, `cd unravl` to that directory,
-then download the release [unravl-0.2.1.zip](https://github.com/sassoftware/unravl/releases/download/v0.2.1/unravl-0.2.1.zip). Unzip the release file in the `unravl` directory.
-Then run UnRAVL using the scripts in the `bin` directory, as described above.
+then download [a release](https://github.com/sassoftware/unravl/releases).
+Unzip the release file in the `unravl` directory.
+Run UnRAVL using the scripts in the `bin` directory, as described above.
 
 ## Contributing
 
+Contributors are welcome to join the project.
 See [ContributorAgreement.txt](ContributorAgreement.txt).
 
 Contributions should use the Eclipse format configuration in `eclipse-java-format.xml`
@@ -227,4 +233,3 @@ Contributors are listed in [CONTRIBUTORS.md](CONTRIBUTORS.md).
 ## License
 
 UnRAVL is released under the [Apache 2.0 License](LICENSE).
-
