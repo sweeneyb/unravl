@@ -7,7 +7,7 @@ The scriptlet form is
 the *`name`* determines what type of authentication,
 and the *`value`* and *`options`* are used to configure that authentication.
 Credentials can be included in the options, or stored
-separately from the script; see [Credentials](#Credentials) below.
+separately from the script; see [Credentials](#credentials) below.
 
 UnRAVL supports two authentication models,
 * [basic](#basic)
@@ -18,7 +18,7 @@ Tip: You can put the `"auth"` member in a template and all scripts which inherit
 ## basic
 
 Basic Authentication locates credentials for the REST API call host
-via the `.netrc` file (see above) and adds an
+via the `.netrc` file (see [Credentials](#credentials) below) and adds an
 
 `Authentication: Basic *encoded-credentials*`
 
@@ -60,7 +60,7 @@ Example:
 
 UnRAVL will lookup the
 The credentials for the {sas.logon.host} URL
-in the file `.netrc` as [described below](#Credentials), then use the full URL
+in the file `.netrc` as [described below](#credentials), then use the full URL
 "http://{sas.logon.host}:7980/SASLogon/rest/v1/tickets" to obtain a TGT.
 Then using that TGT, UnRAVL will request a service ticket for the URL
 "http://{my.app.host}/SASMyApi/rest/myEndpoint/myResource" (after expanding the
@@ -86,10 +86,10 @@ For example, on Linux:
 will not allow others users to read or write the `.netrc` file.
 
 The format of the file is a simplified version of the standard
-[Unix netrc file format](http://www.lehman.cuny.edu/cgi-bin/man-cgi?netrc+4).
+[Unix netrc file format](http://linux.die.net/man/5/netrc).
 
 Warning: The *`default`* entry and
-*`macdef`* in the `[.netrc](http://www.lehman.cuny.edu/cgi-bin/man-cgi?netrc+4)` spec are not supported.
+*`macdef`* in the [`.netrc`](http://linux.die.net/man/5/netrc) spec are not supported.
 
 Credentials must be specified entirely on one line:
 
