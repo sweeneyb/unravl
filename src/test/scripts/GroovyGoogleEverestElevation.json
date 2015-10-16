@@ -19,8 +19,6 @@
     "org.junit.Assert.assertEquals({lat}, 27.988056, 0.0001)",
     "org.junit.Assert.assertEquals({lng}, 86.925278, 0.0001)",
     "org.junit.Assert.assertEquals({elevation}, 8815.7158203125, 0.0001)",
-    { "headers" : { "Content-Type" : "application/json; *charset=UTF-8" } },
-    { "doc" : "following array form is deprecated" },
-    { "headers" : [ { "content-type" : "application/json; *charset=UTF-8" } ]}
+    { "headers" : { "Content-Type" : "application/json; *charset=UTF-8" } }
     ]
 }
