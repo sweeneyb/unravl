@@ -192,7 +192,6 @@ To see the full syntax for UnRAVL scripts, refer to [Reference](doc/Reference.md
 ## Releases
 
 * [Release v1.0.0](https://github.com/sassoftware/unravl/releases/tag/v1.0.0)
-  * Currently this is the 1.0.0-SNAPSHOT release. 1.0.0 is pending
   * Removed deprecated features (equals assertion)
   * Reduced dependency on JUnit. All behaviors, assertions, etc. do not depend on JUnit.
 * [Release v0.2.1](https://github.com/sassoftware/unravl/releases/tag/v0.2.1) is the current release of UnRAVL.
