@@ -39,8 +39,9 @@ The most fundamental form of validation is to invoke an API and
 validate the response code and response body.
 
 The REST call
-
+```
  GET  http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false
+``` 
 should return the JSON body:
 ```JSON
 {
