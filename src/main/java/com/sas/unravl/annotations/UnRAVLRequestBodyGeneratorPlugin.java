@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * com.sas.unravl.generators.JsonRequestBodyGenerator uses the annotation
  *
  * <pre>
- * &#x40;UnRAVLRequestBodyGeneratorPlugin("json")
+ * {@literal @}UnRAVLRequestBodyGeneratorPlugin("json")
  * </pre>
  *
  * so that UnRAVL scripts which use the "body" scriptlet

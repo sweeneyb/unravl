@@ -14,8 +14,8 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 /**
- * A base class for script-based extractors, such as {@link GrovyExtractor}
- * and {@link JavaScriptExractor}.
+ * A base class for script-based extractors, such as {@link GroovyExtractor}
+ * and {@link JavaScriptExtractor}.
  * <p>
  * Usage:
  *

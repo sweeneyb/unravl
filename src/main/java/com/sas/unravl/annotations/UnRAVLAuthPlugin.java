@@ -12,13 +12,13 @@ import java.lang.annotation.Target;
  * class com.sas.unravl.auth.BasicAuth uses the annotation
  *
  * <pre>
- * &#x40;UnRAVLAssertionPlugin("basic")
+ * {@literal @}UnRAVLAssertionPlugin("basic")
  * </pre>
  *
  * so that UnRAVL scripts which use the "auth" scriptlet
  *
  * <pre>
- * "auth" : { "basic" : "location" }
+ * "auth" : { "basic" : true }
  * </pre>
  *
  * will use Basic Authentication based on the credentials for the location

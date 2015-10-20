@@ -70,9 +70,9 @@ public class UnRAVL
      * @param runtime the runtime environment; this may not be null
      * @param script The UnRAVL test object. To run an ArrayNode,
      *        use the execute method in UnRAVLRuntime
-     * @throws JsonProcessingException
+     * @throws JsonProcessingException if the script cannot be parsed
      * @throws IllegalArgumentException if the arguments are null or if the node is not an ObjectNode
-     * @throws UnRAVLException
+     * @throws UnRAVLException if the script is invalid
      */
     public UnRAVL(UnRAVLRuntime runtime, ObjectNode script)
         throws JsonProcessingException, IOException, UnRAVLException

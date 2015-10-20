@@ -105,6 +105,8 @@ public class UnRAVLRuntime {
      * Return a script engine that can evaluate (interpret) script strings
      * using the named script language
      * @param lang the script language, such as "groovy' or "javascript"
+     * @return a script interpreter
+     * @throws UnRAVLException is no engine exists for the script language <var>lang</var>
      */
     public ScriptEngine interpreter(String lang) throws UnRAVLException
     {
