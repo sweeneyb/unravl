@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * com.sas.unravl.extractors.PatternExtractor uses the annotation
  *
  * <pre>
- * &#x40;UnRAVLExtractorPlugin("pattern")
+ * {@literal @}UnRAVLExtractorPlugin("pattern")
  * </pre>
  *
  * so that UnRAVL scripts which use the extractor scriptlet

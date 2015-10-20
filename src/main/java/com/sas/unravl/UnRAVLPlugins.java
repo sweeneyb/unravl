@@ -20,6 +20,10 @@ import javax.script.ScriptEngineManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 
+/**
+ * Manages the mappings of keywords to plugin implementation classes.
+ * @author David.Biesack@sas.com
+ */
 public class UnRAVLPlugins {
 
     private static final Logger logger = Logger.getLogger(UnRAVLRuntime.class);
