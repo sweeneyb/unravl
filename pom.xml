@@ -3,7 +3,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.sas</groupId>
    <artifactId>sas.unravl</artifactId>
-   <version>0.2.1-SNAPSHOT</version>
+   <version>1.0.0-SNAPSHOT</version>
    <description>Uniform REST API Validation Language  (UnRAVL) - a JSON DSL for validating REST APIs</description>
    <url>https://github.com/sassoftware/unravl</url>
    <inceptionYear>2014</inceptionYear>
@@ -226,8 +226,7 @@
          <groupId>junit</groupId>
          <artifactId>junit</artifactId>
          <version>${junit.version}</version>
-			<!-- JUnit is not just a test scope - we use it in UnRAVLAssertion classes
-				<scope>test</scope> -->
+         <scope>test</scope>
       </dependency>
       <dependency>
          <groupId>com.google.guava</groupId>
