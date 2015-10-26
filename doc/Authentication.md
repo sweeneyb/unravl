@@ -98,7 +98,7 @@ Credentials must be specified entirely on one line:
 such as
 
 ```
- machine rdcesx51019.race.sas.com login sasdemo password sasDemoSecret123
+ machine rdcesx51019.race.sas.com login testuser password testuserSecret123
 ```
 The *hostname* field must exactly match the hostname in UnRAVL API calls.
 
@@ -108,14 +108,14 @@ the credentials in the script).
 
 ```JSON
   "auth" : { "basic" : true,
-             "login" : "sasdemo",
-             "password" : "sasDemoSecret123" }
+             "login" : "testuser",
+             "password" : "testuserSecret123" }
 ```
 Your script `"auth"` elements may also use UnRAVL environment variable
 substitution. For example, you can pass the credentials at startup:
 
 ```
-$ export UNRAVL_OPT='-Dhostname.login=sasdemo -Dhostnme.password=sasDemoSecret123
+$ export UNRAVL_OPT='-Dhostname.login=testuser -Dhostnme.password=testuserSecret123'
 $ unravl script1.json scipt2.json
 ```
 
