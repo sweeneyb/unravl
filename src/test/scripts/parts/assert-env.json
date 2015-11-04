@@ -1,0 +1,11 @@
+{
+    "name" : "assert environment set by env.json.",
+    "doc" : "This script is called by ../parts.son",
+	"assert":
+        [
+            "x == 0",
+            "y == 1",
+            "z == -1"
+        ]
+    }
+}

@@ -1,0 +1,6 @@
+{
+    "name" : "assert environment set by JUnit test",
+    "doc" : "This script is called by src/test/java/com/sas/unravl/test/TestScripts.java and asserts the runtime has the variable JUnit bound to true",
+	"assert": "JUnit == true"
+    }
+}

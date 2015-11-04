@@ -1,0 +1,4 @@
+[
+  "@src/test/scripts/parts/env.json",
+  "@src/test/scripts/parts/assert-env.json"
+]
