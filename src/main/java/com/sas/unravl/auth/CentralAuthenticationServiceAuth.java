@@ -185,13 +185,14 @@ public class CentralAuthenticationServiceAuth extends BaseUnRAVLAuth {
         if (mock)
             return "https://sasserver:port/SASLogon/v1/tickets/TGT-18-umUeNL4yUkWHES2VdtKki5mFzatga43kNNCe3niguLWaUxl1aK-cas";
         String host = logonURI.getHost();
-        String[] credentials = new Credentials(getScript().getRuntime())
-                .getHostCredentials(host, false, auth);
+        CredentialsProvider cp = getScript().getRuntime().getPlugins().getCredentialsProvider();
+        cp.setRuntime(getScript().getRuntime());
+        HostCredentials credentials = cp.getHostCredentials(host, auth, false);
         if (credentials == null)
             throw new UnRAVLAssertionException("No CAS credentials for host "
                     + host);
 
-        String user = credentials[0];
+        String user = credentials.getUserName();
         String key = user + "." + host + ".TGT";
         String tgt = null;
         // See if the TGT is cached for this user/host
@@ -210,10 +211,10 @@ public class CentralAuthenticationServiceAuth extends BaseUnRAVLAuth {
             Header requestHeaders[] = new Header[] { new BasicHeader(
                     "Content-Type", "application/x-www-form-urlencoded") };
             String u = Text.urlEncode(user);
-            String p = Text.urlEncode(credentials[1]);
+            String p = Text.urlEncode(credentials.getPassword());
             String body = String.format("username=%s&password=%s", u, p);
             // security: don't hold onto credentials in memory
-            credentials[1] = null;
+            credentials.clear();
             credentials = null;
             p = null;
             post.setURI(logonURI);
