@@ -225,6 +225,11 @@ Run UnRAVL using the scripts in the `bin` directory, as described above.
 Contributors are welcome to join the project.
 See [ContributorAgreement.txt](ContributorAgreement.txt).
 
+To contribute, submit issues for bugs or enhancments. 
+[Fork this repo](https://help.github.com/articles/fork-a-repo), then
+[create a GitHub pull request](https://help.github.com/articles/using-pull-requests/) 
+for submitting new contributions.
+
 Contributions should use the Eclipse format configuration in `eclipse-java-format.xml`
 and organize imports in com, java, javax, org order (alphabetical, with grouping)
 
