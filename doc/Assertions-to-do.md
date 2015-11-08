@@ -74,8 +74,8 @@ which refers to a value in the JSON response body.
      }
 ```
 
-Assert that the values at one or more `*jsonPathExpressions*`
-matches a `*value*`. The `*value*` may be any JSON value. Strings in the value expression
+Assert that the values at one or more *`jsonPathExpressions`*
+matches a *`value`*. The *`value`* may be any JSON value. Strings in the value expression
 are subject to  environment substitution.
 
 The value could be a JSON number, string, boolean, array, or object.
@@ -83,7 +83,7 @@ The value could be a JSON number, string, boolean, array, or object.
 **TODO**: augment to allow environment substitution for numbers,
 booleans, etc.
 
-**TODO**: add a "source" : value
+**TODO**: add a `"from"` : value
 attribute to allow testing another JSON object instead of the response body.
 
 ### jsonPathMatch
