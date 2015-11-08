@@ -59,6 +59,12 @@ above but will auto detect if the referenced schema is an
 XML schema (i.e. the location is .xsd or the value is
 a compiled XML schema object, not an JSON schema object).
 
+### json
+
+Extend the `"json"` assertion to allow simply containment checks,
+and to compare to other JSON values, not just the JSON body.
+See [Issue #21, *Extend "json" assertion to allow subset match; ignore order*](https://github.com/sassoftware/unravl/issues/21).
+
 ### jsonPath
 
 Asserts that a value matches the JSON value identified by a JSONPath expression,
