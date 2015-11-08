@@ -32,9 +32,9 @@ Assertions can take following form:
   "assert" : json-array
 ```
 
-In the first form, the "`expession-string`" is converted to
+In the first form, the `"expession-string"` is converted to
 `"assert" : [ { "groovy" : "expression-string" } ]`;
-see the `"[groovy](#groovy)"`
+see the [`"groovy"`](#groovy)
 assertion element below.
 
 The second form is converted to the general array form,
