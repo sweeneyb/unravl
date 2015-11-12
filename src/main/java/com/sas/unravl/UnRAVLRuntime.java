@@ -21,7 +21,6 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -65,7 +64,7 @@ public class UnRAVLRuntime
     {
         configure();
         this.env = environment;
-        setScriptLanguage(getPlugins().scriptLanguage());
+        setScriptLanguage(getPlugins().getScriptLanguage());
         for (Map.Entry<Object, Object> e : System.getProperties().entrySet())
             bind(e.getKey().toString(), e.getValue());
         bind("failedAssertionCount", Integer.valueOf(0));
