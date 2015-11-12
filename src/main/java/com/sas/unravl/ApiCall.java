@@ -759,12 +759,18 @@ public class ApiCall {
                     logger.info(label);
                     // TODO: pretty print XML
                     if (script.bodyIsJson(headers)) {
-                        ObjectMapper mapper = new ObjectMapper();
-                        mapper.enable(SerializationFeature.INDENT_OUTPUT);
-                        Object json = mapper.readValue(bytes.toString(),
-                                Object.class);
-                        bytes = new ByteArrayOutputStream();
-                        bytes.write(mapper.writeValueAsBytes(json));
+                        try {
+                            ObjectMapper mapper = new ObjectMapper();
+                            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+                            JsonNode json = Json.parse(bytes.toString("UTF-8"));
+                            ByteArrayOutputStream os = new ByteArrayOutputStream();
+                            os.write(mapper.writeValueAsBytes(json));
+                            os.close();
+                            bytes = os;
+                        } catch (UnRAVLException e) {
+                            // ignore parse/format errors; just print bytes w/o
+                            // pretty print.
+                        }
                     }
                     bytes.writeTo(System.out);
                     System.out.println();

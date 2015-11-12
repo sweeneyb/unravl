@@ -49,7 +49,7 @@ public class UnRAVL
     private static final String NAME_KEY = "name";
     private static final String TEMPLATE_EXTENSION = ".template";
     private static final String TEXT_MEDIA_TYPES_REGEX = "^(text/.*|.*/.*(xml|json)).*$";
-    private static final String JSON_MEDIA_TYPES_REGEX = "^(\\.|\\+)*json$";
+    private static final String JSON_MEDIA_TYPES_REGEX = "^.*(\\.|\\+)*json.*$";
     public static final String REDIRECT_PREFIX = "@";
     private UnRAVLRuntime runtime;
     private ObjectNode root;
