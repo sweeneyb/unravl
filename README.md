@@ -59,39 +59,16 @@ should return the JSON body:
 }
 ```
 
-It would be nice to code this interaction as a script:
+We also want to assert that we received a `200 OK` HTTP response.
 
-```
-name: GoogleEverestElevation
-GET: http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false
-assert:
-  response: 200
-  json:
-{ "results" : [ { "elevation" : 8815.7158203125,
-        "location" : { "lat" : 27.988056,
-            "lng" : 86.92527800000001
-          },
-        "resolution" : 152.7032318115234
-      } ],
-  "status" : "OK"
-}
-```
-
-(This is not a formal syntax, just an outline of what might be possible.
-It may look like YAML but it is not. YAML ain't markup language, and this ain't YAML)
-
-Because of its indentation rules, when you want
-to nest other content such as JSON structure, XML, or even markdown text
-(that is, anything that is ''not'' YAML),
-YAML is really unwieldy and cumbersome.
-
-Thus, UnRAVL scripts use simple JSON documents
-that encodes the call and response and assertions.
+UnRAVL scripts use JSON documents
+that encode the call, response, and assertions.
 
 This is useful since much of the test data (request bodies, responses)
 will be JSON.
 
-Here goes:
+Below is an UnRAVL script that performs the above REST call, asserts
+the result matches the expected JSON and that the HTTP response is 200:
 
 ```JSON
 {
@@ -114,30 +91,21 @@ Here goes:
 }
 ```
 
-This is not quite as clean as the non-JSON representation, but this is
-something that a folding hierarchical JSON sensitive editor can work
-with.
-
 This shows invoking an API using the GET method. "GET", "HEAD", "POST", "PUT", "DELETE", "PATCH" are the allowed HTTP verbs. For POST, PUT and PATCH you can also pass a request body.
 
-Next, we handle the result with a set of assertions:
+Next, we verify the result with a set of assertions:
 
 1. the expected HTTP status code, 200 OK ; this could also be an array of allowed response types, such as [200, 204]. You can also supply a string value which is a regular expression, such as "2.." If omitted, the status code must match "2.."; that is, be a 200-level status code.
 1. assert the JSON body matches an expected JSON structure. This is based on JSON structural equality, not exact text.
 
 The simplest response body assertion is a literal assertion that the body matches the expected JSON,
 although admittedly this is somewhat fragile.
-The implementation of such benchmark comparison assertions would perform a structural comparison
-(JSONAssert) and allow for additional values or different order, and would
-need support for some annotations, such as ignoring the values of certain fields
-like date/time values, which may vary across test invocations.
-Note that the numeric floating point comparisons should use fuzzy comparisons using an ''epsilon'' value
-(for example, note that the `lng` 86.92527800000001 value is not exactly equal to
-86.925278.)
+The implementation of such benchmark comparison assertions  performs a structural comparison
+and allows for different order of items in JSON objects.
 
-Another form of response assertion would allow comparing the received body to the contents of a benchmark file
+Another form of response assertion allows comparing the received body to the contents of a benchmark file
 rather than literal JSON in the file.
-(In the JSON based DSL, this form would be required for XML benchamrks.)
+(In the JSON based DSL, this form is be required for XML benchamrks.)
 
 ```
 {
@@ -226,8 +194,32 @@ Contributors are welcome to join the project.
 See [ContributorAgreement.txt](ContributorAgreement.txt).
 
 To contribute, submit issues for bugs or enhancments. 
-[Fork this repo](https://help.github.com/articles/fork-a-repo), then
-[create a GitHub pull request](https://help.github.com/articles/using-pull-requests/) 
+[Fork this repo](https://help.github.com/articles/fork-a-repo),
+then clone your GitHub fork:
+
+```
+$ git clone git@github.com:userid/unravl.git
+```
+
+(Change *`userid`* to your GutHub user id). Next, set the Git upstream
+which will allow you to merge from master:
+```
+$ git remote add upstream git@github.com:sassoftware/unravl.git
+```
+
+Before doing local development, be sure to sync your local code:
+
+To [sync your fork with master](https://help.github.com/articles/syncing-a-fork/)
+after changes have been merged at https://github.com/sassoftware/unravl :
+```
+$ cd unravl # change to your local clone
+$ git fetch upstream # get all branches
+$ git checkout master 
+$ git merge upstream/master
+```
+
+Create a local branch for your changes, then push to your personal unravl repo
+and [create a GitHub pull request](https://help.github.com/articles/using-pull-requests/) 
 for submitting new contributions.
 
 Contributions should use the Eclipse format configuration in `eclipse-java-format.xml`
@@ -235,6 +227,7 @@ and organize imports in com, java, javax, org order (alphabetical, with grouping
 
 Contributors are listed in [CONTRIBUTORS.md](CONTRIBUTORS.md).
 
+```
 ## License
 
 UnRAVL is released under the [Apache 2.0 License](LICENSE).
