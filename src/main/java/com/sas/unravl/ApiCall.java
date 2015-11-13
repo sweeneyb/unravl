@@ -2,6 +2,8 @@ package com.sas.unravl;
 
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.BooleanNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -879,8 +881,21 @@ public class ApiCall
                 }
                 if (logger.isInfoEnabled())
                 {
-                    // TODO: pretty print JSON, XML
                     logger.info(label);
+                    if (script.bodyIsJson(headers)) {
+                        try {
+                            ObjectMapper mapper = new ObjectMapper();
+                            mapper.enable(SerializationFeature.INDENT_OUTPUT);
+                            JsonNode json = Json.parse(bytes.toString("UTF-8"));
+                            ByteArrayOutputStream os = new ByteArrayOutputStream();
+                            os.write(mapper.writeValueAsBytes(json));
+                            os.close();
+                            bytes = os;
+                        } catch (UnRAVLException e) {
+                            // ignore parse/format errors; just print bytes w/o
+                            // pretty print.
+                        }
+                    }
                     bytes.writeTo(System.out);
                     System.out.println();
                 }

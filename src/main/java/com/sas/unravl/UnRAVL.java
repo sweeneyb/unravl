@@ -49,6 +49,7 @@ public class UnRAVL
     private static final String NAME_KEY = "name";
     private static final String TEMPLATE_EXTENSION = ".template";
     private static final String TEXT_MEDIA_TYPES_REGEX = "^(text/.*|.*/.*(xml|json)).*$";
+    private static final String JSON_MEDIA_TYPES_REGEX = "^.*(\\.|\\+)*json.*$";
     public static final String REDIRECT_PREFIX = "@";
     private UnRAVLRuntime runtime;
     private ObjectNode root;
@@ -319,11 +320,22 @@ public class UnRAVL
 
     public boolean bodyIsTextual(Header headers[])
     {
+        return headersMatchPattern(headers, TEXT_MEDIA_TYPES_REGEX);
+    }
+    
+    public boolean bodyIsJson(Header headers[])
+    {
+        return headersMatchPattern(headers, JSON_MEDIA_TYPES_REGEX);
+    }
+    
+    private boolean headersMatchPattern(Header headers[], String pattern)
+    {
         for (Header h : headers)
-            if (h.getValue().matches(TEXT_MEDIA_TYPES_REGEX))
+            if (h.getValue().matches(pattern))
                 return true;
         return false;
     }
+    
 
     public static ObjectNode statusAssertion(UnRAVL script)
         throws UnRAVLException
