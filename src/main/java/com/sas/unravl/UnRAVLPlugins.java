@@ -6,6 +6,8 @@ import com.sas.unravl.annotations.UnRAVLAuthPlugin;
 import com.sas.unravl.annotations.UnRAVLExtractorPlugin;
 import com.sas.unravl.annotations.UnRAVLRequestBodyGeneratorPlugin;
 import com.sas.unravl.assertions.UnRAVLAssertion;
+import com.sas.unravl.auth.CredentialsProvider;
+import com.sas.unravl.auth.NetrcCredentialsProvider;
 import com.sas.unravl.auth.UnRAVLAuth;
 import com.sas.unravl.extractors.UnRAVLExtractor;
 import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
@@ -33,11 +35,34 @@ public class UnRAVLPlugins {
     private Map<String, Class<? extends UnRAVLExtractor>> extractors = new HashMap<String, Class<? extends UnRAVLExtractor>>();
     private Map<String, Class<? extends UnRAVLAuth>> auth = new HashMap<String, Class<? extends UnRAVLAuth>>();
 
-    @Value("#{systemProperties['unravl.script.language'] ?: 'groovy'}")
+    private CredentialsProvider credentialsProvider;
+        
     // must be "Groovy", "groovy", "JavaScript", "js", "javascript", or another valid ScriptEngine name
-    String scriptLanguage = "groovy";
+    @Value("#{systemProperties['unravl.script.language'] ?: 'groovy'}")
+    private String scriptLanguage = "groovy";
 
-    public String scriptLanguage() {
+    public void setScriptLanguage(String scriptLanguage) {
+        this.scriptLanguage = scriptLanguage;
+    }
+
+
+    /**
+     * Return a credentials provider - the instance assigned in the setter, or 
+     * a default {@link NetrcCredentialsProvider}
+     */
+    public CredentialsProvider getCredentialsProvider() {
+        return (credentialsProvider == null) ? new NetrcCredentialsProvider() : credentialsProvider;
+    }
+
+    /**
+     * Assign a credentials provider
+     * @param credentialsProvider the instance which can get userid/password for a host
+     */
+    public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
+        this.credentialsProvider = credentialsProvider;
+    }
+
+    public String getScriptLanguage() {
         if (scriptLanguage == null || scriptLanguage.trim().length() == 0)
             return "groovy";
         else
@@ -46,13 +71,13 @@ public class UnRAVLPlugins {
 
     public ScriptEngine interpreter(String lang) throws UnRAVLException {
         ScriptEngineManager manager = new ScriptEngineManager();
-        ScriptEngine engine = manager.getEngineByName(lang == null ? scriptLanguage() : lang);
+        ScriptEngine engine = manager.getEngineByName(lang == null ? getScriptLanguage() : lang);
         if (engine == null) {
             logSupportedScriptEngines();
             throw new UnRAVLException(String.format(
                     "No script engine available for %sscript lanaguge %s",
                     lang == null ? "unravl.script.langauge " : "",
-                    scriptLanguage()));
+                    getScriptLanguage()));
         }
         return engine;
     }
@@ -113,7 +138,7 @@ public class UnRAVLPlugins {
     }
 
     /**
-     * log availability of scripting engines supported in this environment.
+     * log the availability of scripting engines supported in this environment.
      */
     public static void logSupportedScriptEngines() {
         ScriptEngineManager manager = new ScriptEngineManager();

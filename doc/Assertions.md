@@ -32,9 +32,9 @@ Assertions can take following form:
   "assert" : json-array
 ```
 
-In the first form, the "`expession-string`" is converted to
+In the first form, the `"expession-string"` is converted to
 `"assert" : [ { "groovy" : "expression-string" } ]`;
-see the `"[groovy](#groovy)"`
+see the [`"groovy"`](#groovy)
 assertion element below.
 
 The second form is converted to the general array form,
@@ -206,18 +206,18 @@ Examples:
 Asserts that one or more JSON structures conform to a JSON schema. There are
 several possible forms for this assertion:
 
-1. `{ "schema" : <var>schema</var> }`
-1. `{ "schema" : <var>schema</var>, "values" : <var>values</var> }`
+  1. `{ "schema" : `*schema*` }`
+  1. `{ "schema" : `*schema*`, "values" : `*values*` }`
 
-<var>schema</var> may be:
-1. a JSON object which represents an embedded JSON schema
-1. the name of a variable that contains a JSON object
-1. a string in the form of `"@location"` where <var>location</var> is the URI of the JSON schema. (Environment variables are expanded within the <var>location</var> location string.)
+*schema* may be:
+  1. a JSON object which represents an embedded JSON schema
+  1. the name of a variable that contains a JSON object
+  1. a string in the form of `"@location"` where *location* is the URI of the JSON schema. (Environment variables are expanded within the *location* location string.)
 
-<var>values</var> may be
-1. a string containing a single variable (the key `"value"` may be used instead of the plural `"values"`)
-1. an array of variable names
-1. For forms 1 and 2, each such variable must be bound to a JSON object or array. The JSON value of the variable is validated against the above referenced JSON schema.
+*values* may be
+  1. a string containing a single variable (the key `"value"` may be used instead of the plural `"values"`)
+  1. an array of variable names
+  1. For forms 1 and 2, each such variable must be bound to a JSON object or array. The JSON value of the variable is validated against the above referenced JSON schema.
 
 If `"values"` is omitted, the the current response
 body will be validated against the schema.
