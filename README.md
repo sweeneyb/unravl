@@ -204,6 +204,7 @@ $ git clone git@github.com:userid/unravl.git
 (Change *`userid`* to your GutHub user id). Next, set the Git upstream
 which will allow you to merge from master:
 ```
+$ cd unravl
 $ git remote add upstream git@github.com:sassoftware/unravl.git
 ```
 
