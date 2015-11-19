@@ -118,8 +118,8 @@ The second form may be used to extract values from a variable
 in the environment.
 The value of that variable should be a JSON object
 (such as from an `"env"` element or a previous
-`"json"` or other extractor) or a `Map&lt;String,Object>`
-or `List&lt;Object>`.
+`"json"` or other extractor) or a `Map<String,Object>`
+or `List<Object>`.
 
 ```JSON
 { "jsonPath" : {
