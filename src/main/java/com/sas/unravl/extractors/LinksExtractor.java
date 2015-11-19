@@ -290,10 +290,6 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
         return key.equals("href") || key.equals("hrefs");
     }
 
-    private String key(ObjectNode extractor) {
-        return extractor.fields().next().getKey();
-    }
-
     private void extractLinks(ObjectNode root, ObjectNode from,
             ObjectNode effectiveSpec, boolean href, ApiCall call)
             throws UnRAVLException {

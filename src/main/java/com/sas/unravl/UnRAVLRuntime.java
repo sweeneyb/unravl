@@ -4,6 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.spi.json.JacksonJsonProvider;
+import com.jayway.jsonpath.spi.json.JsonProvider;
+import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
+import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.sas.unravl.annotations.UnRAVLAssertionPlugin;
 import com.sas.unravl.annotations.UnRAVLExtractorPlugin;
 import com.sas.unravl.assertions.UnRAVLAssertion;
@@ -18,9 +24,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
@@ -169,6 +177,30 @@ public class UnRAVLRuntime
         String[] contextXml = new String[] {"/META-INF/spring/unravlApplicationContext.xml"};
         ctx = new ClassPathXmlApplicationContext(contextXml);
         assert (ctx != null);
+        
+        // Configure jsonPath to use Jackson
+        Configuration.Defaults jsonPathConfig = new Configuration.Defaults() {
+
+            private final JsonProvider jsonProvider = new JacksonJsonProvider();
+            private final MappingProvider mappingProvider = new JacksonMappingProvider();
+
+            @Override
+            public JsonProvider jsonProvider() {
+                return jsonProvider;
+            }
+
+            @Override
+            public MappingProvider mappingProvider() {
+                return mappingProvider;
+            }
+
+            @Override
+            public Set<Option> options() {
+                return EnumSet.noneOf(Option.class);
+            }
+        };
+
+        Configuration.setDefaults(jsonPathConfig);
     }
 
     public UnRAVLRuntime execute(String[] argv)
