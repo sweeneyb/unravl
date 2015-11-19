@@ -102,8 +102,6 @@ Tip: Do not use other matcher groups in the regular expression. Where necessary 
 
 ### jsonPath
 
-**TODO**
-
 Binds values from the JSON response by extracting data via their
 [JsonPath](https://github.com/jayway/JsonPath).
 
@@ -113,10 +111,15 @@ Binds values from the JSON response by extracting data via their
 ```
 
 The first form binds from the JSON response.
-The second form may be used to name a variable in the environment;
-th value of that variable should be a JSON object
+This also parses the response body as JSON and binds
+it to the variable `responseBody`.
+
+The second form may be used to extract values from a the value
+named in the environment.
+The value of that variable should be a JSON object
 (such as from an `"env"` element or a previous
-`"json"` extractor.)
+`"json"` extractor) or a Map<String,Object>
+or List<Object>.
 
 ```JSON
 { "jsonPath" : {
@@ -235,7 +238,7 @@ If the content type matches ".*[/+]xml", it is pretty printed as XML.
 ```
  { "json" : "@file-name" }
  { "json" : "var" }
- { "json" : "var", "class" : class-name }
+
 ```
 
 Parses the response body as a JSON object or JSON array.
