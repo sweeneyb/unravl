@@ -19,27 +19,27 @@ import org.apache.log4j.Logger;
 
 /**
  * This extractor evaluates one or more <a
- * href='https://github.com/jayway/JsonPath'>JSON Path expressions</a> on the
+ * href='https://github.com/jayway/JsonPath'>JsonPath expressions</a> on the
  * JSON result or another JSON value and binds the resulting values to variables
  * in the current environment. For example, for the JSON result
  * 
  * <pre>
- *  { "jsonResponse" :  {
- *         "results" : [
- *             {
- *                 "elevation" : 8815.7158203125,
- *                 "location" : {
- *                     "lat" : 27.988056,
- *                     "lng" : 86.92527800000001
- *                 },
- *                 "resolution" : 152.7032318115234
- *             }
- *         ],
- *         "status" : "OK"
- *     }
+ *  {
+ *      "results" : [
+ *          {
+ *              "elevation" : 8815.7158203125,
+ *              "location" : {
+ *                 "lat" : 27.988056,
+ *                 "lng" : 86.92527800000001
+ *              },
+ *              "resolution" : 152.7032318115234
+ *          }
+ *      ],
+ *      "status" : "OK"
+ *  }
  * </pre>
  * 
- * the following extracts the JSON Path-addressed values from the response and
+ * the following extracts the JsonPath-addressed values from the response and
  * sets the variables <var>elevation, lat</var>, and <var>lng</var>:
  * 
  * <pre>
