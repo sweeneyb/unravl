@@ -115,7 +115,8 @@ This also parses the response body as JSON and binds
 it to the variable `responseBody`.
 
 The second form may be used to extract values from a variable
-in the environment.
+in the environment instead of the JSON response from
+the REST API call.
 The value of that variable should be a JSON object
 (such as from an `"env"` element or a previous
 `"json"` or other extractor) or a `Map<String,Object>`
@@ -147,7 +148,7 @@ above will extract `actualLat` and `actualLng`
 from `$.results[0].location.lat` and `$.results[0].location.lng`
 resoectively.
 
-Note that many Jsonath expressions result in arrays of values
+Note that many JsonPath expressions result in arrays of values
 that match the path.
 
 ## pattern
