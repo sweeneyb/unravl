@@ -7,8 +7,17 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.BigIntegerNode;
+import com.fasterxml.jackson.databind.node.BooleanNode;
+import com.fasterxml.jackson.databind.node.DecimalNode;
+import com.fasterxml.jackson.databind.node.DoubleNode;
+import com.fasterxml.jackson.databind.node.FloatNode;
+import com.fasterxml.jackson.databind.node.IntNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.LongNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.ShortNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 import com.google.common.base.Function;
 import com.sas.unravl.UnRAVL;
@@ -342,6 +351,35 @@ public class Json {
         if (value == null || !value.isTextual())
             return defaultValue;
         return value.textValue();
+    }
+
+    public static Object unwrap(Object val) { // Can Jackson do this via ObjectMapper.treeToValue()? The spec is unclear 
+        Object result = val;
+        ObjectMapper mapper = new ObjectMapper();
+        if (val instanceof ObjectNode) {
+            result = mapper.convertValue((ObjectNode) val, Map.class);
+        } else if (val instanceof ArrayNode) {
+            result = mapper.convertValue((ObjectNode) val, List.class);
+        } else if (val instanceof NullNode) {
+            result = null;
+        } else if (val instanceof BooleanNode) {
+            result = ((BooleanNode) val).booleanValue();
+        } else if (val instanceof ShortNode) {
+            result = ((ShortNode) val).shortValue();
+        } else if (val instanceof IntNode) {
+            result = ((IntNode) val).intValue();
+        } else if (val instanceof LongNode) {
+            result = ((LongNode) val).longValue();
+        } else if (val instanceof DoubleNode) {
+            result = ((DoubleNode) val).doubleValue();
+        } else if (val instanceof FloatNode) {
+            result = ((FloatNode) val).floatValue();
+        } else if (val instanceof BigIntegerNode) {
+            result = ((BigIntegerNode) val).bigIntegerValue();
+        } else if (val instanceof DecimalNode) {
+            result = ((DecimalNode) val).decimalValue();
+        } 
+        return result;
     }
 
 }
