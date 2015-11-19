@@ -100,6 +100,53 @@ Each of these have one group for each element of the timestamp.
 
 Tip: Do not use other matcher groups in the regular expression. Where necessary escape special regular expression characters like *, ?, and .
 
+### jsonPath
+
+**TODO**
+
+Binds values from the JSON response by extracting data via their
+[JsonPath](https://github.com/jayway/JsonPath).
+
+```
+ { "jsonPath" : { map-of-var-path-pairs } }
+ { "jsonPath" : { map-of-var-path-pairs }, "from" : "varname" }
+```
+
+The first form binds from the JSON response.
+The second form may be used to name a variable in the environment;
+th value of that variable should be a JSON object
+(such as from an `"env"` element or a previous
+`"json"` extractor.)
+
+```JSON
+{ "jsonPath" : {
+     "actualLat" : "$.results[0].location.lat",
+     "actualLng" : "$.results[0].location.lng",
+     "actualElevation" : "results[0].elevation"
+     }
+}
+```
+
+```JSON
+{ "jsonPath" : {
+     "actualLat" : "{location}.lat",
+     "actualLng" : "{location}.lng",
+     "actualElevation" : "results.elevation"
+     },
+   "from" : "jsonResponse"
+}
+```
+
+The JsonPath strings are subject to environment substitution.
+For example, if the variable `"location"` is bound
+to `$.results[0].location`, then the second example
+above will extract `actualLat` and `actualLng`
+from `$.results[0].location.lat` and `$.results[0].location.lng`
+resoectively.
+
+Note that many Jsonath expressions result in arrays of values
+that match the path.
+
 ## pattern
 
 Matches text against grouping regular expressions and binds the substrings
@@ -114,7 +161,7 @@ such as
 ```
 This will match the value of the environment expansion of `"{responseType}"` to the given regular expression pattern `^(.*)\s*;\s*charset=(.*)$`, and bind the media type and the encoding character set substrings to the variables `mediaType` and `charset`. (Note that a per the JSON grammar,
 backslash (`\\`) characters in a JSON string must be escaped, so the regular expression notation `\s` is coded in the JSON string as `\\\\s`.)
-For example, if the `responseType` binding in the environment was `application/json; charset=UTF-8`, 
+For example, if the `responseType` binding in the environment was `application/json; charset=UTF-8`,
 this pattern specification will bind the variables:
 `mediaType` to `application/json`, and
 charset to `UTF-8`.
