@@ -146,7 +146,7 @@ For example, if the variable `"location"` is bound
 to `$.results[0].location`, then the second example
 above will extract `actualLat` and `actualLng`
 from `$.results[0].location.lat` and `$.results[0].location.lng`
-resoectively.
+respectively.
 
 Note that many JsonPath expressions result in arrays of values
 that match the path.
