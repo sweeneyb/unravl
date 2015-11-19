@@ -114,12 +114,12 @@ The first form binds from the JSON response.
 This also parses the response body as JSON and binds
 it to the variable `responseBody`.
 
-The second form may be used to extract values from a the value
-named in the environment.
+The second form may be used to extract values from a variable
+in the environment.
 The value of that variable should be a JSON object
 (such as from an `"env"` element or a previous
-`"json"` extractor) or a Map<String,Object>
-or List<Object>.
+`"json"` or other extractor) or a `Map&lt;String,Object>`
+or `List&lt;Object>`.
 
 ```JSON
 { "jsonPath" : {
