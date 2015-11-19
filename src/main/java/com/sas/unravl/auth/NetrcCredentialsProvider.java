@@ -58,16 +58,18 @@ public class NetrcCredentialsProvider extends AbstractCredentialsProvider implem
                 return credentials(login, password);
         }
 
-        File netrc = new File(".netrc");
+        // Locate the netrc config file with credentials
+        File netrc = new File(".netrc"); // look in current dir first
+        if (!netrc.exists())
+            netrc = new File("_netrc"); // possible Windows file name, in current dir
         File home = new File(System.getProperty("user.home"));
-        if (!netrc.exists()) {
+        if (!netrc.exists())
             netrc = new File(home, ".netrc");
-            if (!netrc.exists())
-                netrc = new File(home, "_netrc"); // on Windows
-            if (!netrc.exists()) {
-                return null;
-            }
-        }
+        if (!netrc.exists())
+            netrc = new File(home, "_netrc");
+        if (!netrc.exists())
+           return null;
+        
         // Note: We can read and cache all the credentials, but that
         // is a security issue; we should probably encrypt the cached content.
         // Also, if we do cache the file content, we would still have to check
