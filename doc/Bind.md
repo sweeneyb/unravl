@@ -100,6 +100,57 @@ Each of these have one group for each element of the timestamp.
 
 Tip: Do not use other matcher groups in the regular expression. Where necessary escape special regular expression characters like *, ?, and .
 
+### jsonPath
+
+Binds values from the JSON response by extracting data via their
+[JsonPath](https://github.com/jayway/JsonPath).
+
+```
+ { "jsonPath" : { map-of-var-path-pairs } }
+ { "jsonPath" : { map-of-var-path-pairs }, "from" : "varname" }
+```
+
+The first form binds from the JSON response.
+This also parses the response body as JSON and binds
+it to the variable `responseBody`.
+
+The second form may be used to extract values from a variable
+in the environment instead of the JSON response from
+the REST API call.
+The value of that variable should be a JSON object
+(such as from an `"env"` element or a previous
+`"json"` or other extractor) or a `Map<String,Object>`
+or `List<Object>`.
+
+```JSON
+{ "jsonPath" : {
+     "actualLat" : "$.results[0].location.lat",
+     "actualLng" : "$.results[0].location.lng",
+     "actualElevation" : "results[0].elevation"
+     }
+}
+```
+
+```JSON
+{ "jsonPath" : {
+     "actualLat" : "{location}.lat",
+     "actualLng" : "{location}.lng",
+     "actualElevation" : "results.elevation"
+     },
+   "from" : "jsonResponse"
+}
+```
+
+The JsonPath strings are subject to environment substitution.
+For example, if the variable `"location"` is bound
+to `$.results[0].location`, then the second example
+above will extract `actualLat` and `actualLng`
+from `$.results[0].location.lat` and `$.results[0].location.lng`
+respectively.
+
+Note that many JsonPath expressions result in arrays of values
+that match the path.
+
 ## pattern
 
 Matches text against grouping regular expressions and binds the substrings
@@ -114,7 +165,7 @@ such as
 ```
 This will match the value of the environment expansion of `"{responseType}"` to the given regular expression pattern `^(.*)\s*;\s*charset=(.*)$`, and bind the media type and the encoding character set substrings to the variables `mediaType` and `charset`. (Note that a per the JSON grammar,
 backslash (`\\`) characters in a JSON string must be escaped, so the regular expression notation `\s` is coded in the JSON string as `\\\\s`.)
-For example, if the `responseType` binding in the environment was `application/json; charset=UTF-8`, 
+For example, if the `responseType` binding in the environment was `application/json; charset=UTF-8`,
 this pattern specification will bind the variables:
 `mediaType` to `application/json`, and
 charset to `UTF-8`.
@@ -188,7 +239,7 @@ If the content type matches ".*[/+]xml", it is pretty printed as XML.
 ```
  { "json" : "@file-name" }
  { "json" : "var" }
- { "json" : "var", "class" : class-name }
+
 ```
 
 Parses the response body as a JSON object or JSON array.

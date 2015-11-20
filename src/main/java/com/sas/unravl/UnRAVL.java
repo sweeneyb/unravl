@@ -93,7 +93,11 @@ public class UnRAVL
     @Override
     public String toString()
     {
-        return "UnRAVL:[" + getName() + " " + getMethod() + " " + getURI() + "]";
+        return "UnRAVL:[" + getName() + " " + safe(getMethod(),"<no method>") + " " + safe(getURI(), "<no url>") + "]";
+    }
+
+    private String safe(Object method2, String string) {
+        return (method2 == null) ? string : method2.toString();
     }
 
     public UnRAVLRuntime getRuntime()
