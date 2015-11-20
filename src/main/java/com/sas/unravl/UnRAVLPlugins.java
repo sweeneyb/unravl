@@ -36,7 +36,7 @@ public class UnRAVLPlugins {
     private Map<String, Class<? extends UnRAVLAuth>> auth = new HashMap<String, Class<? extends UnRAVLAuth>>();
 
     private CredentialsProvider credentialsProvider;
-        
+
     // must be "Groovy", "groovy", "JavaScript", "js", "javascript", or another valid ScriptEngine name
     @Value("#{systemProperties['unravl.script.language'] ?: 'groovy'}")
     private String scriptLanguage = "groovy";
@@ -47,8 +47,9 @@ public class UnRAVLPlugins {
 
 
     /**
-     * Return a credentials provider - the instance assigned in the setter, or 
+     * Return a credentials provider - the instance assigned in the setter, or
      * a default {@link NetrcCredentialsProvider}
+     * @return the assigned CredentialsProvider
      */
     public CredentialsProvider getCredentialsProvider() {
         return (credentialsProvider == null) ? new NetrcCredentialsProvider() : credentialsProvider;

@@ -1,0 +1,25 @@
+
+{ "name" : "POST a hello message to httpbin",
+  "env" : { "hello" : "Hello, httpbin, from UnRAVL",
+            "data" :  { "greeting" : "{hello}" }},
+  "POST" : "http://www.httpbin.org/post",
+  "headers" : { "Content-Type" : "text/json",
+                "Accept" : "application/json",
+                "Agent" : "UnRAVL"
+              },
+  "body" : { "json" : "data" },
+  "bind" : [ { "json" : "@-", 
+               "unwrap" : true },
+             { "groovy" : {
+                 "actual" : "responseBody.json",
+                 "sentHeaders" : "responseBody.headers"
+                 }
+               }
+             ],
+  "assert" : [
+      "actual.greeting == hello",
+      "sentHeaders['Accept'] == 'application/json'",
+      "sentHeaders['Content-Type']== 'text/json'",
+      "sentHeaders['Agent'] == 'UnRAVL'"
+      ]
+}

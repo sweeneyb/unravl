@@ -6,8 +6,7 @@
                 "Agent" : "UnRAVL"
               },
   "body" : { "json" : "data" },
-  "bind" : [ { "json" : "-" },
-             { "json" : "responseBody" },
+  "bind" : [ { "json" : "@-" },
              { "groovy" : {
                  "actual" : "responseBody.json",
                  "sentHeaders" : "responseBody.headers"
