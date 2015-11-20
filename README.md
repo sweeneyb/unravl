@@ -41,7 +41,7 @@ validate the response code and response body.
 The REST call
 ```
  GET  http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false
-``` 
+```
 should return the JSON body:
 ```JSON
 {
@@ -178,8 +178,8 @@ You can download the source from this repo and run
 ```
 Run UnRAVL as:
 ```bash
-    bin/unravl.sh src/test/scripts/hello.json  # from Linux or Mac OS X
-    bin\unravl.bat src/test/scripts/hello.json # from Windows
+    src/main/bin/unravl.sh src/test/scripts/hello.json  # from Linux or Mac OS X
+    src\main\bin\unravl.bat src/test/scripts/hello.json # from Windows
 ```
 
 Alternatively, you can download the binary release.
@@ -193,7 +193,7 @@ Run UnRAVL using the scripts in the `bin` directory, as described above.
 Contributors are welcome to join the project.
 See [ContributorAgreement.txt](ContributorAgreement.txt).
 
-To contribute, submit issues for bugs or enhancments. 
+To contribute, submit issues for bugs or enhancments.
 [Fork this repo](https://help.github.com/articles/fork-a-repo),
 then clone your GitHub fork:
 
@@ -215,12 +215,12 @@ after changes have been merged at https://github.com/sassoftware/unravl :
 ```
 $ cd unravl # change to your local clone
 $ git fetch upstream # get all branches
-$ git checkout master 
+$ git checkout master
 $ git merge upstream/master
 ```
 
 Create a local branch for your changes, then push to your personal unravl repo
-and [create a GitHub pull request](https://help.github.com/articles/using-pull-requests/) 
+and [create a GitHub pull request](https://help.github.com/articles/using-pull-requests/)
 for submitting new contributions.
 
 Contributions should use the Eclipse format configuration in `eclipse-java-format.xml`

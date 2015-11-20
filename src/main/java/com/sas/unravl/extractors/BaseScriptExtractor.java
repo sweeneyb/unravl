@@ -2,6 +2,7 @@ package com.sas.unravl.extractors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.databind.node.TextNode;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
@@ -24,7 +25,7 @@ import org.apache.log4j.Logger;
  *    { "lang" : { var-value-pairs } }
  *    ]
  * </pre>
- * 
+ *
  * where "lang" is a supported script language name such as "groovy" or
  * "javascript".
  * <p>
@@ -40,7 +41,7 @@ import org.apache.log4j.Logger;
  * including preceding <var>var-value-pairs</var> in the current scriptlet.
  * Example (for Groovy):
  * </p>
- * 
+ *
  * <pre>
  * "bind" : [
  *    { "groovy" : { "pi" : "Math.PI",

@@ -86,8 +86,13 @@ public class BaseUnRAVLExtractor extends BaseUnRAVLPlugin implements
         plugins.addExtractor(this.getClass());
     }
 
+    /**
+     * Returns the name of this extractor. THis is the name (key) of the first value
+     * in the object.
+     * @param extractor the JSON object containing an UnRAVL extractor
+     * @return the key (name) of the first value
+     */
     protected static String key(ObjectNode extractor) {
         return extractor.fields().next().getKey();
     }
-
 }
