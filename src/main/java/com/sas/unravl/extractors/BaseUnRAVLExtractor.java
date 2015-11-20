@@ -1,6 +1,7 @@
 // Copyright (c) 2014, SAS Institute Inc., Cary, NC, USA, All Rights Reserved
 package com.sas.unravl.extractors;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.BaseUnRAVLPlugin;
@@ -38,6 +39,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class BaseUnRAVLExtractor extends BaseUnRAVLPlugin implements
         UnRAVLExtractor {
 
+    protected static boolean unwrapOption(ObjectNode scriptlet) throws UnRAVLException {
+        return booleanOption(scriptlet, "unwrap");
+    }
+
+    protected static boolean booleanOption(ObjectNode scriptlet, String optionName)
+            throws UnRAVLException {
+                JsonNode wrap = scriptlet.get("unwrap");
+                if (wrap == null)
+                    return false;
+                if (wrap.isBoolean())
+                    return wrap.booleanValue();
+                String msg = String.format(
+                        "%s option in %s must be a Boolean value; found %s",
+                        optionName, key(scriptlet), wrap);
+                throw new UnRAVLException(msg);
+            }
+
     @Override
     public ObjectNode extractor() {
         return getScriptlet();
@@ -66,6 +84,10 @@ public class BaseUnRAVLExtractor extends BaseUnRAVLPlugin implements
     @Autowired
     public void setPluginManager(UnRAVLPlugins plugins) {
         plugins.addExtractor(this.getClass());
+    }
+
+    protected String key(ObjectNode extractor) {
+        return extractor.fields().next().getKey();
     }
 
 }
