@@ -2,8 +2,6 @@ package com.sas.unravl.extractors;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.fasterxml.jackson.databind.node.TextNode;
-import com.fasterxml.jackson.databind.node.TextNode;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;

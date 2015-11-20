@@ -12,11 +12,26 @@ import com.sas.unravl.util.Json;
 import org.apache.log4j.Logger;
 
 /**
- * An extractor for <code>{ "json" : "varName" }</code> or
- * <code>{ "json" : "@file-name" }</code>
+ * An extractor for 
+ * <pre>
+ * { "json" : "varName" }
+ * { "json" : "@file-name" }
+ * </pre>
  * 
  * <p>
- * In both cases, the JSON body is also bound to the variable "responseBody"
+ * In both cases, the JSON body is also bound to the variable <code>"responseBody"</code>.
+ * The value will be a Jackson <code>ObjectNode</code> or <code>ArrayNode</code>.
+ * <p>
+ * This extractor also allows an option, <code>"unwrap"</code>:
+ * </p>
+ * <pre>
+ * { "json" : "varName", "unwrap" : true }
+ * { "json" : "@file-name", "unwrap" : true }
+ * </pre>
+ * <p>
+ * If the <code>"unwrap"<c/ode> option is <code>true</code>, the JSON value will be "unwrapped".
+ * An <code>ObjectNode</code> will be unwrapped into a <code>java.util.Map</code>;
+ * a <code>ArrayNode</code> will be unwrapped into a <code>java.util.List</code>.
  * 
  * @author David.Biesack@sas.com
  */
@@ -31,14 +46,15 @@ public class JsonExtractor extends BaseUnRAVLExtractor {
             throws UnRAVLException {
         super.extract(current, extractor, call);
         JsonNode target = Json.firstFieldValue(extractor);
+        boolean unwrap = unwrapOption(extractor);
         if (!target.isTextual())
             throw new UnRAVLException(
                     "json binding value must be a var name or a @file-name string");
         String to = target.textValue();
-
         JsonNode json = Json.parse(Text.utf8ToString(call.getResponseBody()
                 .toByteArray()));
-        current.bind("responseBody", json);
+        Object result = unwrap ? Json.unwrap(json) : json;
+        current.bind("responseBody", result);
         if (to.startsWith(UnRAVL.REDIRECT_PREFIX)) {
             String where = to.substring(UnRAVL.REDIRECT_PREFIX.length());
             where = getScript().expand(where);
@@ -46,7 +62,7 @@ public class JsonExtractor extends BaseUnRAVLExtractor {
             if (!where.equals("-"))
                 logger.info("Wrote JSON to file " + where);
         } else {
-            current.bind(to, json);
+            current.bind(to, result);
         }
     }
 

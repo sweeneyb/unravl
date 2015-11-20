@@ -86,7 +86,7 @@ public class BaseUnRAVLExtractor extends BaseUnRAVLPlugin implements
         plugins.addExtractor(this.getClass());
     }
 
-    protected String key(ObjectNode extractor) {
+    protected static String key(ObjectNode extractor) {
         return extractor.fields().next().getKey();
     }
 
