@@ -22,24 +22,21 @@ import java.util.regex.Pattern;
  * That file is read from the current directory, or if not found there, from the
  * home directory (<code>.~/.netrc</code> or <code>.%USERPROFILE%\\.netrc</code>
  * ). The file contains lines in the following format:
- * 
+ *
  * <pre>
  * machine <em>qualified.hostname</em> login <em>userid-for-host</em> password <em>password-for-host</em>
  * </pre>
- * 
+ *
  * @author DavidBiesack@sas.com
  */
 public class NetrcCredentialsProvider extends AbstractCredentialsProvider implements CredentialsProvider {
 
     /**
      * Create a Credentials instance for use with the UnRAVL runtime
-     * 
-     * @param runtime
-     *            a non-null UnRAVL runtime instance
      */
     public NetrcCredentialsProvider() {
     }
-    
+
     static final Pattern NETRC = Pattern
             .compile("^\\s*machine\\s+([^\\s]+)\\s+login\\s+([^\\s]+)\\s+password\\s+([^\\s]+).*$");
 
@@ -69,7 +66,7 @@ public class NetrcCredentialsProvider extends AbstractCredentialsProvider implem
             netrc = new File(home, "_netrc");
         if (!netrc.exists())
            return null;
-        
+
         // Note: We can read and cache all the credentials, but that
         // is a security issue; we should probably encrypt the cached content.
         // Also, if we do cache the file content, we would still have to check

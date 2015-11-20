@@ -22,7 +22,7 @@ import org.apache.log4j.Logger;
  * href='https://github.com/jayway/JsonPath'>JsonPath expressions</a> on the
  * JSON result or another JSON value and binds the resulting values to variables
  * in the current environment. For example, for the JSON result
- * 
+ *
  * <pre>
  *  {
  *      "results" : [
@@ -38,10 +38,10 @@ import org.apache.log4j.Logger;
  *      "status" : "OK"
  *  }
  * </pre>
- * 
+ *
  * the following extracts the JsonPath-addressed values from the response and
  * sets the variables <var>elevation, lat</var>, and <var>lng</var>:
- * 
+ *
  * <pre>
  *     "bind" : [
  *         { "jsonPath" : { "elevation" : "$.results[0].elevation",
@@ -50,23 +50,22 @@ import org.apache.log4j.Logger;
  *            "from" : "jsonResponse" }
  *     ],
  * </pre>
- * 
+ *
  * Also, the JSON response body is bound to the variable
  * <var>responseBody</var>.
  * <p>
  * This extractor supports an optional parameter "from" as
  * described below.
- * 
+ * </p>
  * <pre>
  * "from" : "varName"
  * </pre>
- * 
+ * <p>
  * allows an UnRAVL script to extract from JSON defined by a UnRAVL environment
  * variable instead of the current API call's response body. The from value can
  * be a value assigned by another extractor or defined in the "env" element.
  * </p>
- * <p>
- * 
+ *
  * @author David.Biesack@sas.com
  */
 @UnRAVLExtractorPlugin({ "jsonPath", "jsonpath" })

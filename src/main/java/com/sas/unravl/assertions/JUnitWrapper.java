@@ -38,10 +38,10 @@ public class JUnitWrapper
     };
 
     /**
-     * Run all scripts in the directory. 
+     * Run all scripts in the directory.
      * This will try to run all scripts, even if some fail.
      * Each script runs independently in its own environment.
-     * TODO: Add boolean recursive option 
+     * TODO: Add boolean recursive option
      * @param map initial environment
      * @param directoryName directory where scripts should be found
      */
@@ -51,11 +51,11 @@ public class JUnitWrapper
     }
 
     /**
-     * Run scripts in the directory if the file names match the pattern. 
+     * Run scripts in the directory if the file names match the pattern.
      * This will try to run all scripts, even if some fail.
      * Each script runs independently in its own environment.
-     * TODO: Add boolean recursive option 
-     * 
+     * TODO: Add boolean recursive option
+     *
      * @param map initial environment
      * @param directoryName directory where scripts should be found
      * @param pattern Only run scripts whose name match this file name pattern.
@@ -86,7 +86,7 @@ public class JUnitWrapper
             throw new AssertionError(String.format("Warning: directory %s does not exist.", dir));
         }
     }
-    
+
     public static void runScriptsInDirectory(UnRAVLRuntime runtime,
                                              String directoryName,
                                              final String pattern)
@@ -127,14 +127,14 @@ public class JUnitWrapper
     {
         return runScriptFiles(null, env, scriptFileNames);
     }
-    
+
 
     /**
      * Run a set of script files. Each runs in the initial env passed in (the environments modified
      * by each script is discarded). This method asserts that each script has no assertion failures.
      * Run each script, even if earlier ones had failures.
      *
-     * @param env The initial environment to pass to each.
+     * @param runtime The initial environment to pass to each.
      * @param scriptFileNames an array of script file names to run.
      * @return number of scripts which ran
      */
@@ -142,11 +142,11 @@ public class JUnitWrapper
     {
         return runScriptFiles(runtime, null, scriptFileNames);
     }
-    
+
     private static int runScriptFiles(UnRAVLRuntime runtime, Map<String, Object> env, String... scriptFileNames) {
         // for now, assume each command line arg is an UnRAVL script
         int count = 0;
-        Map<String, Object> newEnv = (env == null 
+        Map<String, Object> newEnv = (env == null
                 ? new HashMap<String, Object>()
                 : new HashMap<String, Object>(env));
         Throwable caught = null;
@@ -181,7 +181,7 @@ public class JUnitWrapper
 
     /**
      * Run all scripts in the directory, but expect an UnRAVLException. This should be used to test
-     * invalid scripts. Each script runs independently in its own environment. 
+     * invalid scripts. Each script runs independently in its own environment.
      * TODO: Add boolean recursive option
      *
      * @param env Additional variable bindings
@@ -233,7 +233,7 @@ public class JUnitWrapper
     /**
      * Run a set of script files, but expect an UnRAVLException. This should be used to test invalid
      * scripts
-     * 
+     *
      * @param env Additional variable bindings
      * @param scriptFileNames script file names to scan for scripts
      * @return the number of scripts which ran
