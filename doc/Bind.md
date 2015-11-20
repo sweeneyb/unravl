@@ -36,6 +36,120 @@ the environment in the variable named `jsonResponse`.
 
 Below are the UnRAVL extractors listed by name.
 
+## json
+
+```
+ { "json" : "@file-name" }
+ { "json" : "var" }
+ { "json" : "@file-name", "unwrap" : true }
+ { "json" : "var", "unwrap" : true }
+
+```
+
+Parses the response body as a JSON object or JSON array.
+
+It is an error if the response body cannot be parsed as JSON.
+
+This extractor uses the Jackson 2.x JSON parser. If the response
+is a JSON object `{ ... }`, the result is bound to a
+[`org.fasterxml.jackson.databins.ObjectNode`](https://fasterxml.github.io/jackson-databind/javadoc/2.4/com/fasterxml/jackson/databind/node/ObjectNode.html).
+If the JSON result is a JSON array `[ ... ]`, the result is bound to a
+[`org.fasterxml.jackson.databins.ArrayNode`](https://fasterxml.github.io/jackson-databind/javadoc/2.4/com/fasterxml/jackson/databind/node/ArrayNode.html).
+
+If `"unwrap"` is true, the bound value will be "unwrapped"
+from `ObjectNode` to a `java.util.Map` or from `ArrayNode` to
+a `java.util.List`.
+
+TODO: If the target `class` or class array is present,
+Jackson will be used to bind the result to an instance of that class,
+and the resulting Java object will be stored in the variable.
+The class must be accessible in the current classpath.
+
+## binary
+
+This binds the response body to a variable as a byte[] array,
+or writes it to a file.
+
+```JSON
+ { "binary" : "varName" }
+ { "binary" : "@file" }
+```
+
+The content is copied exactly as 8-bit binary bytes, with no default encoding.
+As binary content, the output cannot be streamed to stdout with "@-"
+as with the "text" extractor.
+
+## text
+
+This binds the response body to a variable or writes it to a file.
+
+```
+ { "text" : "varName" }
+ { "text" : "@file", "pretty" : boolean }
+```
+
+The file name "-", as in
+`{ "body" : "@-" }`,
+denotes standard output.
+
+##### To do
+
+If pretty is true, then the output will be pretty printed.
+The value of the Content-Type header will be used to determine how to pretty print.
+If the content type matches ".*[/+]json", it is pretty printed as JSON.
+If the content type matches ".*[/+]xml", it is pretty printed as XML.
+
+## jsonPath
+
+Binds values from the JSON response by extracting data via their
+[JsonPath](https://github.com/jayway/JsonPath).
+
+```
+ { "jsonPath" : { map-of-var-path-pairs } }
+ { "jsonPath" : { map-of-var-path-pairs }, "from" : "varname" }
+```
+
+The first form binds from the JSON response.
+This also parses the response body as JSON and binds
+it to the variable `responseBody`.
+
+The second form may be used to extract values from a variable
+in the environment instead of the JSON response from
+the REST API call.
+The value of that variable should be a JSON object
+(such as from an `"env"` element or a previous
+`"json"` or other extractor) or a `Map<String,Object>`
+or `List<Object>`.
+
+```JSON
+{ "jsonPath" : {
+     "actualLat" : "$.results[0].location.lat",
+     "actualLng" : "$.results[0].location.lng",
+     "actualElevation" : "results[0].elevation"
+     }
+}
+```
+
+```JSON
+{ "jsonPath" : {
+     "actualLat" : "{location}.lat",
+     "actualLng" : "{location}.lng",
+     "actualElevation" : "results.elevation"
+     },
+   "from" : "jsonResponse"
+}
+```
+
+The JsonPath strings are subject to environment substitution.
+For example, if the variable `"location"` is bound
+to `$.results[0].location`, then the second example
+above will extract `actualLat` and `actualLng`
+from `$.results[0].location.lat` and `$.results[0].location.lng`
+respectively.
+
+Note that many JsonPath expressions result in arrays of values
+that match the path.
+
 ## headers
 
 The `headers` element is used to extract text from response headers
@@ -100,57 +214,6 @@ Each of these have one group for each element of the timestamp.
 
 Tip: Do not use other matcher groups in the regular expression. Where necessary escape special regular expression characters like *, ?, and .
 
-### jsonPath
-
-Binds values from the JSON response by extracting data via their
-[JsonPath](https://github.com/jayway/JsonPath).
-
-```
- { "jsonPath" : { map-of-var-path-pairs } }
- { "jsonPath" : { map-of-var-path-pairs }, "from" : "varname" }
-```
-
-The first form binds from the JSON response.
-This also parses the response body as JSON and binds
-it to the variable `responseBody`.
-
-The second form may be used to extract values from a variable
-in the environment instead of the JSON response from
-the REST API call.
-The value of that variable should be a JSON object
-(such as from an `"env"` element or a previous
-`"json"` or other extractor) or a `Map<String,Object>`
-or `List<Object>`.
-
-```JSON
-{ "jsonPath" : {
-     "actualLat" : "$.results[0].location.lat",
-     "actualLng" : "$.results[0].location.lng",
-     "actualElevation" : "results[0].elevation"
-     }
-}
-```
-
-```JSON
-{ "jsonPath" : {
-     "actualLat" : "{location}.lat",
-     "actualLng" : "{location}.lng",
-     "actualElevation" : "results.elevation"
-     },
-   "from" : "jsonResponse"
-}
-```
-
-The JsonPath strings are subject to environment substitution.
-For example, if the variable `"location"` is bound
-to `$.results[0].location`, then the second example
-above will extract `actualLat` and `actualLng`
-from `$.results[0].location.lat` and `$.results[0].location.lng`
-respectively.
-
-Note that many JsonPath expressions result in arrays of values
-that match the path.
-
 ## pattern
 
 Matches text against grouping regular expressions and binds the substrings
@@ -203,6 +266,31 @@ The resulting text string is subject to environment substitution before
 being interpreted as Groovy. All variables in the current environment are
 available for use as local variables in the Groovy script.
 
+### Wrapped vs. unwrapped values
+
+Note that if a value referenced in a Groovy script is a Jackson
+[`ObjectNode`](https://fasterxml.github.io/jackson-databind/javadoc/2.4/com/fasterxml/jackson/databind/node/ObjectNode.html)
+[`ArrayNode`](https://fasterxml.github.io/jackson-databind/javadoc/2.4/com/fasterxml/jackson/databind/node/ArrayNode.html)
+or other
+[`JsonNode`](https://fasterxml.github.io/jackson-databind/javadoc/2.4/com/fasterxml/jackson/databind/JsonNode.html),
+you may need to use value methods (`textValue()`, `doubleValue()`, etc.)
+to get data out of the node.
+In the above example, jsonResponse is a JSON `ObjectNode`. The Groovy
+runtime can access fields and elements of JSON objects and arrays
+to navigate to the `lat`, `lng` and `elevation` values,
+but the corresponding `doubleValue()` methods must be used
+to get the double value. If not, the result of the Groovy
+expression would be a
+[`DoubleNode`](https://fasterxml.github.io/jackson-databind/javadoc/2.4/com/fasterxml/jackson/databind/node/DoubleNode.html)
+(in this case), or other `JsonNode` subclass,
+not a `Double` value.
+
+If on the otherhand you use the `"unwrap"` option in the above
+`"json"` extractor, the values won't be Jackson types but
+core Java types such as `java.util.Map` (for JSON objects),
+`java.util.List` for a JSON aray, or `String`, `Double`, `Long`,
+`Integer`, `Boolean`, etc.
+
 ## javascript
 
 Run javascript scripts and bind the results to variables in the environment.
@@ -214,61 +302,8 @@ This works like the "groovy" bind element above but uses JavaScript expressions
 See the note under the "javascript" assertion about difference
 between Groovy and JavaScript.
 
-## text
-
-This binds the response body to a variable or writes it to a file.
-
-```
- { "text" : "varName" }
- { "text" : "@file", "pretty" : boolean }
-```
-
-The file name "-", as in
-`{ "body" : "@-" }`,
-denotes standard output.
-
-##### To do
-
-If pretty is true, then the output will be pretty printed.
-The value of the Content-Type header will be used to determine how to pretty print.
-If the content type matches ".*[/+]json", it is pretty printed as JSON.
-If the content type matches ".*[/+]xml", it is pretty printed as XML.
-
-#### json
-
-```
- { "json" : "@file-name" }
- { "json" : "var" }
-
-```
-
-Parses the response body as a JSON object or JSON array.
-
-It is an error if the response body cannot be parsed as JSON.
-
-Using the Jackson 2.x JSON parser and the result is bound to a
-[`org.fasterxml.jackson.databins.JsonNode`](http://fasterxml.github.io/jackson-databind/javadoc/2.2.0/com/fasterxml/jackson/databind/JsonNode.html) as a variable in the current
-Environment.
-
-TODO: If the target `class` or class array is present,
-Jackson will be used to bind the result to an instance of that class,
-and the resulting Java object will be stored in the variable.
-The class must be accessible in the current classpath.
-This may not be used with the "@file-name" target.
-
-## binary
-
-This binds the response body to a variable as a byte[] array,
-or writes it to a file.
-
-```JSON
- { "binary" : "varName" }
- { "binary" : "@file" }
-```
-
-The content is copied exactly as 8-bit binary bytes, with no default encoding.
-As binary content, the output cannot be streamed to stdout with "@-"
-as with the "text" extractor.
+See also the discussion in the above "Wrapped vs. unwrapped values"
+section about processing Jackson JSON values compared to unwrapped values.
 
 ## links and hrefs
 

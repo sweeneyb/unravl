@@ -366,8 +366,12 @@ assertion but also result in test errors.
 Note that if you wish to compare *values* in a JSON object,
 you must extract values with `.textValue() , .doubleValue(),
 .longValue(), .intValue(), .booleanValue(),` etc.
+(You can use the `"unwrap"` option in the `"json"` extractor
+to unwrap JSON objects into Java core types. See
+also the "Wrapped vs. unwrapped values" section in
+[Bind](Bind.md).
 
-For example, assuming the response body has been saved in a variable
+For example, assuming the (wrapped) response body  has been saved in a variable
 named `result` in the current environment, an assertion such as
  "result[0].type == 'Folder'"
 will always be false, even if the *type* field of the 0<sup>th</sup>
