@@ -9,25 +9,25 @@ UnRAVL scripts consist of a JSON description of a REST API call:
 1. Request body (optional)
 1. Authentication (optional)
 
-For each API call, an UnRAVL script also contains one or more
-assertions which validate the results. You can assert:
+For each API call, an UnRAVL script may also contain
+*assertions* which validate the results. You can assert:
 
 1. The result body matches expected JSON, text or other data
 1. Specific headers exist with specific values
 1. HTTP status code is a specific value or is in a specific set
 
 UnRAVL also supports extracting data from a REST API call's results
-and using those values for future API calls and validations.
+and using those values for assertions or in future API calls.
 
 A template facility provides reusable API call and validation constructs.
 
 Although initially conceived as as a REST validation too, UnRAVL
-is also well-suited for use as a REST scripting language, for
+is also well-suited for use as a *REST scripting language*, for
 stringing together a set of interrelated REST calls, extracting
 results and headers from early calls to be used when making
 subsequent calls. Users may find it useful to associate `.unravl`
 files with the UnRAVL jar file via the batch scripts in the
-[`bin`](https://github.com/sassoftware/unravl/tree/master/bin) directory
+[`src/main/bin`](https://github.com/sassoftware/unravl/tree/master/src/main/bin) directory
 so you can run scripts from your file explorer.
 
 UnRAVL was designed and initially implemented and is patent pending by David Biesack [@DavidBiesack](https://github.com/DavidBiesack) (GitHub)
@@ -38,11 +38,19 @@ UnRAVL was designed and initially implemented and is patent pending by David Bie
 The most fundamental form of validation is to invoke an API and
 validate the response code and response body.
 
-The REST call
+Let's consider the REST call
 ```
  GET  http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false
 ```
-should return the JSON body:
+This can be captured in JSON using the UnRAVL syntax
+```JSON
+{ "GET" : "http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false" }
+```
+This is a fully functioning UnRAVL script. Besides executing the call, UnRAVL will also validate
+that the call returns a 2xx level HTTP status code, indicating success in one form or another.
+
+However, that is not highly useful. 
+This particular REST call should return the JSON body:
 ```JSON
 {
    "results" : [
@@ -59,11 +67,7 @@ should return the JSON body:
 }
 ```
 
-We also want to assert that we received a `200 OK` HTTP response.
-
-UnRAVL scripts use JSON documents
-that encode the call, response, and assertions.
-
+UnRAVL scripts are JSON documents that encode the call, response, and assertions.
 This is useful since much of the test data (request bodies, responses)
 will be JSON.
 
@@ -91,17 +95,18 @@ the result matches the expected JSON and that the HTTP response is 200:
 }
 ```
 
-This shows invoking an API using the GET method. "GET", "HEAD", "POST", "PUT", "DELETE", "PATCH" are the allowed HTTP verbs. For POST, PUT and PATCH you can also pass a request body.
+This shows invoking an API using the GET method. `"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"` are the allowed HTTP verbs. 
+For `POST`, `PUT` and `PATCH`, you can also pass a request body.
 
 Next, we verify the result with a set of assertions:
 
-1. the expected HTTP status code, 200 OK ; this could also be an array of allowed response types, such as [200, 204]. You can also supply a string value which is a regular expression, such as "2.." If omitted, the status code must match "2.."; that is, be a 200-level status code.
+1. the expected HTTP status code, 200 OK ; this could also be an array of allowed response types, such as [200, 204]. You can also supply a string value which is a regular expression, such as "2.." If a `"status"` assertion is omitted, the status code must match "2.."; that is, be a 200-level status code.
 1. assert the JSON body matches an expected JSON structure. This is based on JSON structural equality, not exact text.
 
 The simplest response body assertion is a literal assertion that the body matches the expected JSON,
 although admittedly this is somewhat fragile.
-The implementation of such benchmark comparison assertions  performs a structural comparison
-and allows for different order of items in JSON objects.
+The implementation of such benchmark comparison assertions performs a structural comparison
+and allows for different order of items in JSON objects, as well as whitespace differences.
 
 Another form of response assertion allows comparing the received body to the contents of a benchmark file
 rather than literal JSON in the file.
@@ -118,7 +123,7 @@ rather than literal JSON in the file.
 }
 ```
 
-The @ notation indicates the JSON is located at a file or URL, not in line.
+The `@` notation indicates the JSON is located at a file or URL, not in line.
 This example expects two variables to be bound in the UnRAVL environment:
 `benchmarks` is the name of a directory containing JSON files.
 name is the current test name (set by the `"name"` element of the script),
@@ -186,7 +191,7 @@ Alternatively, you can download the binary release.
 Create a directory `unravl` for your local copy of UnRAVL, `cd unravl` to that directory,
 then download [a release](https://github.com/sassoftware/unravl/releases).
 Unzip the release file in the `unravl` directory.
-Run UnRAVL using the scripts in the `bin` directory, as described above.
+Run UnRAVL using the scripts in the `src/main/bin` directory, as described above.
 
 ## Contributing
 
