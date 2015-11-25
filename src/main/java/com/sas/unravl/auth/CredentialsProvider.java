@@ -10,6 +10,8 @@ import java.io.IOException;
 /**
  * An interface for an object that can provide user credentials
  * (login id, password) for connecting to a host.
+ * Set the provider via {@link com.sas.unravl.UnRAVLPlugins#setCredentialsProvider(CredentialsProvider)}.
+ * The default, if not overridden, is the {@link NetrcCredentialsProvider}.
  * @author David.Biesack@sas.com
  */
 public interface CredentialsProvider {

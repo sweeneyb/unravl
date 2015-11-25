@@ -4,7 +4,6 @@ package com.sas.unrav.auth.test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.UnRAVLRuntime;
