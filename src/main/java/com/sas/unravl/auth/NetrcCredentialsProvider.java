@@ -24,12 +24,13 @@ import java.util.regex.Pattern;
  * That file is read from the current directory, or if not found there, from the
  * home directory (<code>.~/.netrc</code> or <code>.%USERPROFILE%\\.netrc</code>
  * ). The file contains lines in the following format:
- *
+ * </p>
  * <pre>
  * machine <em>qualified.hostname</em> login <em>userid-for-host</em> password <em>password-for-host</em>
- * 
+ *
  * machine <em>qualified.hostname</em> login <em>userid-for-host</em> password <em>password-for-host</em> port <em>port-number</em>
  * </pre>
+ * <p>
  * Items must appeaqr in this order.
  * You may use <code>user</code> instead of <code>login</code>.
  * </p>
@@ -56,7 +57,7 @@ public class NetrcCredentialsProvider extends AbstractCredentialsProvider {
      static final int QUOTED_PASSWORD_GROUP = 5;
      static final int UNQUOTED_PASSWORD_GROUP = 6;
      static final int PORT_GROUP = 8;
-             
+
     /* (non-Javadoc)
      * @see com.sas.unravl.auth.CredentialsProvider#getCredentials(java.lang.String, java.lang.String, java.lang.String, boolean)
      */
@@ -72,7 +73,7 @@ public class NetrcCredentialsProvider extends AbstractCredentialsProvider {
                 return credentials(login, password);
         }
 
-        // Locate the netrc config file that contains credentials for hosts 
+        // Locate the netrc config file that contains credentials for hosts
         File netrc = new File(".netrc"); // look in current dir first
         if (!netrc.exists())
             netrc = new File("_netrc"); // possible Windows file name, in current dir
