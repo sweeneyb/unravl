@@ -95,12 +95,23 @@ Credentials must be specified entirely on one line:
 
 `machine` *`hostname`* `login` *`userid`* `password` *`password`*
 
+`machine` *`hostname`* `login` *`userid`* `password` *`password`* `port` *`port`*
+
 such as
 
 ```
  machine rdcesx51019.race.sas.com login testuser password testuserSecret123
+ machine rdcesx51019.race.sas.com user testuser password testuserSecret123 port 8080
 ```
-The *hostname* field must exactly match the hostname in UnRAVL API calls.
+
+You may use either the .netrc standard `login` key, or
+the key `user` to identify the login/user ID.
+
+The port is optional; use this if you want to match
+a test API on a non-default port such as port 8080.
+
+The *hostname* field must *exactly* match the hostname in UnRAVL API
+calls.
 
 You may also embed the credentials directly inside the authentication element in the script.
 These may be the login id and password (if there are no security issues with directly embedding
