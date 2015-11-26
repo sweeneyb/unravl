@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 /**
  * Manages the mappings of keywords to plugin implementation classes.
+ * 
  * @author David.Biesack@sas.com
  */
 public class UnRAVLPlugins {
@@ -37,7 +38,8 @@ public class UnRAVLPlugins {
 
     private CredentialsProvider credentialsProvider;
 
-    // must be "Groovy", "groovy", "JavaScript", "js", "javascript", or another valid ScriptEngine name
+    // must be "Groovy", "groovy", "JavaScript", "js", "javascript", or another
+    // valid ScriptEngine name
     @Value("#{systemProperties['unravl.script.language'] ?: 'groovy'}")
     private String scriptLanguage = "groovy";
 
@@ -45,19 +47,22 @@ public class UnRAVLPlugins {
         this.scriptLanguage = scriptLanguage;
     }
 
-
     /**
-     * Return a credentials provider - the instance assigned in the setter, or
-     * a default {@link NetrcCredentialsProvider}
+     * Return a credentials provider - the instance assigned in the setter, or a
+     * default {@link NetrcCredentialsProvider}
+     * 
      * @return the assigned CredentialsProvider
      */
     public CredentialsProvider getCredentialsProvider() {
-        return (credentialsProvider == null) ? new NetrcCredentialsProvider() : credentialsProvider;
+        return (credentialsProvider == null) ? new NetrcCredentialsProvider()
+                : credentialsProvider;
     }
 
     /**
      * Assign a credentials provider
-     * @param credentialsProvider the instance which can get userid/password for a host
+     * 
+     * @param credentialsProvider
+     *            the instance which can get userid/password for a host
      */
     public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
         this.credentialsProvider = credentialsProvider;
@@ -72,7 +77,8 @@ public class UnRAVLPlugins {
 
     public ScriptEngine interpreter(String lang) throws UnRAVLException {
         ScriptEngineManager manager = new ScriptEngineManager();
-        ScriptEngine engine = manager.getEngineByName(lang == null ? getScriptLanguage() : lang);
+        ScriptEngine engine = manager
+                .getEngineByName(lang == null ? getScriptLanguage() : lang);
         if (engine == null) {
             logSupportedScriptEngines();
             throw new UnRAVLException(String.format(
@@ -144,7 +150,8 @@ public class UnRAVLPlugins {
     public static void logSupportedScriptEngines() {
         ScriptEngineManager manager = new ScriptEngineManager();
         logger.error("Available Script Engines:");
-        for (final ScriptEngineFactory scriptEngine : manager.getEngineFactories()) {
+        for (final ScriptEngineFactory scriptEngine : manager
+                .getEngineFactories()) {
             logger.error(scriptEngine.getEngineName() + " "
                     + scriptEngine.getEngineVersion());
             logger.error("\tLanguage: " + scriptEngine.getLanguageName() + " "

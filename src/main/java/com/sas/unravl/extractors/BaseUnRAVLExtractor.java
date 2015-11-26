@@ -39,22 +39,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class BaseUnRAVLExtractor extends BaseUnRAVLPlugin implements
         UnRAVLExtractor {
 
-    protected static boolean unwrapOption(ObjectNode scriptlet) throws UnRAVLException {
+    protected static boolean unwrapOption(ObjectNode scriptlet)
+            throws UnRAVLException {
         return booleanOption(scriptlet, "unwrap");
     }
 
-    protected static boolean booleanOption(ObjectNode scriptlet, String optionName)
-            throws UnRAVLException {
-                JsonNode wrap = scriptlet.get("unwrap");
-                if (wrap == null)
-                    return false;
-                if (wrap.isBoolean())
-                    return wrap.booleanValue();
-                String msg = String.format(
-                        "%s option in %s must be a Boolean value; found %s",
-                        optionName, key(scriptlet), wrap);
-                throw new UnRAVLException(msg);
-            }
+    protected static boolean booleanOption(ObjectNode scriptlet,
+            String optionName) throws UnRAVLException {
+        JsonNode wrap = scriptlet.get("unwrap");
+        if (wrap == null)
+            return false;
+        if (wrap.isBoolean())
+            return wrap.booleanValue();
+        String msg = String.format(
+                "%s option in %s must be a Boolean value; found %s",
+                optionName, key(scriptlet), wrap);
+        throw new UnRAVLException(msg);
+    }
 
     @Override
     public ObjectNode extractor() {
@@ -87,9 +88,11 @@ public class BaseUnRAVLExtractor extends BaseUnRAVLPlugin implements
     }
 
     /**
-     * Returns the name of this extractor. THis is the name (key) of the first value
-     * in the object.
-     * @param extractor the JSON object containing an UnRAVL extractor
+     * Returns the name of this extractor. THis is the name (key) of the first
+     * value in the object.
+     * 
+     * @param extractor
+     *            the JSON object containing an UnRAVL extractor
      * @return the key (name) of the first value
      */
     protected static String key(ObjectNode extractor) {

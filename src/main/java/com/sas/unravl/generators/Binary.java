@@ -47,7 +47,7 @@ public class Binary {
      * Binary(object, "binary")
      * 
      * @param script
-     *            TODO
+     *            the current UnRAVL script
      * @param node
      *            the JSON node for this scriptlet
      * @param fieldName
@@ -68,7 +68,7 @@ public class Binary {
      * Construct a Binary instance from the binary spec value.
      * 
      * @param script
-     *            TODO
+     *            the current UnRAVL script
      * @param binarySpec
      *            either a TextNode with the value "@file-or-url", or a
      *            ArrayNode that contains integer byte values (0 to 255) or

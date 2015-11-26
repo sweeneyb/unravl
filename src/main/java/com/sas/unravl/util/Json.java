@@ -353,7 +353,9 @@ public class Json {
         return value.textValue();
     }
 
-    public static Object unwrap(Object val) { // Can Jackson do this via ObjectMapper.treeToValue()? The spec is unclear 
+    public static Object unwrap(Object val) { // Can Jackson do this via
+                                              // ObjectMapper.treeToValue()? The
+                                              // spec is unclear
         Object result = val;
         ObjectMapper mapper = new ObjectMapper();
         if (val instanceof ObjectNode) {
@@ -378,7 +380,7 @@ public class Json {
             result = ((BigIntegerNode) val).bigIntegerValue();
         } else if (val instanceof DecimalNode) {
             result = ((DecimalNode) val).decimalValue();
-        } 
+        }
         return result;
     }
 

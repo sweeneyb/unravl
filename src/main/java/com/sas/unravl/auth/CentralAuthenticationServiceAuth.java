@@ -185,7 +185,8 @@ public class CentralAuthenticationServiceAuth extends BaseUnRAVLAuth {
         if (mock)
             return "https://sasserver:port/SASLogon/v1/tickets/TGT-18-umUeNL4yUkWHES2VdtKki5mFzatga43kNNCe3niguLWaUxl1aK-cas";
         String host = logonURI.getHost();
-        CredentialsProvider cp = getScript().getRuntime().getPlugins().getCredentialsProvider();
+        CredentialsProvider cp = getScript().getRuntime().getPlugins()
+                .getCredentialsProvider();
         cp.setRuntime(getScript().getRuntime());
         HostCredentials credentials = cp.getHostCredentials(host, auth, false);
         if (credentials == null)
