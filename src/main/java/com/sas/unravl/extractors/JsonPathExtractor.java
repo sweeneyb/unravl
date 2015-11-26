@@ -54,9 +54,9 @@ import org.apache.log4j.Logger;
  * Also, the JSON response body is bound to the variable
  * <var>responseBody</var>.
  * <p>
- * This extractor supports an optional parameter "from" as
- * described below.
+ * This extractor supports an optional parameter "from" as described below.
  * </p>
+ * 
  * <pre>
  * "from" : "varName"
  * </pre>

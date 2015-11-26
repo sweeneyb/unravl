@@ -4,9 +4,9 @@ import com.sas.unravl.annotations.UnRAVLExtractorPlugin;
 
 /**
  * This extractor runs Groovy scripts and binds the result of each script to a
- * variable. See {@link BaseScriptExtractor} for details.
- * This extractor uses the "lang" value of "groovy" but
- * "Groovy" is recognized as an alias:
+ * variable. See {@link BaseScriptExtractor} for details. This extractor uses
+ * the "lang" value of "groovy" but "Groovy" is recognized as an alias:
+ * 
  * <pre>
  * "bind" : [
  *    { "groovy" : { "r" : "json.a[2].getDoubleValue()" } }
