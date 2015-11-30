@@ -81,17 +81,16 @@ import org.apache.log4j.Logger;
  * false positive.
  * <p>
  * The more advanced form works like the {@link PatternExtractor} and binds
- * regular expression grouping values into additional environment variables.
- * For example, 
+ * regular expression grouping values into additional environment variables. For
+ * example,
  *
  * <pre>
  * [ "Content-Type", "responseType", "^(.*)\\s*;\\s*charset=(.*)$", "mediaType", "charset" ]
  * </pre>
  *
- * will bind the value of the Content-Type header into the environment
- * variable named "responseType", then perform pattern matching to extract the
- * media type and the encoding character set into the variables mediaType and
- * charset.
+ * will bind the value of the Content-Type header into the environment variable
+ * named "responseType", then perform pattern matching to extract the media type
+ * and the encoding character set into the variables mediaType and charset.
  *
  * @author David.Biesack@sas.com
  */

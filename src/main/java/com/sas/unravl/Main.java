@@ -54,7 +54,7 @@ public final class Main {
         System.exit(rc);
     }
 
-    // Scan for --v|-verbose|-q|--quiet and set the log4j configuration
+    // Scan for --v | -verbose | -q | --quiet and set the log4j configuration
     // remove those args from the arg list and return the remainder
     private static String[] preProcessArgs(String[] argv) {
         ArrayList<String> args = new ArrayList<String>();

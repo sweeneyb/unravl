@@ -108,14 +108,18 @@ public class BaseScriptExtractor extends BaseUnRAVLExtractor {
     }
 
     /**
-     * Evaluate an expression. Subclasses may override this.
-     * The default implementation evaluates the expression using
-     * the Java script language associated with this instance
-     * (Groovy, JavaScript, etc.)
-     * @param unravl the current UnRAVL script
-     * @param expressionString the expression to evaluate
+     * Evaluate an expression. Subclasses may override this. The default
+     * implementation evaluates the expression using the Java script language
+     * associated with this instance (Groovy, JavaScript, etc.)
+     * 
+     * @param unravl
+     *            the current UnRAVL script
+     * @param expressionString
+     *            the expression to evaluate
      * @return the result of evaluating the expression
-     * @throws UnRAVLException if the expression is invalid or results in an error during evaluation
+     * @throws UnRAVLException
+     *             if the expression is invalid or results in an error during
+     *             evaluation
      */
     protected Object evaluate(UnRAVL unravl, String expressionString)
             throws UnRAVLException {

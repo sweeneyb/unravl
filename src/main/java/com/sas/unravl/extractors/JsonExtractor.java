@@ -13,25 +13,29 @@ import org.apache.log4j.Logger;
 
 /**
  * An extractor for
+ * 
  * <pre>
  * { "json" : "varName" }
  * { "json" : "@file-name" }
  * </pre>
  *
  * <p>
- * In both cases, the JSON body is also bound to the variable <code>"responseBody"</code>.
- * The value will be a Jackson <code>ObjectNode</code> or <code>ArrayNode</code>.
+ * In both cases, the JSON body is also bound to the variable
+ * <code>"responseBody"</code>. The value will be a Jackson
+ * <code>ObjectNode</code> or <code>ArrayNode</code>.
  * <p>
  * This extractor also allows an option, <code>"unwrap"</code>:
  * </p>
+ * 
  * <pre>
  * { "json" : "varName", "unwrap" : true }
  * { "json" : "@file-name", "unwrap" : true }
  * </pre>
  * <p>
- * If the <code>"unwrap"</code> option is <code>true</code>, the JSON value will be "unwrapped".
- * An <code>ObjectNode</code> will be unwrapped into a <code>java.util.Map</code>;
- * a <code>ArrayNode</code> will be unwrapped into a <code>java.util.List</code>.
+ * If the <code>"unwrap"</code> option is <code>true</code>, the JSON value will
+ * be "unwrapped". An <code>ObjectNode</code> will be unwrapped into a
+ * <code>java.util.Map</code>; a <code>ArrayNode</code> will be unwrapped into a
+ * <code>java.util.List</code>.
  *
  * @author David.Biesack@sas.com
  */

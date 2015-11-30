@@ -8,9 +8,9 @@ import java.lang.annotation.Target;
 /**
  * An annotation for UnRAVLAssertion plugin classes, which will allow
  * UnRAVLRuntime to associate one ore more string keys (the annotation value)
- * with a class within "assert" or "precondition" elements of an UnRAVL
- * script. For example, the class com.sas.unravl.assertions.BoundAssertion uses
- * the annotation
+ * with a class within "assert" or "precondition" elements of an UnRAVL script.
+ * For example, the class com.sas.unravl.assertions.BoundAssertion uses the
+ * annotation
  *
  * <pre>
  * {@literal @}UnRAVLAssertionPlugin("bound")

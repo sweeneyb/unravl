@@ -90,8 +90,8 @@ the result matches the expected JSON and that the HTTP response is 200:
       } ],
   "status" : "OK"
 }
-           }
-           ]
+     }
+  ]
 }
 ```
 
@@ -100,8 +100,8 @@ For `POST`, `PUT` and `PATCH`, you can also pass a request body.
 
 Next, we verify the result with a set of assertions:
 
-1. the expected HTTP status code, 200 OK ; this could also be an array of allowed response types, such as [200, 204]. You can also supply a string value which is a regular expression, such as "2.." If a `"status"` assertion is omitted, the status code must match "2.."; that is, be a 200-level status code.
-1. assert the JSON body matches an expected JSON structure. This is based on JSON structural equality, not exact text.
+1. the expected HTTP status code, 200 OK ; the value could also be an array of allowed response types, such as [200, 204] or a string value which is a regular expression, such as "2.." If a `"status"` assertion is omitted, the status code must match "2.."; that is, be a 200-level status code.
+1. assert the JSON body matches an expected JSON structure.
 
 The simplest response body assertion is a literal assertion that the body matches the expected JSON,
 although admittedly this is somewhat fragile.
@@ -110,7 +110,7 @@ and allows for different order of items in JSON objects, as well as whitespace d
 
 Another form of response assertion allows comparing the received body to the contents of a benchmark file
 rather than literal JSON in the file.
-(In the JSON based DSL, this form is be required for XML benchamrks.)
+(In the JSON based DSL, this form is required for XML benchamrks.)
 
 ```
 {
@@ -148,14 +148,20 @@ an alternate approach would be to perform more specific assertions for data elem
 }
 ```
 
-UnRAVL scripts also have an Environment, which is a set of name/value pairs or variables.
+UnRAVL scripts also have an *environment*, which is a set of name/value pairs or variables.
 You can set variables explicitly, or bind them based on the result of API calls.
-For example, the above binds the JSON response body to a JsonNode (using the Jackson
-library for JSON) named `response`. This variable may be used to compare nested
+For example, the above binds the JSON response body to a JsonNode (using the 
+[Jackson](https://github.com/FasterXML/jackson)
+library for JSON) named `response`. (See [`"json"`](doc/Bind.md#json)
+for details.) This variable may be used to compare nested
 values, as seen in the `assert` array. Each assertion string is a Groovy
 expression that must evaluate to true for the test to pass.
 (You can also use JavaScript.)
-Many string values in UnRAVL scripts are subject to environment substitution
+Groovy expressions can walk JSON structures naturally by accessing object values
+by name, or array items by index. The `doubleValue()` method extracts
+the numeric value of a Jackson [NumericNode](https://fasterxml.github.io/jackson-databind/javadoc/2.2.0/com/fasterxml/jackson/databind/node/NumericNode.html) item. 
+
+Most string values in UnRAVL scripts are subject to environment substitution
 which replaces substrings of the form `{varName}` with the value
 of the named variable from the environment.
 
@@ -184,14 +190,32 @@ You can download the source from this repo and run
 Run UnRAVL as:
 ```bash
     src/main/bin/unravl.sh src/test/scripts/hello.json  # from Linux or Mac OS X
-    src\main\bin\unravl.bat src/test/scripts/hello.json # from Windows
+    src\main\bin\unravl.bat src\test\scripts\hello.json # from Windows
 ```
 
 Alternatively, you can download the binary release.
 Create a directory `unravl` for your local copy of UnRAVL, `cd unravl` to that directory,
 then download [a release](https://github.com/sassoftware/unravl/releases).
 Unzip the release file in the `unravl` directory.
-Run UnRAVL using the scripts in the `src/main/bin` directory, as described above.
+Run UnRAVL using the scripts in the `bin` directory, as described above.
+(In the binary distribution the scripts are in `bin` not `src/main/bin`.)
+
+When integrated into a Java application, you may run UnRAVL
+scripts by instantiating an `UnRAVLRuntime` object,
+then creating an `UnRAVL` object based on a Jackson `ObjectNode`
+or ArrayNode, then invoking the run() method.
+```Java
+import com.sas.unravl.UnRAVL;
+import com.sas.unravl.UnRAVLRuntime;
+import com.sas.unravl.ApiCall;
+import com.sas.unravl.util.Json;
+...
+  UnRAVLRuntime runtime = new UnRAVLRuntime();
+  UnRAVL unravl = new UnRAVL(runtime, objectNode);
+  ApiCall call = unravl.run();
+```
+The `UnRAVLRuntime` contains the environment variables
+and may be reused to run multiple `UnRAVL` instances.
 
 ## Contributing
 

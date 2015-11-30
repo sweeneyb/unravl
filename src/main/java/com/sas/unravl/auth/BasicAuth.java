@@ -92,7 +92,8 @@ public class BasicAuth extends BaseUnRAVLAuth {
     private void basicAuth(URI uri, ObjectNode auth) throws UnRAVLException,
             IOException {
         String host = uri.getHost();
-        CredentialsProvider cp = getScript().getRuntime().getPlugins().getCredentialsProvider();
+        CredentialsProvider cp = getScript().getRuntime().getPlugins()
+                .getCredentialsProvider();
         cp.setRuntime(getScript().getRuntime());
         HostCredentials credentials = cp.getHostCredentials(host, auth, mock);
 
@@ -100,8 +101,8 @@ public class BasicAuth extends BaseUnRAVLAuth {
             throw new UnRAVLException("No Basic Auth credentials for host "
                     + host);
 
-        String creds = new Base64().encodeToString(Text.utf8(credentials.getUserName()
-                + ":" + credentials.getPassword()));
+        String creds = new Base64().encodeToString(Text.utf8(credentials
+                .getUserName() + ":" + credentials.getPassword()));
         credentials.clear();
         // TODO: use the ApiCall and add headers there instead of mutating the
         // script
