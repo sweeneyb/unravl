@@ -21,6 +21,8 @@
       <json.schema.validator.version>2.2.6</json.schema.validator.version>
       <json.schema.core.version>1.2.5</json.schema.core.version>
       <jackson.core.utils.version>1.8</jackson.core.utils.version>
+      <json.path.version>2.1.0</json.path.version>
+      <slf4j.version>1.7.13</slf4j.version>
    </properties>
 
    <scm>
@@ -168,6 +170,16 @@
          <scope>test</scope> <!-- for unit tests -->
       </dependency>
 
+      <dependency>
+        <groupId>com.jayway.jsonpath</groupId>
+        <artifactId>json-path</artifactId>
+        <version>${json.path.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-log4j12</artifactId>
+        <version>${slf4j.version}</version>
+      </dependency>
       <dependency>
          <groupId>org.codehaus.groovy</groupId>
          <artifactId>groovy-all</artifactId>
