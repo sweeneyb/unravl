@@ -67,7 +67,8 @@ public class UnRAVLPlugins {
      * @param credentialsProvider
      *            the instance which can get userid/password for a host
      */
-    public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
+    public void setCredentialsProvider(
+            CredentialsProvider credentialsProvider) {
         this.credentialsProvider = credentialsProvider;
     }
 
@@ -167,19 +168,23 @@ public class UnRAVLPlugins {
         }
     }
 
-    /** 
+    /**
      * Set the default RestTemplate instance that UnRAVL and ApiCall will use.
-     * @param restTemplate the default RestTemplate instance
+     * 
+     * @param restTemplate
+     *            the default RestTemplate instance
      */
     public void setRestTemplate(RestTemplate restTemplate) {
-      this.defaultRestTemplate = restTemplate;
+        this.defaultRestTemplate = restTemplate;
     }
 
-    /** 
-     * @return the default RestTemplate instance that UnRAVL and ApiCall will use
+    /**
+     * @return the default RestTemplate instance that UnRAVL and ApiCall will
+     *         use
      */
     public RestTemplate getRestTemplate() {
-      return defaultRestTemplate == null ? new RestTemplate() : defaultRestTemplate;
+        return defaultRestTemplate == null ? new RestTemplate()
+                : defaultRestTemplate;
     }
-    
+
 }

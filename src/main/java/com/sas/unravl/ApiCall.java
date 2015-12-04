@@ -177,8 +177,8 @@ public class ApiCall {
         authenticate(script);
     }
 
-    private void authenticate(UnRAVL script) throws UnRAVLException,
-            IOException {
+    private void authenticate(UnRAVL script)
+            throws UnRAVLException, IOException {
         if (script == null)
             return;
 
@@ -189,8 +189,8 @@ public class ApiCall {
         }
         ObjectNode spec = Json.object(auth);
         String authKey = spec.fields().next().getKey();
-        Class<? extends UnRAVLAuth> authClass = getPlugins().getAuth().get(
-                authKey);
+        Class<? extends UnRAVLAuth> authClass = getPlugins().getAuth()
+                .get(authKey);
         try {
             UnRAVLAuth authInstance = authClass.newInstance();
             authInstance.authenticate(getScript(), spec, this);
@@ -304,19 +304,18 @@ public class ApiCall {
                         .getExtractors().get(key);
                 if (ec == null)
                     if (!bind.isObject())
-                        throw new UnRAVLException("No defined extractor " + key);
+                        throw new UnRAVLException(
+                                "No defined extractor " + key);
                 UnRAVLExtractor ex;
                 try {
                     ex = ec.newInstance();
                     ex.extract(script, ob, this);
                 } catch (InstantiationException e1) {
-                    throw new UnRAVLException(
-                            "Could not instantiate extractor " + key
-                                    + " using class " + ec.getName(), e1);
+                    throw new UnRAVLException("Could not instantiate extractor "
+                            + key + " using class " + ec.getName(), e1);
                 } catch (IllegalAccessException e1) {
-                    throw new UnRAVLException(
-                            "Could not instantiate extractor " + key
-                                    + " using class " + ec.getName(), e1);
+                    throw new UnRAVLException("Could not instantiate extractor "
+                            + key + " using class " + ec.getName(), e1);
                 }
             }
         } finally {
@@ -458,11 +457,11 @@ public class ApiCall {
     }
 
     public InputStream getResponseBodyAsInputStream() {
-        ByteArrayInputStream i = new ByteArrayInputStream(getResponseBody()
-                .toByteArray());
+        ByteArrayInputStream i = new ByteArrayInputStream(
+                getResponseBody().toByteArray());
         return i;
     }
-    
+
     public void executeAPI() throws UnRAVLException {
         if (isCanceled())
             return;
@@ -481,12 +480,13 @@ public class ApiCall {
     }
 
     // ApiCall originally invoked the API via Apache HTTP Client
-    // and the members of ApiCall still reflect that. 
-    // If invoking with RestTemplate, we must map between the 
+    // and the members of ApiCall still reflect that.
+    // If invoking with RestTemplate, we must map between the
     // Apache Headers and Spring headers representations.
-    private void executeAPIWithRestTemplate(RestTemplate restTemplate) throws UnRAVLException {
+    private void executeAPIWithRestTemplate(RestTemplate restTemplate)
+            throws UnRAVLException {
         long start = System.currentTimeMillis();
-        
+
         try {
             RequestEntity<String> request = newHttpRequest(new URI(getURI()),
                     mapHeaders(script.getRequestHeaders()));
@@ -500,7 +500,7 @@ public class ApiCall {
                         String.class);
                 status = response.getStatusCode();
                 if (response.hasBody())
-                responseBody.write(response.getBody().getBytes());
+                    responseBody.write(response.getBody().getBytes());
                 responseHeaders = response.getHeaders();
             } catch (HttpStatusCodeException e) {
                 status = e.getStatusCode();
@@ -535,8 +535,7 @@ public class ApiCall {
         ArrayList<Header> h = new ArrayList<Header>(responseHeaders.size());
         for (Entry<String, List<String>> es : responseHeaders.entrySet()) {
             String name = es.getKey();
-            for (String v : es.getValue())
-            {
+            for (String v : es.getValue()) {
                 Header header = new BasicHeader(name, v);
                 h.add(header);
             }
@@ -557,7 +556,7 @@ public class ApiCall {
                 : new String(requestBody.toByteArray(), "UTF-8");
         return new RequestEntity<String>(body, headers, meth, apiUri);
     }
-    
+
     private void setMethod(Method method) {
         this.method = method;
     }
@@ -603,7 +602,7 @@ public class ApiCall {
     // }
 
     private void assertStatus(int httpStatus)
-                throws UnRAVLAssertionException, UnRAVLException {
+            throws UnRAVLAssertionException, UnRAVLException {
         StatusAssertion sa = new StatusAssertion();
         sa.setScript(script);
         sa.setScriptlet(STATUS_ASSERTION);
@@ -614,8 +613,8 @@ public class ApiCall {
                 sa.check(script, node, UnRAVLAssertion.Stage.ASSERT, this);
             } else {
                 if (httpStatus < 200 || httpStatus >= 300)
-                    throw new UnRAVLAssertionException("http status "
-                            + httpStatus + " not a 2xx status.");
+                    throw new UnRAVLAssertionException(
+                            "http status " + httpStatus + " not a 2xx status.");
             }
         } catch (UnRAVLAssertionException e) {
             failedAssertions.add(sa);
@@ -658,31 +657,10 @@ public class ApiCall {
 
     private void attachBody(HttpEntityEnclosingRequestBase method) {
         if (requestBody != null) {
-            HttpEntity entity = new InputStreamEntity(new ByteArrayInputStream(
-                    requestBody.toByteArray()));
+            HttpEntity entity = new InputStreamEntity(
+                    new ByteArrayInputStream(requestBody.toByteArray()));
             method.setEntity(entity);
         }
-    }
-
-    private class UnravlResponseHandler implements
-            ResponseHandler<HttpResponse> {
-
-        @Override
-        public HttpResponse handleResponse(HttpResponse response)
-                throws ClientProtocolException, IOException {
-            if (response.getEntity() == null)
-                return response;
-            InputStream input = response.getEntity().getContent();
-            if (input != null) {
-                responseBody = new ByteArrayOutputStream();
-                Binary.copy(input, responseBody);
-                responseBody.close();
-            } else
-                responseBody = null;
-
-            return response;
-        }
-
     }
 
     private boolean runAssertions(Stage stage) throws UnRAVLException {
@@ -724,12 +702,12 @@ public class ApiCall {
                 a.check(this.script, assertionScriptlet, stage, this);
                 passedAssertions.add(a);
             } catch (InstantiationException e) {
-                failedAssertions.add(BaseUnRAVLAssertion.of(script,
-                        assertionScriptlet));
+                failedAssertions.add(
+                        BaseUnRAVLAssertion.of(script, assertionScriptlet));
                 e.printStackTrace();
             } catch (IllegalAccessException e) {
-                failedAssertions.add(BaseUnRAVLAssertion.of(script,
-                        assertionScriptlet));
+                failedAssertions.add(
+                        BaseUnRAVLAssertion.of(script, assertionScriptlet));
                 logger.error(e.getMessage());
                 throw new UnRAVLException("Assertion class " + aClass.getName()
                         + " cannot be instantiated.");
@@ -799,20 +777,23 @@ public class ApiCall {
     private void log(HttpResponse response) {
         for (Header h : response.getAllHeaders())
             logger.info(h);
-        log("response body:", responseBody, response.getHeaders("Content-Type"));
+        log("response body:", responseBody,
+                response.getHeaders("Content-Type"));
     }
 
     private void log(RequestEntity<String> request) {
         logger.info(script.getMethod() + " " + uri);
         log("request body:", requestBody, map(request.getHeaders()));
     }
-    
-    private void log(String label, ByteArrayOutputStream bytes, Header[] contentTypeheaders) {
+
+    private void log(String label, ByteArrayOutputStream bytes,
+            Header[] contentTypeheaders) {
         if (script.bodyIsTextual(contentTypeheaders))
             try {
                 if (bytes == null) {
                     if (getMethod() != Method.HEAD)
-                        logger.warn("Warning: Non-HEAD request returned a text Content-Type header but defines no body.");
+                        logger.warn(
+                                "Warning: Non-HEAD request returned a text Content-Type header but defines no body.");
                     return;
                 }
                 if (logger.isInfoEnabled()) {
