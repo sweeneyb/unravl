@@ -32,13 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
@@ -48,8 +44,6 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpHeaders;
@@ -326,31 +320,6 @@ public class ApiCall {
 
     private ObjectNode statusAssertion(UnRAVL script) throws UnRAVLException {
         return UnRAVL.statusAssertion(script);
-    }
-
-    private HttpRequestBase newHttpRequest() throws UnRAVLException {
-        switch (script.getMethod()) {
-        case HEAD:
-            return new HttpHead();
-        case GET:
-            return new HttpGet();
-        case DELETE:
-            return new HttpDelete();
-        case PUT:
-            HttpPut put = new HttpPut();
-            attachBody(put);
-            return put;
-        case POST:
-            HttpPost post = new HttpPost();
-            attachBody(post);
-            return post;
-        case PATCH:
-            HttpPatch patch = new HttpPatch();
-            attachBody(patch);
-            return patch;
-        default:
-            throw new UnRAVLException("Unknown method " + script.getMethod());
-        }
     }
 
     public Header getResponseHeader(String headerName) {
@@ -760,25 +729,6 @@ public class ApiCall {
             return Json.wrapInArray(val);
         throw new UnRAVLException("Value of " + stage.getName()
                 + " must be a string, an object, or an array.");
-    }
-
-    private void log(HttpRequestBase request, URI uri) {
-        logger.info(script.getMethod() + " " + uri);
-        for (Header h : request.getAllHeaders()) {
-            if (h.getName() == "Authorization") // Don't log easily decoded
-                                                // credentials
-                logger.info(h.getName() + ": ************");
-            else
-                logger.info(h);
-        }
-        log("request body:", requestBody, request.getHeaders("Content-Type"));
-    }
-
-    private void log(HttpResponse response) {
-        for (Header h : response.getAllHeaders())
-            logger.info(h);
-        log("response body:", responseBody,
-                response.getHeaders("Content-Type"));
     }
 
     private void log(RequestEntity<String> request) {
