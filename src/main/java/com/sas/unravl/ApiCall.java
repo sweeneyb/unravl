@@ -464,6 +464,18 @@ public class ApiCall {
     }
     
     public void executeAPI() throws UnRAVLException {
+        if (isCanceled())
+            return;
+        if (script.getMethod() == null || script.getURI() == null) {
+            logger.warn("Warning: Non-template script " + script.getName()
+                    + " does not define an HTTP method or URI.");
+            return;
+        }
+        String apiUri = script.getURI();
+        apiUri = script.expand(apiUri);
+        setURI(apiUri);
+        setMethod(script.getMethod());
+
         RestTemplate restTemplate = getRuntime().getPlugins().getRestTemplate();
         if (restTemplate == null)
           executeAPIWithApache();
@@ -472,21 +484,10 @@ public class ApiCall {
     }
 
     private void executeAPIWithApache() throws UnRAVLException {
-        if (isCanceled())
-            return;
-        if (script.getMethod() == null || script.getURI() == null) {
-            logger.warn("Warning: Non-template script " + script.getName()
-                    + " does not define an HTTP method or URI.");
-            return;
-        }
         long start = System.currentTimeMillis();
-        String apiUri = script.getURI();
-        apiUri = script.expand(apiUri);
-        CloseableHttpClient httpclient = HttpClients.createSystem();
+        
         HttpRequestBase request = newHttpRequest();
-        try {
-            setURI(apiUri);
-            setMethod(script.getMethod());
+        try (CloseableHttpClient httpclient = HttpClients.createSystem()) {
             authenticate();
             request.setURI(new URI(getURI()));
 
@@ -494,8 +495,6 @@ public class ApiCall {
                 request.setHeaders(script.getRequestHeaders().toArray(
                         (new Header[script.getRequestHeaders().size()])));
             log(request, request.getURI());
-            if (isCanceled())
-                return;
             ResponseHandler<HttpResponse> responseHandler = new UnravlResponseHandler();
             HttpResponse response = httpclient
                     .execute(request, responseHandler);
@@ -504,44 +503,29 @@ public class ApiCall {
                     + "ms, returned HTTP status " + response);
             setResponseHeaders(response.getAllHeaders());
             log(response);
-            assertStatus(response);
+            httpStatus = response.getStatusLine().getStatusCode();
+            assertStatus(httpStatus);
         } catch (ClientProtocolException e) {
             throwException(e);
         } catch (IOException e) {
             throwException(e);
         } catch (URISyntaxException e) {
             throwException(e);
-        } finally {
-            try {
-                httpclient.close();
-            } catch (IOException e) {
-                throwException(e);
-            }
         }
     }
 
+    // ApiCall originally invoked the API via Apache HTTP Client
+    // and the members of ApiCall still reflect that. 
+    // If invoking with RestTemplate, we must map between the 
+    // Apache Headers and Spring headers representations.
     private void executeAPIWithRestTemplate(RestTemplate restTemplate) throws UnRAVLException {
-        if (isCanceled())
-            return;
-        if (script.getMethod() == null || script.getURI() == null) {
-            logger.warn("Warning: Non-template script " + script.getName()
-                    + " does not define an HTTP method or URI.");
-            return;
-        }
         long start = System.currentTimeMillis();
-        String apiUri = script.getURI();
-        apiUri = script.expand(apiUri);
         
         try {
-            setURI(apiUri);
-            setMethod(script.getMethod());
             RequestEntity<String> request = newHttpRequest(new URI(getURI()),
                     mapHeaders(script.getRequestHeaders()));
             authenticate();
-
             log(request);
-            if (isCanceled())
-                return;
             HttpStatus status;
             HttpHeaders responseHeaders;
             responseBody = new ByteArrayOutputStream();
@@ -558,7 +542,6 @@ public class ApiCall {
                     responseBody.write(e.getResponseBodyAsByteArray());
                 responseHeaders = e.getResponseHeaders();
             }
-
             long end = System.currentTimeMillis();
             logger.info(script.getMethod() + " took " + (end - start)
                     + "ms, returned HTTP status " + status);
@@ -653,12 +636,6 @@ public class ApiCall {
     // return getRuntime().getBindings();
     // }
 
-    private void assertStatus(HttpResponse response)
-            throws UnRAVLAssertionException, UnRAVLException {
-        httpStatus = response.getStatusLine().getStatusCode();
-        assertStatus(httpStatus);
-    }
-    
     private void assertStatus(int httpStatus)
                 throws UnRAVLAssertionException, UnRAVLException {
         StatusAssertion sa = new StatusAssertion();

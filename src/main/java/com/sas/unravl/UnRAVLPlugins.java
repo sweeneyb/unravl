@@ -167,7 +167,6 @@ public class UnRAVLPlugins {
         }
     }
 
-    
     /** 
      * Set the default RestTemplate instance that UnRAVL and ApiCall will use.
      * @param restTemplate the default RestTemplate instance
@@ -180,7 +179,7 @@ public class UnRAVLPlugins {
      * @return the default RestTemplate instance that UnRAVL and ApiCall will use
      */
     public RestTemplate getRestTemplate() {
-      return defaultRestTemplate;
+      return defaultRestTemplate == null ? new RestTemplate() : defaultRestTemplate;
     }
     
 }
