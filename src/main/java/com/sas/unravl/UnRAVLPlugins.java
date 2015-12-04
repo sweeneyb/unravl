@@ -21,6 +21,7 @@ import javax.script.ScriptEngineManager;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.client.RestTemplate;
 
 /**
  * Manages the mappings of keywords to plugin implementation classes.
@@ -37,6 +38,8 @@ public class UnRAVLPlugins {
     private Map<String, Class<? extends UnRAVLAuth>> auth = new HashMap<String, Class<? extends UnRAVLAuth>>();
 
     private CredentialsProvider credentialsProvider;
+
+    private RestTemplate defaultRestTemplate;
 
     // must be "Groovy", "groovy", "JavaScript", "js", "javascript", or another
     // valid ScriptEngine name
@@ -164,4 +167,20 @@ public class UnRAVLPlugins {
         }
     }
 
+    
+    /** 
+     * Set the default RestTemplate instance that UnRAVL and ApiCall will use.
+     * @param restTemplate the default RestTemplate instance
+     */
+    public void setRestTemplate(RestTemplate restTemplate) {
+      this.defaultRestTemplate = restTemplate;
+    }
+
+    /** 
+     * @return the default RestTemplate instance that UnRAVL and ApiCall will use
+     */
+    public RestTemplate getRestTemplate() {
+      return defaultRestTemplate;
+    }
+    
 }
