@@ -477,41 +477,7 @@ public class ApiCall {
         setMethod(script.getMethod());
 
         RestTemplate restTemplate = getRuntime().getPlugins().getRestTemplate();
-        if (restTemplate == null)
-          executeAPIWithApache();
-        else
-          executeAPIWithRestTemplate(restTemplate);
-    }
-
-    private void executeAPIWithApache() throws UnRAVLException {
-        long start = System.currentTimeMillis();
-        
-        HttpRequestBase request = newHttpRequest();
-        try (CloseableHttpClient httpclient = HttpClients.createSystem()) {
-            authenticate();
-            request.setURI(new URI(getURI()));
-
-            if (script.getRequestHeaders() != null)
-                request.setHeaders(script.getRequestHeaders().toArray(
-                        (new Header[script.getRequestHeaders().size()])));
-            log(request, request.getURI());
-            ResponseHandler<HttpResponse> responseHandler = new UnravlResponseHandler();
-            HttpResponse response = httpclient
-                    .execute(request, responseHandler);
-            long end = System.currentTimeMillis();
-            logger.info(script.getMethod() + " took " + (end - start)
-                    + "ms, returned HTTP status " + response);
-            setResponseHeaders(response.getAllHeaders());
-            log(response);
-            httpStatus = response.getStatusLine().getStatusCode();
-            assertStatus(httpStatus);
-        } catch (ClientProtocolException e) {
-            throwException(e);
-        } catch (IOException e) {
-            throwException(e);
-        } catch (URISyntaxException e) {
-            throwException(e);
-        }
+        executeAPIWithRestTemplate(restTemplate);
     }
 
     // ApiCall originally invoked the API via Apache HTTP Client
