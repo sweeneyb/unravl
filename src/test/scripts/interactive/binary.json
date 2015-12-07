@@ -1,8 +1,10 @@
 [
 
     {
-        "env" : { "baseFileName" : "src/test/data/Un.png" },
-        "POST" : "http://localhost:8888/echo",
+        "env" : { "baseFileName" : "src/test/data/Un.png",
+                  "echo" : "http://localhost:8338/echo"
+                },
+        "POST" : "{echo}",
         "body" : { "binary" : "@{baseFileName}" },
         "headers" : { "Content-Type" : "image/png" },
         "bind" : { "binary" : "un" },
@@ -13,7 +15,7 @@
     },
 
     {
-        "POST" : "http://localhost:8888/echo",
+        "POST" : "{echo}",
         "body" : { "binary" : "@{baseFileName}.aa" },
         "headers" : { "Content-Type" : "application/octet-stream" },
 
@@ -26,7 +28,7 @@
     },
 
     {
-        "POST" : "http://localhost:8888/echo",
+        "POST" : "{echo}",
         "body" : { "binary" : "@{baseFileName}.ab" },
         "headers" : { "Content-Type" : "application/octet-stream" },
 
