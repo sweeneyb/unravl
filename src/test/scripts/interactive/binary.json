@@ -7,10 +7,13 @@
         "POST" : "{echo}",
         "body" : { "binary" : "@{baseFileName}" },
         "headers" : { "Content-Type" : "image/png" },
-        "bind" : { "binary" : "un" },
+        "bind" : [ { "binary" : "un" },
+                   { "groovy" : { "un_bytes" : "new File('{baseFileName}').bytes" }}
+                 ],
         "assert" : [
             { "binary" : "@{baseFileName}" },
-            "un.length == 50245"
+            "un.length == 50245",
+            "un == un_bytes"
             ]
     },
 
@@ -19,11 +22,15 @@
         "body" : { "binary" : "@{baseFileName}.aa" },
         "headers" : { "Content-Type" : "application/octet-stream" },
 
-        "bind" : { "binary" : "un_aa" },
+        "bind" : [ { "binary" : "un_aa" },
+                   { "groovy" : { "un_aa_bytes" : "new File('{baseFileName}.aa').bytes" }}
+                 ],
         "assert" : [
             { "binary" : "@{baseFileName}.aa" },
             "un_aa.length == 10240",
-            "un != un_aa"
+            "un != un_aa",
+            "un_aa == un_aa_bytes",
+            "un_aa != un_bytes"
             ]
     },
 
@@ -32,12 +39,16 @@
         "body" : { "binary" : "@{baseFileName}.ab" },
         "headers" : { "Content-Type" : "application/octet-stream" },
 
-        "bind" : { "binary" : "un_ab" },
+        "bind" : [ { "binary" : "un_ab" },
+                   { "groovy" : { "un_ab_bytes" : "new File('{baseFileName}.ab').bytes" }}
+                 ],
         "assert" : [
             { "binary" : "@{baseFileName}.ab" },
             "un_ab.length == 10240",
             "un != un_aa",
-            "un_ab != un_aa"
+            "un_ab != un_aa",
+            "un_ab == un_ab_bytes",
+            "un_ab != un_bytes"
             ]
     }
 
