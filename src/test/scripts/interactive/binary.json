@@ -1,0 +1,44 @@
+[
+
+    {
+        "env" : { "baseFileName" : "src/test/data/Un.png",
+                  "echo" : "http://localhost:8338/echo"
+                },
+        "POST" : "{echo}",
+        "body" : { "binary" : "@{baseFileName}" },
+        "headers" : { "Content-Type" : "image/png" },
+        "bind" : { "binary" : "un" },
+        "assert" : [
+            { "binary" : "@{baseFileName}" },
+            "un.length == 50245"
+            ]
+    },
+
+    {
+        "POST" : "{echo}",
+        "body" : { "binary" : "@{baseFileName}.aa" },
+        "headers" : { "Content-Type" : "application/octet-stream" },
+
+        "bind" : { "binary" : "un_aa" },
+        "assert" : [
+            { "binary" : "@{baseFileName}.aa" },
+            "un_aa.length == 10240",
+            "un != un_aa"
+            ]
+    },
+
+    {
+        "POST" : "{echo}",
+        "body" : { "binary" : "@{baseFileName}.ab" },
+        "headers" : { "Content-Type" : "application/octet-stream" },
+
+        "bind" : { "binary" : "un_ab" },
+        "assert" : [
+            { "binary" : "@{baseFileName}.ab" },
+            "un_ab.length == 10240",
+            "un != un_aa",
+            "un_ab != un_aa"
+            ]
+    }
+
+]
