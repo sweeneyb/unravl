@@ -9,65 +9,68 @@ import com.sas.unravl.ApiCall;
 import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.UnRAVLRuntime;
+import com.sas.unravl.generators.Binary;
 import com.sas.unravl.util.Json;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
+import org.junit.Assert;
 import org.junit.Test;
 
-public class TestSimplifyJsonBody {
+public class TestSimplifyJsonBody extends TestBase {
 
     // object
     @Test
     public void testJsonObject() throws Exception {
-        assertRequestBody("{\"name\":\"value\"}",
-                "{\"body\":{\"json\":{\"name\":\"value\"}}}");
+        assertRequestBodyJson("{'name':'value'}",
+                "{'body':{'json':{'name':'value'}}}");
 
     }
 
     @Test
     public void testObjectWithoutJsonKey() throws Exception {
-        assertRequestBody("{\"name\":\"value\"}",
-                "{\"body\":{\"name\":\"value\"}}");
+        assertRequestBodyJson("{'name':'value'}",
+                "{'body':{'name':'value'}}");
 
     }
 
     @Test
     public void testObjectBooleanValue() throws Exception {
-        assertRequestBody("{\"name\":true}",
-                "{\"body\":{\"json\":{\"name\":true}}}");
+        assertRequestBodyJson("{'name':true}",
+                "{'body':{'json':{'name':true}}}");
 
     }
 
     @Test
     public void testObjectBooleanValueWithoutJsonKey() throws Exception {
-        assertRequestBody("{\"name\":true}", "{\"body\":{\"name\":true}}");
+        assertRequestBodyJson("{'name':true}", "{'body':{'name':true}}");
 
     }
 
     @Test
     public void testObjectNumericValue() throws Exception {
-        assertRequestBody("{\"name\":1}", "{\"body\":{\"json\":{\"name\":1}}}");
+        assertRequestBodyJson("{'name':1}", "{'body':{'json':{'name':1}}}");
 
     }
 
     @Test
     public void testObjectNumericValueWithoutJsonKey() throws Exception {
-        assertRequestBody("{\"name\":1}", "{\"body\":{\"name\":1}}");
+        assertRequestBodyJson("{'name':1}", "{'body':{'name':1}}");
 
     }
 
     @Test
     public void testObjectNullValue() throws Exception {
-        assertRequestBody("{\"name\":null}",
-                "{\"body\":{\"json\":{\"name\":null}}}");
+        assertRequestBodyJson("{'name':null}",
+                "{'body':{'json':{'name':null}}}");
 
     }
 
     @Test
     public void testObjectNullValueWithoutJsonKey() throws Exception {
-        assertRequestBody("{\"name\":null}", "{\"body\":{\"name\":null}}");
+        assertRequestBodyJson("{'name':null}", "{'body':{'name':null}}");
 
     }
 
@@ -76,12 +79,12 @@ public class TestSimplifyJsonBody {
     @Test
     public void testObjectEmpty() throws Exception {
 
-        assertRequestBody("{}", "{\"body\":{\"json\":{}}}");
+        assertRequestBodyJson("{}", "{'body':{'json':{}}}");
     }
 
     @Test
     public void testObjectEmptyWithoutJsonKey() throws Exception {
-        assertRequestBody("{}", "{\"body\":{}}");
+        assertRequestBodyJson("{}", "{'body':{}}");
 
     }
 
@@ -90,46 +93,46 @@ public class TestSimplifyJsonBody {
     @Test
     public void testArray() throws Exception {
 
-        assertRequestBody("[{\"name\":\"value\"}]",
-                "{\"body\":{\"json\":[{\"name\":\"value\"}]}}");
+        assertRequestBodyJson("[{'name':'value'}]",
+                "{'body':{'json':[{'name':'value'}]}}");
 
     }
 
     @Test
     public void testArrayWithoutJsonKey() throws Exception {
 
-        assertRequestBody("[{\"name\":\"value\"}]",
-                "{\"body\":[{\"name\":\"value\"}]}");
+        assertRequestBodyJson("[{'name':'value'}]",
+                "{'body':[{'name':'value'}]}");
 
     }
 
     @Test
     public void testArrayMultipleElements() throws Exception {
 
-        assertRequestBody("[{\"name\":\"value\"},{\"name2\":\"value2\"}]",
-                "{\"body\":{\"json\":[{\"name\":\"value\"},{\"name2\":\"value2\"}]}}");
+        assertRequestBodyJson("[{'name':'value'},{'name2':'value2'}]",
+                "{'body':{'json':[{'name':'value'},{'name2':'value2'}]}}");
 
     }
 
     @Test
     public void testArrayMultipleElementsWithoutJsonKey() throws Exception {
 
-        assertRequestBody("[{\"name\":\"value\"},{\"name2\":\"value2\"}]",
-                "{\"body\":[{\"name\":\"value\"},{\"name2\":\"value2\"}]}");
+        assertRequestBodyJson("[{'name':'value'},{'name2':'value2'}]",
+                "{'body':[{'name':'value'},{'name2':'value2'}]}");
 
     }
 
     @Test
     public void testEmptyArray() throws Exception {
 
-        assertRequestBody("[]", "{\"body\":{\"json\":[]}}");
+        assertRequestBodyJson("[]", "{'body':{'json':[]}}");
 
     }
 
     @Test
     public void testEmptyArrayWithoutJsonKey() throws Exception {
 
-        assertRequestBody("[]", "{\"body\":[]}");
+        assertRequestBodyJson("[]", "{'body':[]}");
 
     }
 
@@ -138,16 +141,16 @@ public class TestSimplifyJsonBody {
     @Test
     public void testTextualFileReference() throws Exception {
 
-        assertRequestBody("{\"name\":\"SimplifyJsonBody\"}",
-                "{\"body\": {\"json\":\"@src/test/SimplifyJsonBody.json\"}}");
+        assertRequestBodyJson("{'name':'SimplifyJsonBody'}",
+                "{'body': {'json':'@src/test/SimplifyJsonBody.json'}}");
 
     }
 
     @Test
     public void testTextualFileReferenceWithoutJsonKey() throws Exception {
 
-        assertRequestBody("{\"name\":\"SimplifyJsonBody\"}",
-                "{\"body\":\"@src/test/SimplifyJsonBody.json\"}");
+        assertRequestBodyJson("{'name':'SimplifyJsonBody'}",
+                "{'body':'@src/test/SimplifyJsonBody.json'}");
 
     }
 
@@ -156,16 +159,16 @@ public class TestSimplifyJsonBody {
     @Test
     public void testVarNameContainJsonValue() throws Exception {
 
-        assertRequestBody("{\"name1\":\"val1\"}",
-                "{\"env\":{\"var1\":{\"name1\":\"val1\"}}, \"body\":{\"json\":\"var1\"}}");
+        assertRequestBodyJson("{'name1':'val1'}",
+                "{'env':{'var1':{'name1':'val1'}}, 'body':{'json':'var1'}}");
 
     }
 
     @Test
     public void testVarNameContainJsonValueWithoutJsonKey() throws Exception {
 
-        assertRequestBody("{\"name1\":\"val1\"}",
-                "{\"env\":{\"var1\":{\"name1\":\"val1\"}}, \"body\":\"var1\"}");
+        assertRequestBodyJson("{'name1':'val1'}",
+                "{'env':{'var1':{'name1':'val1'}}, 'body':'var1'}");
 
     }
 
@@ -173,7 +176,7 @@ public class TestSimplifyJsonBody {
     @Test
     public void testTextualContent() throws Exception {
 
-        assertRequestBody("textValue1", "{\"body\":{\"text\":\"textValue1\"}}");
+        assertRequestBody("textValue1", "{'body':{'text':'textValue1'}}");
 
     }
 
@@ -181,7 +184,7 @@ public class TestSimplifyJsonBody {
     public void testTextualContentCarriageReturn() throws Exception {
 
         assertRequestBody("textValue1\r\n",
-                "{\"body\":{\"text\":\"textValue1\\r\\n\"}}");
+                "{'body':{'text':'textValue1\\r\\n'}}");
 
     }
 
@@ -189,21 +192,21 @@ public class TestSimplifyJsonBody {
     public void testTextualContentMultiline() throws Exception {
 
         assertRequestBody("textValue1\r\ntextValue2",
-                "{\"body\":{\"text\":\"textValue1\\r\\ntextValue2\"}}");
+                "{'body':{'text':'textValue1\\r\\ntextValue2'}}");
 
     }
 
     @Test
     public void testBlankTextualContent() throws Exception {
 
-        assertRequestBody("", "{\"body\":\"\"}");
+        assertRequestBody("", "{'body':''}");
 
     }
 
     @Test
     public void testNullTextualContent() throws Exception {
 
-        assertRequestBody(null, "{\"body\":null}");
+        assertRequestBody(null, "{'body':null}");
 
     }
 
@@ -211,9 +214,16 @@ public class TestSimplifyJsonBody {
     @Test
     public void testBinay() throws Exception {
 
-        String actuals = getActuals("{\"body\":{\"binary\":\"@src/test/data/Un.png\"}}");
+        String actuals = getActuals("{'body':{'binary':'@src/test/data/Un.png'}}");
         assertNotNull(actuals);
 
+    }
+
+    private void assertRequestBodyJson(String expected, String input)
+            throws Exception {
+
+        String actual = getActuals(input);
+        assertEquals(mockJson(expected).toString(), actual);
     }
 
     private void assertRequestBody(String expected, String input)
@@ -232,19 +242,27 @@ public class TestSimplifyJsonBody {
 
     private String getRequestBodyContent(ApiCall apiCall)
             throws UnRAVLException {
-        apiCall.run();
-        ByteArrayOutputStream baos = apiCall.getRequestBody();
-        if (baos == null) {
+        apiCall.run(); // These calls may not have a method (PUT or POST) that will consume the requestStream
+        if (apiCall.getRequestStream() == null) {
             return null;
         }
-        String requestBodyString = baos.toString();
-        return requestBodyString;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            Binary.copy(apiCall.getRequestStream(), baos);
+            String requestBodyString = null;
+            requestBodyString = baos.toString("UTF-8");
+            return requestBodyString;
+        } catch (UnsupportedEncodingException e) {
+            throw new UnRAVLException(e.getMessage());// should not happen; UTF-8 should exist
+        } catch (IOException e) {
+            throw new UnRAVLException(e.getMessage());
+        }
     }
 
     private ApiCall createApiCall(String input) throws UnRAVLException,
             IOException, JsonProcessingException {
         UnRAVLRuntime r = new UnRAVLRuntime();
-        ObjectNode root = Json.object(Json.parse(input));
+        ObjectNode root = Json.object(mockJson(input));
         UnRAVL script = new UnRAVL(r, root);
         ApiCall apiCall = new ApiCall(script);
         return apiCall;
