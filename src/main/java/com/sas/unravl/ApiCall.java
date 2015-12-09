@@ -59,8 +59,12 @@ public class ApiCall {
     private static final String JSON_GENERATOR_KEY = "json";
 
     private UnRAVL script;
+    /**
+     * @deprecated use requestStream instead
+     */
     private ByteArrayOutputStream requestBody;
     private ByteArrayOutputStream responseBody;
+    private InputStream requestStream;
 
     private int httpStatus;
     private Header responseHeaders[];
@@ -203,10 +207,9 @@ public class ApiCall {
         if (body.isTextual() && !isVariableHoldingJson(body.asText())) {
             String s = script.expand(body.asText());
             if (!s.trim().startsWith(UnRAVL.REDIRECT_PREFIX)) {
-                requestBody = new ByteArrayOutputStream();
                 try {
-                    requestBody.write(s.getBytes("UTF-8"));
-                    requestBody.close();
+                    requestStream = new ByteArrayInputStream(
+                            s.getBytes("UTF-8"));
                 } catch (IOException e) {
                     throw new UnRAVLException(
                             "Could not encode string using UTF-8 for body "
@@ -236,12 +239,7 @@ public class ApiCall {
 
         try {
             UnRAVLRequestBodyGenerator gen = bgClass.newInstance();
-            InputStream is = gen.getBody(script, bodyObj, this);
-            // TODO: Instead of storing in memory, store in a temp file?
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            Binary.copy(is, baos);
-            baos.close();
-            requestBody = baos;
+            requestStream = gen.getBody(script, bodyObj, this);
         } catch (InstantiationException e) {
             throw new UnRAVLException(
                     "Could not instantiate body generator plugin for " + body);
@@ -446,12 +444,13 @@ public class ApiCall {
         // We're using the requestcallback here and responseextractor below in
         // case the request or response is binary.
         final RequestCallback requestCallback = new RequestCallback() {
+
             @Override
             public void doWithRequest(final ClientHttpRequest request)
                     throws IOException {
                 request.getHeaders().putAll(headers);
-                if (requestBody != null)
-                    request.getBody().write(requestBody.toByteArray());
+                if (requestStream != null)
+                    Binary.copy(requestStream, request.getBody());
                 ;
             }
         };
@@ -547,8 +546,27 @@ public class ApiCall {
         getRuntime().bind(varName, value);
     }
 
+    /**
+     * @return the request body, wrapped in a ByteArrayOutputStream
+     * @deprecated Use getRequestStream() instead
+     */
     public ByteArrayOutputStream getRequestBody() {
+        if (requestBody == null) {
+            if (requestStream == null)
+                return null;
+            requestBody = new ByteArrayOutputStream();
+            try {
+                Binary.copy(requestStream, requestBody); 
+            } catch (IOException e) {
+                logger.error(e);
+            }
+            requestStream = null;
+        }
         return requestBody;
+    }
+    
+    public InputStream getRequestStream() {
+        return requestStream;
     }
 
     public ByteArrayOutputStream getResponseBody() {
