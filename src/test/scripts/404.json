@@ -1,0 +1,5 @@
+[
+  { "GET" : "http://www.no-such-host-name-matches-this-so-we-expect-404.com",
+    "assert" : { "status" : 404 }
+  }
+]
