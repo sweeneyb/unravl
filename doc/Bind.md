@@ -312,6 +312,8 @@ Extract links via link relation names or link matchers.
 ```
  { "links" : matchers }
  { "links" : matchers, "from" : "path" }
+ { "links" : matchers, "unwrap" : true }
+ { "links" : matchers, "from" : "path", "unwrap" : true }
  { "hrefs" : matchers }
  { "hrefs" : matchers, "from" : "path" }
 ```
@@ -361,7 +363,30 @@ you can access fields of the link objects with
 Groovy expressions such as `self.href.textValue()`
 and `self.method.textValue()`.
 
-By default, <br />
+The `"unwrap"` option may be used to convert the link objects
+from the default Jackson `ObjectNode` to a `java.util.Map` instance.
+This lets you compare values without having to extract the text
+via the Jackson `ObjectNode.textValue()` method:
+
+```JSON
+   { "name" : "Extract just the self URL",
+     "GET" : "{location}",
+     "bind" : [
+                { "json" : "resource" },
+                { "links" : [ "self", "update", "delete"], 
+                            "from" : "resource", 
+                            "unwrap" : true}
+              ],
+     "assert" : [ "self.href == location",
+                  "self.method.== 'GET'",
+                  "delete.href == location",
+                  "update.method == 'PUT'",
+                  "delete.href == location",
+                  "delete.method == 'DELETE'"
+                ]
+```
+
+By default,
 "links" extracts links from the current JSON object stored in `responseBody`,
 which is normally defined when using the `"json"` extractor.
 You may use `"from"` to specify an alternate object that contains links,
