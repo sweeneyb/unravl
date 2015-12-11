@@ -1,0 +1,13 @@
+{ 
+    "doc" : [
+       "Normally, this should fail with a 404. However, some ISPs or network security proxies",
+       " will 'handle' DNS errors and return an actual (HTML) response and a 200 OK response. Ugh.",
+       "So this test can't be a regular test in the src/test/scripts directory.",
+       "Instead, it is in the interactive directory as a sample, and is coded to expect either 200 or 404."
+    ],
+    
+    "GET" : "http://www.no-such-host-name-matches-this-so-we-expect-404.com",
+    
+    "assert" : { "status" : [200,404] }
+}
+
