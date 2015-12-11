@@ -39,8 +39,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RequestCallback;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.ResponseExtractor;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -434,17 +437,13 @@ public class ApiCall {
         executeAPIWithRestTemplate(restTemplate, headers);
     }
 
-    // ApiCall originally invoked the API via Apache HTTP Client
-    // and the members of ApiCall still reflect that.
-    // If invoking with RestTemplate, we must map between the
-    // Apache Headers and Spring headers representations.
     private void executeAPIWithRestTemplate(RestTemplate restTemplate,
             final HttpHeaders headers) throws UnRAVLException {
-
+    
         // We're using the requestcallback here and responseextractor below in
         // case the request or response is binary.
         final RequestCallback requestCallback = new RequestCallback() {
-
+    
             @Override
             public void doWithRequest(final ClientHttpRequest request)
                     throws IOException {
@@ -469,26 +468,41 @@ public class ApiCall {
         } catch (IOException e) {
             throwException(e);
         }
-
+    
         long start = System.currentTimeMillis();
-        InternalResponse response = restTemplate.execute(getURI(),
-                HttpMethod.valueOf(method.name()), requestCallback,
-                responseExtractor);
-        setResponseHeaders(mapHeaders(response.headers));
-        httpStatus = response.status.value();
-        responseBody = new ByteArrayOutputStream();
         try {
+            InternalResponse response = restTemplate.execute(getURI(),
+                    HttpMethod.valueOf(method.name()), requestCallback,
+                    responseExtractor);
+            setResponseHeaders(mapHeaders(response.headers));
+            httpStatus = response.status.value();
+            responseBody = new ByteArrayOutputStream();
             responseBody.write(response.responseBody);
+            long end = System.currentTimeMillis();
+            logger.info(script.getMethod() + " took " + (end - start)
+                    + "ms, returned HTTP status " + response.status);
+            log("Response body:", responseBody, "Response headers:",
+                    response.headers);
+            assertStatus(response.status.value());
         } catch (IOException e) {
             throwException(e);
+        } catch (HttpStatusCodeException e) {
+            assertStatus(e.getStatusCode().value());
+            // this happens if the hostnme cannot be resolved.
+            assertStatus(e.getStatusCode().value());
+        } catch (ResourceAccessException e) {
+            // execute can also throw ResourceAccessException if host does not resolve.
+            assertStatus(HttpStatus.NOT_FOUND.value());
+        } catch (RestClientException e) {
+            // execute can also throw RestClientException
+            // but that exception does not convey a HTTP status code.
+            // We assume 400 if we get RestClientException
+            assertStatus(HttpStatus.BAD_REQUEST.value());
+        } catch (RuntimeException e) { // Spring RestTemplate can
+                                       // throw NestedRuntimeException
+            throwException(e);
         }
-        long end = System.currentTimeMillis();
-
-        logger.info(script.getMethod() + " took " + (end - start)
-                + "ms, returned HTTP status " + response.status);
-        log("Response body:", responseBody, "Response headers:",
-                response.headers);
-        assertStatus(response.status.value());
+    
     }
 
     private class InternalResponse {
@@ -585,24 +599,21 @@ public class ApiCall {
         this.responseHeaders = responseHeaders;
     }
 
-    // public Binding getEnv() {
-    // return getRuntime().getBindings();
-    // }
-
-    private void assertStatus(int httpStatus) throws UnRAVLAssertionException,
+    private void assertStatus(int httpStatusCode) throws UnRAVLAssertionException,
             UnRAVLException {
+        this.httpStatus = httpStatusCode;
         StatusAssertion sa = new StatusAssertion();
         sa.setScript(script);
         sa.setScriptlet(STATUS_ASSERTION);
         try {
-            bind("status", new Integer(httpStatus));
+            bind("status", new Integer(httpStatusCode));
             ObjectNode node = statusAssertion();
             if (node != null) {
                 sa.check(script, node, UnRAVLAssertion.Stage.ASSERT, this);
             } else {
-                if (httpStatus < 200 || httpStatus >= 300)
+                if (httpStatusCode < 200 || httpStatusCode >= 300)
                     throw new UnRAVLAssertionException("http status "
-                            + httpStatus + " not a 2xx status.");
+                            + httpStatusCode + " not a 2xx status.");
             }
         } catch (UnRAVLAssertionException e) {
             failedAssertions.add(sa);
