@@ -488,7 +488,7 @@ public class ApiCall {
             throwException(e);
         } catch (HttpStatusCodeException e) {
             assertStatus(e.getStatusCode().value());
-            // this happens if the hostnme cannot be resolved.
+            // this happens if the host name cannot be resolved.
             assertStatus(e.getStatusCode().value());
         } catch (ResourceAccessException e) {
             // execute can also throw ResourceAccessException if host does not resolve.
