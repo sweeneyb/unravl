@@ -27,6 +27,9 @@
     { "name" : "Extract self, update, and delete links",
       "bind" : { "links" : [ "self", "update", "delete" ]},
       "assert" : [
+          "self instanceof com.fasterxml.jackson.databind.node.ObjectNode",
+          "update instanceof com.fasterxml.jackson.databind.node.ObjectNode",
+          "delete instanceof com.fasterxml.jackson.databind.node.ObjectNode",
           "self.href.textValue() == location",
           "update.href.textValue() == location",
           "delete.href.textValue() == location",
@@ -36,6 +39,26 @@
           "self.method.textValue() == 'GET'",
           "update.method.textValue() == 'PUT'",
           "delete.method.textValue() == 'DELETE'"
+      ]
+    },
+    
+    
+    { "name" : "Extract self, update, and delete links, but unwrapped to use Map, not Jackson ObjectNode",
+      "bind" : { "links" : [ "self", "update", "delete" ],
+                           "unwrap" : true},
+      "assert" : [
+          "self instanceof java.util.Map",
+          "update instanceof java.util.Map",
+          "delete instanceof java.util.Map",
+          "self.href == location",
+          "update.href == location",
+          "delete.href == location",
+          "self.rel == 'self'",
+          "update.rel == 'update'",
+          "delete.rel == 'delete'",
+          "self.method == 'GET'",
+          "update.method == 'PUT'",
+          "delete.method == 'DELETE'"
       ]
     },
 
@@ -80,6 +103,16 @@
           "alt.href.textValue() == expectedAlt"
       ]
     },
+    
+    {
+      "name" : "Extract HAL links, unwrapped",
+      
+      "bind" :  { "links" : [ "link", "alt" ], "from" : "hal", "unwrap" : true},
+      "assert" : [
+          "link.href == expectedLink",
+          "alt.href == expectedAlt"
+      ]
+    },
 
     { "name" : "Extract HAL links from a JSON env var, not default responseBody",
       "bind" : { "hrefs" : [ "link", "alt" ], "from" : "hal"},
@@ -111,6 +144,16 @@
       ]
     },
 
+
+    {
+      "name" : "Extract from Collection+JSON and unwrap",
+
+      "bind" :  { "links" : [ "cjLink", "cjAlt" ], "from" : "collection+json", "unwrap" : true},
+      "assert" : [
+          "cjLink.href == expectedLink",
+          "cjAlt.href == expectedAlt"
+      ]
+    },
 
     { "name" : "Extract Collection+JSON links from a JSON env var, not default responseBody",
       "bind" : { "hrefs" : [  "cjLink", "cjAlt" ], "from" : "collection+json"},
