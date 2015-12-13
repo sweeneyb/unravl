@@ -1,0 +1,7 @@
+
+    {   "name" : "expect error; links \"from\" value is not JSON or a Map",
+        "bind" : [ { "groovy":  {"notJson" : "[0,1,2,3,4]" } },
+                   { "links" : "echo", "unwrap" : true, "from" : "notJson" }
+                 ]
+    }
+    

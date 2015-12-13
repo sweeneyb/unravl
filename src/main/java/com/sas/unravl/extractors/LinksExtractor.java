@@ -410,6 +410,7 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
         return effectiveSpec;
     }
 
+    @SuppressWarnings("rawtypes")
     private ObjectNode jsonObjectSource(ObjectNode root, JsonNode fromNode,
             ApiCall call, UnRAVL script) throws UnRAVLException {
         ObjectNode from = null;
@@ -422,14 +423,16 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
             if (f == null) {
                 throw new UnRAVLException(String.format(
                         "No responseBody binding in %s extractor.", key(root)));
-            }
-            if (!(f instanceof ObjectNode)) {
+            } else if (f instanceof Map) {
+                from = Json.wrap((Map) f);
+            } else if (f instanceof ObjectNode) {
+                from = (ObjectNode) f;
+            } else {
                 throw new UnRAVLException(
                         String.format(
-                                "responseBody is not bound to a JSON object in %s extractor.",
-                                key(root)));
-            }
-            from = (ObjectNode) f;
+                                "responseBody is not bound to a JSON object in %s extractor: %s",
+                                key(root), f));
+            } 
         } else {
             if (fromNode.isTextual()) {
                 String where = fromNode.textValue();
@@ -437,11 +440,13 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
                     Object val = call.getScript().binding(where);
                     if (val instanceof ObjectNode) {
                         from = (ObjectNode) val;
+                    } else if (val instanceof Map) {
+                        from = Json.wrap((Map) val);
                     } else {
                         throw new UnRAVLException(
                                 String.format(
-                                        "from value %s in %s extractor is not a JSON object",
-                                        from, key(root)));
+                                        "Value of \"from\": \"%s\" in %s extractor is not a JSON object:\n%s",
+                                        fromNode.textValue(), key(root), val));
                     }
                 } else {
                     Object o = call.getScript().eval(where);

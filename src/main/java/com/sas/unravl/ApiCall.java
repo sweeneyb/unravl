@@ -301,6 +301,9 @@ public class ApiCall {
                     throw new UnRAVLException(
                             "Could not instantiate extractor " + key
                                     + " using class " + ec.getName(), e1);
+                } catch (RuntimeException e1) {
+                    throw new UnRAVLException(
+                            e1.getMessage(), e1);
                 }
             }
         } finally {

@@ -384,4 +384,14 @@ public class Json {
         return result;
     }
 
+    // Convert a Java Map to a JSON ObjectNode
+    public static ObjectNode wrap(@SuppressWarnings("rawtypes") Map val) {
+        return mapper.valueToTree(val);
+    }
+
+
+    // Convert a Java List to a JSON ArrayNode
+    public static ObjectNode wrap(@SuppressWarnings("rawtypes") List val) {
+        return mapper.valueToTree(val);
+    }
 }
