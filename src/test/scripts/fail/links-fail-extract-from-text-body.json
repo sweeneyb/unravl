@@ -1,0 +1,5 @@
+
+    {   "name" : "expect error; value not JSON or a Map",
+        "body" : { "text" : [ "this POST body", "consists of two lines" ] },
+        "bind" : { "links" : "echo", "unwrap" : true, "from" : "requestBody" }
+    }
