@@ -436,27 +436,33 @@ public class ApiCall {
         setMethod(script.getMethod());
         setURI(script.expand(script.getURI()));
         RestTemplate restTemplate = getRuntime().getPlugins().getRestTemplate();
-        HttpHeaders headers = mapHeaders(script.getRequestHeaders());
-        executeAPIWithRestTemplate(restTemplate, headers);
+        executeAPIWithRestTemplate(restTemplate);
     }
 
-    private void executeAPIWithRestTemplate(RestTemplate restTemplate,
-            final HttpHeaders headers) throws UnRAVLException {
+    private void executeAPIWithRestTemplate(RestTemplate restTemplate) throws UnRAVLException {
+        //authenticate first, since this may add new (Authentication) headers
+        try {
+            authenticate();
+        } catch (IOException e) {
+            throwException(e);
+        }
     
-        // We're using the requestcallback here and responseextractor below in
-        // case the request or response is binary.
+        // Use RequestCallback and ResponseExtractor 
+        // to handle all request bodies, including binary.
+        // RestTemplate.exchange can't handle binary byte[] body
         final RequestCallback requestCallback = new RequestCallback() {
     
             @Override
             public void doWithRequest(final ClientHttpRequest request)
                     throws IOException {
+                final HttpHeaders headers = mapHeaders(script.getRequestHeaders());
                 request.getHeaders().putAll(headers);
                 if (requestStream != null)
                     Binary.copy(requestStream, request.getBody());
                 ;
             }
         };
-        ResponseExtractor<InternalResponse> responseExtractor = new ResponseExtractor<InternalResponse>() {
+        final ResponseExtractor<InternalResponse> responseExtractor = new ResponseExtractor<InternalResponse>() {
             @Override
             public InternalResponse extractData(ClientHttpResponse response)
                     throws IOException {
@@ -466,12 +472,7 @@ public class ApiCall {
                         baos.toByteArray(), response.getHeaders());
             }
         };
-        try {
-            authenticate();
-        } catch (IOException e) {
-            throwException(e);
-        }
-    
+
         long start = System.currentTimeMillis();
         try {
             InternalResponse response = restTemplate.execute(getURI(),

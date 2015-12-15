@@ -145,6 +145,7 @@ public class CentralAuthenticationServiceAuth extends BaseUnRAVLAuth {
     private String serviceTicket(String location, String serviceTicket)
             throws UnsupportedEncodingException {
         String encodedTicket = Text.urlEncode(serviceTicket);
+        logger.info("\"cas\" authentication added service ticket= query parameter to request URL.");
         if (location.indexOf('?') == -1)
             return location + "?ticket=" + encodedTicket;
         else
