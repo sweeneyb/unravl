@@ -16,6 +16,7 @@ import java.net.URISyntaxException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.message.BasicHeader;
+import org.apache.log4j.Logger;
 
 /**
  * An auth element which provides basic authentication. This authenticates by
@@ -52,6 +53,7 @@ import org.apache.http.message.BasicHeader;
 @UnRAVLAuthPlugin("basic")
 public class BasicAuth extends BaseUnRAVLAuth {
 
+    private static final Logger logger = Logger.getLogger(BasicAuth.class);
     private boolean mock; // JSON spec contains "mock" : true, then mock out the
                           // responses
 
@@ -108,6 +110,7 @@ public class BasicAuth extends BaseUnRAVLAuth {
         // script
         getScript().addRequestHeader(
                 new BasicHeader("Authorization", "Basic " + creds));
+        logger.info("\"basic\" auth added 'Authorization: Basic ******' header");
     }
 
 }
