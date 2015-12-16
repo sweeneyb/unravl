@@ -12,6 +12,8 @@ import com.sas.unravl.auth.UnRAVLAuth;
 import com.sas.unravl.extractors.UnRAVLExtractor;
 import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +23,7 @@ import javax.script.ScriptEngineManager;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -183,8 +186,29 @@ public class UnRAVLPlugins {
      *         use
      */
     public RestTemplate getRestTemplate() {
-        return defaultRestTemplate == null ? new RestTemplate()
+        return defaultRestTemplate == null ? newRestTemplate()
                 : defaultRestTemplate;
+    }
+
+    // This RestTemplate uses a custom ClientHttpRequestFactory
+    // that follows redirect for HEAD calls. The default
+    // SimpleClientHttpRequestFactory only follows redirects
+    // for GET.
+    // see http://stackoverflow.com/questions/29418583/follow-302-redirect-using-spring-resttemplate
+    private RestTemplate newRestTemplate()
+    {
+        RestTemplate rt = new RestTemplate(new SimpleClientHttpRequestFactory() {
+            @Override
+            protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
+                
+                super.prepareConnection(connection, httpMethod);
+
+                if ("HEAD".equals(httpMethod)) {
+                    connection.setInstanceFollowRedirects(true);
+                }
+            }
+        });
+        return rt;
     }
 
 }
