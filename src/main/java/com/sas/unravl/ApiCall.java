@@ -778,14 +778,14 @@ public class ApiCall {
                 contentType.toString()) };
         if (script.bodyIsTextual(ct))
             try {
-                if (bytes == null) {
+                if (bytes == null || bytes.size() == 0) {
                     if (getMethod() != Method.HEAD)
                         logger.warn("Warning: Non-HEAD request returned a text Content-Type header but defines no body.");
                     return;
                 }
                 if (logger.isInfoEnabled()) {
                     logger.info(bodyLabel);
-                    if (script.bodyIsJson(ct)) {
+                    if (script.bodyIsJson(ct) && bytes.size() > 0) {
                         try {
                             ObjectMapper mapper = new ObjectMapper();
                             mapper.enable(SerializationFeature.INDENT_OUTPUT);
