@@ -27,26 +27,35 @@ descriptions of `"assert"` also applies to `"preconditions"`.
 Assertions can take following form:
 
 ```
-  "assert" : "expression-string"
   "assert" : json-object
   "assert" : json-array
+  "assert" : "expression-string"
 ```
 
-In the first form, the `"expession-string"` is converted to
-`"assert" : [ { "groovy" : "expression-string" } ]`;
-see the [`"groovy"`](#groovy)
-assertion element below.
-
-The second form is converted to the general array form,
+The first form is converted to the general array form,
 `"assert" : [ json-object ]`
 
-The third form is the most general case: an array of
-assertions, using the forms described below.
-If an element of the array is a string, it is
-assumed to be a Groovy (or JavaScript) assertion.
+The second form is the most general case: an array of
+assertions, using any combination of the forms described below.
 
 Each assertion in the array is evaluated in order. Validation stops
 on the first failed assertion in the array.
+
+The third form `"expession-string"` is a convenient
+abbreviation for
+
+```
+"assert" : [ { "groovy" : "expression-string" } ]`
+```
+(See the [`"groovy"`](#groovy) assertion element below.)
+
+Groovy is the default expression evaluation language.
+You may use the `unravl.script.language` system property
+to set the script language that UnRAVL
+uses tp evaluate such expression strings.
+See [Script language](#Reference.md#script_language) for
+to learn how to change the languages UnRAVL
+uses to evaluate such expressions.
 
 Below is the set of assertions supported by UnRAVL.
 Reminder: all the precondition/assertion forms described below are embedded within a
@@ -60,7 +69,7 @@ Reminder: all the precondition/assertion forms described below are embedded with
 ```
 element. Note however that some only make sense
 inside `"assert"` since they make assertions about
-the result of the API call.
+the *result* of the API call.
 
 ## status
 

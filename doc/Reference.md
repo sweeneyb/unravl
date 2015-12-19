@@ -41,7 +41,7 @@ Syntax element.                                  | Description
   `"template" : "template-name",`                | Inheritance of tests via [templates](#template)
   `"env" : {env-bindings},`                      | Assign variables in the [environment](#env)
   `"preconditions" : [assertions],`              | Assert [preconditions](#preconditions) are true before calling the API
-  `"if" : condition,`                            | Conditionally execute the test [if](#if) `condition` is true 
+  `"if" : condition,`                            | Conditionally execute the test [if](#if) `condition` is true
   `"headers" : {request-headers}`                | Names/values of request [headers](#headers) to pass to the API
   `"auth" : {authentication},`                   | Use [authentication](#auth) to call the API
   `method : "URL",`                              | The HTTP method **`GET, POST, PUT, DELETE, HEAD, PATCH`** and target URL
@@ -72,7 +72,7 @@ of test objects, test names, or test resource names (file or URLs):
 If the element of the array is a simple string, it should be the name of a
 test that has already been executed. If multiple tests have the same
 name, sequential execution order will replace the previous name-to-test mapping
-(thus, "last one wins".) 
+(thus, "last one wins".)
 
 If a `"@file-or-URL"` element names a file (not a URL) without an absolute file location,
 it should reside relative to the current directory
@@ -84,7 +84,7 @@ and which may be used to perform validations/assertions.
 
 Below are the structural elements of an UnRAVL test,
 with syntax and descriptions. Some elements can have
-complex or varied bodies which are explained in separate 
+complex or varied bodies which are explained in separate
 documentaton.
 
 ### name
@@ -364,7 +364,7 @@ the status code, the response headers, and the response body.
 Syntax:
 
 ```
-  "assert" : assertsion
+  "assert" : assertion
   "assert" : [ assertions ]
 ```
 
@@ -563,7 +563,7 @@ You can override the default language (Groovy) by setting the system
 property `unravl.script.language` to `javascript`.
 Java 7 and higher comes with a JavaScript engine. UnRAVL also includes
 [`groovy-all`](http://www.groovy-lang.org/download.html) which includes a Groovy script engine (the default).
-Thus, the valid values for 
+Thus, the valid values for
 `unravl.script.language` are `groovy` and `javascript`.
 
 The script language must have a corresponding assertion
@@ -729,19 +729,25 @@ First, copy all dependencies
 
 to download the jars necessary to run UnRAVL with a classpath pointing to the dependcy directory
 
-Run with
+Run UnRAVL as:
+```bash
+    src/main/bin/unravl.sh src/test/scripts/hello.json  # from Linux or Mac OS X
+    src\main\bin\unravl.bat src\test\scripts\hello.json # from Windows
+```
 
-* Linux:
-  *  `java -classpath 'build/libs/*:build/output/lib/*' com.sas.unravl.Main file.json ... file.json`
-* Windows:
-  *  `java -classpath 'build/libs/*;build/output/lib/*' com.sas.unravl.Main file.json ... file.json`
+You may set system properties to configure UnRAVL
+by setting the `UNRAVL_OPT` environment variable
+before running the scripts.
 
-You may deploy all the jar files to a single filter named by UNRAVL_LIB and then run
+If you wish to deploy UnRAVL outside the build
+directory, You may deploy all the jar files from
+`build/lib` and `build/output/lib`
+into a single directory
+named by `UNRAVL_LIB` and then run
 
- `java -classpath "$UNRAVL_LIB/*" com.sas.unravl.Main file.json ... file.json`
+ `java $UNRAVL_OPT -classpath "$UNRAVL_LIB/*" com.sas.unravl.Main file.json ... file.json`
 
-If your project uses Spring, you should augment your Spring configuration to include
+If you embed UnRAVL in a Spring Java application,
+you should augment your Spring configuration to include
 
  classpath:/META-INF/spring/unravlApplicationContext.xml
-
-
