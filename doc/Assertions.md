@@ -14,7 +14,7 @@ from other APIs calls in earlier tests.
  "preconditions" : assertions
 ```
 
-`"assert"` assertions run after the API call and validate the result.
+`"assert"` assertions run *after* the API call and validate the result.
 
 ```JSON
  "assert" : assertions
@@ -27,26 +27,35 @@ descriptions of `"assert"` also applies to `"preconditions"`.
 Assertions can take following form:
 
 ```
-  "assert" : "expression-string"
   "assert" : json-object
   "assert" : json-array
+  "assert" : "expression-string"
 ```
 
-In the first form, the `"expession-string"` is converted to
-`"assert" : [ { "groovy" : "expression-string" } ]`;
-see the [`"groovy"`](#groovy)
-assertion element below.
-
-The second form is converted to the general array form,
+The first form is converted to the general array form,
 `"assert" : [ json-object ]`
 
-The third form is the most general case: an array of
-assertions, using the forms described below.
-If an element of the array is a string, it is
-assumed to be a Groovy (or JavaScript) assertion.
+The second form is the most general case: an array of
+assertions, using any combination of the forms described below.
 
 Each assertion in the array is evaluated in order. Validation stops
 on the first failed assertion in the array.
+
+The third form `"expession-string"` is a convenient
+abbreviation for
+
+```
+"assert" : [ { "groovy" : "expression-string" } ]`
+```
+(See the [`"groovy"`](#groovy) assertion element below.)
+
+Groovy is the default expression evaluation language.
+You may use the `unravl.script.language` system property
+to set the script language that UnRAVL
+uses tp evaluate such expression strings.
+See [Script language](Reference.md#script-language) for
+to learn how to change the languages UnRAVL
+uses to evaluate such expressions.
 
 Below is the set of assertions supported by UnRAVL.
 Reminder: all the precondition/assertion forms described below are embedded within a
@@ -60,7 +69,7 @@ Reminder: all the precondition/assertion forms described below are embedded with
 ```
 element. Note however that some only make sense
 inside `"assert"` since they make assertions about
-the result of the API call.
+the *result* of the API call.
 
 ## status
 
@@ -78,6 +87,9 @@ Examples:
  { "status" : [200, 204] }
  { "status" : "2.." }
 ```
+
+The third form is a regular expression; `"2.."`
+will match any status between 200 and 299.
 
 *Warning*: Unless there is an explicit { "status" : status-code } assertion,
 UnRAVL will execute an implicit `{ "status" : "2.." }` assertion.
@@ -97,7 +109,8 @@ String values in the JSON are subject to environment substitution,
 and anywhere when using a @file-or-url.
 
 **TODO**: augment to allow environment substitution for numbers, booleans, etc.
-in literal JSON.  We can't put naked env references in there, such as
+in literal JSON.  We can't use naked env references in the
+JSON literal, such as
 
  { "longitude" : {longitude} }
 
@@ -105,7 +118,7 @@ to expand into
 
  { "longitude" : 89.392 }
 
-because the JSON is parsed *before* the environment is defined,
+because the entire UnRAVL script is parsed as JSON *before* any environment variables are defined,
 and the JSON parser will balk at `{longitude}` as invalid JSON.
 
 **TODO**: add an option to test or ignore only certain fields or JSON Path expressions.
@@ -120,15 +133,15 @@ Asserts that the response body matches the (usually) plain/text body.
  { "text" : array-of-strings }
 ```
 
-The text literals are encoded with Unicode and escape characters,
+The `"text"` literals are encoded with Unicode and escape characters,
 such as `\n` for newlines. An array of strings will
 be concatenated, separated by a newline. Any string that begins with the '@' character
 is assumed to be a file or URL reference and that content
 streamed in.
 
-Environment substition is applied to strings and external text.
+Environment substitution is applied to strings and external text.
 
-Initially, only UTF-8 text would be allowed.
+Only UTF-8 text is allowed.
 
 ```JSON
  { "text" : "This is\na multiline\nresponse\n" }
@@ -212,18 +225,18 @@ several possible forms for this assertion:
 *schema* may be:
   1. a JSON object which represents an embedded JSON schema
   1. the name of a variable that contains a JSON object
-  1. a string in the form of `"@location"` where *location* is the URI of the JSON schema. (Environment variables are expanded within the *location* location string.)
+  1. a string in the form of `"@location"` where *location* is the URI of the JSON schema. (Environment variables are expanded within the *location* string.)
 
 *values* may be
   1. a string containing a single variable (the key `"value"` may be used instead of the plural `"values"`)
   1. an array of variable names
   1. For forms 1 and 2, each such variable must be bound to a JSON object or array. The JSON value of the variable is validated against the above referenced JSON schema.
 
-If `"values"` is omitted, the the current response
+If `"values"` is omitted, the current JSON response
 body will be validated against the schema.
 
 The assertion fails if any value does not
-conform to the JSON schema, or if
+conform to the JSON schema, if
 the elements do not have the forms described above
 or if the referenced JSON schema is not a valid schema.
 
@@ -243,35 +256,33 @@ the Swagger 2.0 schema.
 ----
 
 This example creates an UnRAVL template for fetching a resource (via the
-variable resId and validating the response body against a JSON schema.
-The next three scripts use the template, setting the resId variable
+variable `resId`) and validating the response body against a JSON schema.
+The next three scripts use the template, setting the `resId` variable
 to different values each time.
+(Templates are described in [Templates](Temlates.md).)
 
-Note: At present, the UnRAVL "schema" assertion does **not**
+Note: At present, the UnRAVL `"schema"` assertion does **not**
 cache JSON schema objects, so this will reread, parse, and process
 the JSON schema object for each API call.
 
 ```JSON
 [
   {
-     "name" : "resourceX schema validation.template",
+     "name" : "imlicit.template",
+     "preconditions" : { "bound" : "resId"},
      "env"  : {
-	        "schema" : "http://www.example.com/api/schemas/resourceX.json",
-		"resId" : "<< Rebind this to a specific resurce id >>"
+	        "schema" : "http://www.example.com/api/schemas/resourceX.json"
 	       },
      "GET" : "http://www.example.com/api/resources/{resId}",
      "assert" : { "schema" : "@{schema}" }
    },
    {
-     "template" : "resourceX schema validation.template",
      "env" : { "restId" : "r123" }
    },
    {
-     "template" : "resourceX schema validation.template",
      "env" : { "restId" : "r456" }
    },
    {
-     "template" : "resourceX schema validation.template",
      "env" : { "restId" : "r789" }
    }
 ]
@@ -281,7 +292,7 @@ the JSON schema object for each API call.
 
 This example is another way to do the previous test, to validate
 that the result of three GET calls all conform to the JSON schema.
-This one binds the response bodies (as JSON object) to three
+This example binds the response bodies (as JSON object) to three
 different variables, then validates that the bound JSON objects
 conform to the schema. It has the benefit of parsing and
 processing the JSON schema only once.
@@ -338,13 +349,13 @@ expressed as \uxxxx (four hex digits), as per the JSON syntax rules.
 (The entire unRAVL script must be UTF-8.)
 
 If the string or one of the lines in the array form
-starts with @ then the value is assumed to be the name
+starts with `@`` then the value is assumed to be the name
 of a (relative) file resource or a URL and the Groovy script or fragment
 is downloaded from there.
 
 Tip: Avoid absolute path names. Use relative path names, and use
 portable path notation, namely forward slashes which work on
-both Linux **and** windows. Make sure the filename case is correct;
+both Linux **and** Microsoft Windows. Make sure the filename case is correct;
 Windows will ignore case differences, but Linux will not.
 
 The values in the current environment are passed to Groovy scripts.
@@ -354,36 +365,40 @@ the JSON result of the API call to a variable using the
 and put it in a
 [`org.fasterxml.jackson.databins.JsonNode`](http://fasterxml.github.io/jackson-databind/javadoc/2.2.0/com/fasterxml/jackson/databind/JsonNode.html) (using the Jackson JSON parser).
 
-The Groovy is evaluated and if the result is a Boolean,
-the assertion is true iff the Boolean value is true.
+The Groovy is evaluated and
+the assertion is true iff
+if the result is a Boolean and the Boolean value is true.
 Warning: Other types are ignored.
 
-The Groovy script may also throw an java.lang.AssertionError
+The Groovy script may also throw a `java.lang.AssertionError`
 to indicate a failed assertion.
-A java.lang.RuntimeException results in a failed
-assertion but also result in test errors.
+A `java.lang.RuntimeException` results in a failed
+assertion but also results in test errors.
 
-Note that if you wish to compare *values* in a JSON object,
+Note that JSON results are represented with Jackson `ObjectNode` or `ArrayNode` values.
+Thus, if you wish to use Groovy to select and operate on *values* in a JSON object,
 you must extract values with `.textValue() , .doubleValue(),
 .longValue(), .intValue(), .booleanValue(),` etc.
-(You can use the `"unwrap"` option in the `"json"` extractor
+
+Tip: You can use the `"unwrap"` option in the `"json"` extractor
 to unwrap JSON objects into Java core types. See
 also the "Wrapped vs. unwrapped values" section in
 [Bind](Bind.md).
 
-For example, assuming the (wrapped) response body  has been saved in a variable
+For example, assuming the (wrapped) response body has been saved in a variable
 named `result` in the current environment, an assertion such as
  "result[0].type == 'Folder'"
 will always be false, even if the *type* field of the 0<sup>th</sup>
-element of the JsonNode *result* has the value `"Folder"`, because
-the type of `JsonNode` is a Jackson TextNode, not a `String`. Thus, the comparison is always false.
+element of the `JsonNode` *result* has the value `"Folder"`, because
+the type of `JsonNode` is a Jackson `TextNode`, not a `String`.
+Thus, the comparison is always false.
 
 Instead, use
 
  "result[0].type.textValue() == 'Folder'"
 
-In addition, if any element of the "assert" or "preconditions" arrays
-are simple text strings, they are interpreted as groovy assertions.
+In addition, if any element of the `"assert"` or `"preconditions"` arrays
+are simple text strings, they are interpreted as Groovy assertions.
 Thus,
 ```JSON
  "assert" : [
@@ -406,8 +421,8 @@ assertion and not a `"groovy"` assertion such as `"status == 404"`.
 
 ## javascript
 
-The javascript assertion works just like the groovy assertion
-described above, except that the expression is interpeted by
+The `"javascript"` assertion works just like the `"groovy"` assertion
+described above, except that the expression is interpreted by
 the JVM's JavaScript (Rhino) interpreter.
 
 ```
@@ -441,10 +456,10 @@ the assertion
 will not work because the JavaScript String class
 does not have the `endsWith` method that Java's String class has.
 
-
 ## ignore and doc
 
-Useful to "comment out" an existing assertion in an UnRAVL, since JSON does not support comment syntax.
+The `"ignore"` and `"doc"` assertions are
+useful to "comment out" an existing assertion in an UnRAVL,since JSON does not support comment syntax.
 For example, if you have the assertion
 ```JSON
  "assert" : [
@@ -452,14 +467,14 @@ For example, if you have the assertion
      { "status" : 201 }
      ]
 ```
-and you wish to ignore the "json" assertion, but retain it for future use, change it into an ignore:
+and you wish to ignore the "json" assertion, but retain it for future use, change it into an `"ignore"`:
 ```JSON
  "assert" : [
      { "ignore" : { "json" : "@benchmark.json" } },
      { "status" : 201 }
      ]
 ```
-This may also be used as a "doc" element, to allow arbitrary JSON documentation inside an "assert" or "preconditions":
+This may also be used as a `"doc"` element, to allow arbitrary test documentation inside an `"assert"` or `"preconditions"`:
 ```JSON
 "assert" : [
      { "doc" : "Verify that the POST returns 201 Created status to indicate it successfully created a new resource." },
@@ -469,6 +484,5 @@ This may also be used as a "doc" element, to allow arbitrary JSON documentation 
 
 ## To do
 
-See [Assertsions to do](Assertions-to-do.md) for some possible
+See [Assertions to do](Assertions-to-do.md) for some possible
 new assertion elements.
-
