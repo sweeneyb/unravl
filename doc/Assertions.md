@@ -53,7 +53,7 @@ Groovy is the default expression evaluation language.
 You may use the `unravl.script.language` system property
 to set the script language that UnRAVL
 uses tp evaluate such expression strings.
-See [Script language](Reference.md#script_language) for
+See [Script language](Reference.md#script-language) for
 to learn how to change the languages UnRAVL
 uses to evaluate such expressions.
 
