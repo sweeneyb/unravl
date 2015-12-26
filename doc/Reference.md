@@ -296,18 +296,18 @@ The *body-specification* may take one of several forms:
 
 The different forms are described in [Body](Body.md).
 
-### Method and UR:
+### Method and URL:
 
 The UnRAVL script specifies the API call with the method name and URL.
 
 ```JSON
-  method : UR:
+  method : URL
 ```
 
 The *`method`* and *`URL`* are both strings. The *method* must be one of
 `"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"`.
 The *`URL`* is the REST API being tested.
-Onlye one `*method* : *URL*` pair is allowed per test object.
+Only one `*method* : *URL*` pair is allowed per test object.
 Use an array of test objects to perform multiple API calls.
 
 Examples:
@@ -709,13 +709,14 @@ You can configure more fine-grained logging other Log4J configuration files:
 
 ## Logistics
 
-UnRAVL is built with either [[Gradle]] or [[Maven]]. The Gradle wrapper is included in the project,
+UnRAVL is built with either [Gradle](http://gradle.org/) or [Maven](https://maven.apache.org/). 
+The Gradle wrapper is included in the project,
 so no extra setup is required (unlike Maven)
 to create a jar file `sas.unravl-<em>version</em>.jar`
 
 * Gradle build puts the jar in ./build/libs
 * Windows:
-  * `gradlew.bat build`
+  * `.\gradlew.bat build`
 * Linux
   * `./gradlew build`
 * Maven build puts the jar in ./target
@@ -737,7 +738,10 @@ Run UnRAVL as:
 
 You may set system properties to configure UnRAVL
 by setting the `UNRAVL_OPT` environment variable
-before running the scripts.
+before running the scripts. For example, for Linux:
+```bash
+export UNRAVL_OPT="-Dapi.host=www.example.com -Dapi.port=8080"
+```
 
 If you wish to deploy UnRAVL outside the build
 directory, You may deploy all the jar files from
@@ -745,9 +749,10 @@ directory, You may deploy all the jar files from
 into a single directory
 named by `UNRAVL_LIB` and then run
 
- `java $UNRAVL_OPT -classpath "$UNRAVL_LIB/*" com.sas.unravl.Main file.json ... file.json`
+ `java $UNRAVL_OPT -classpath "$UNRAVL_LIB/*" com.sas.unravl.Main file.json file.json`
 
 If you embed UnRAVL in a Spring Java application,
 you should augment your Spring configuration to include
-
+```
  classpath:/META-INF/spring/unravlApplicationContext.xml
+```
