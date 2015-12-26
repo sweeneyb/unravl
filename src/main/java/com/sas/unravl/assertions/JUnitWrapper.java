@@ -54,7 +54,7 @@ public class JUnitWrapper {
     /**
      * Run scripts in the directory if the file names match the pattern. This
      * will try to run all scripts, even if some fail. Each script runs
-     * independently in its own environment. 
+     * independently in its own environment.
      * 
      * TODO: Add boolean recursive option
      *
@@ -149,6 +149,8 @@ public class JUnitWrapper {
             Map<String, Object> env, String... scriptFileNames) {
         // for now, assume each command line arg is an UnRAVL script
         int count = 0;
+        if (runtime != null)
+            runtime.reset();
         Map<String, Object> newEnv = (env == null ? new HashMap<String, Object>()
                 : new HashMap<String, Object>(env));
         Throwable caught = null;
@@ -160,9 +162,11 @@ public class JUnitWrapper {
                 System.out.println("Run UnRAVL script " + scriptFile);
                 rt.execute(scriptFile);
                 for (ApiCall call : rt.getApiCalls()) {
-                    if (call.getFailedAssertions().size() > 0)
+                    if (call.getFailedAssertions().size() > 0) {
+                        printFailedAssertions(call);
                         throw new AssertionError("script " + scriptFile
                                 + " should have had 0 assertion failures.");
+                    }
                 }
             } catch (Throwable t) {
                 logger.error(t.getMessage());
@@ -176,10 +180,17 @@ public class JUnitWrapper {
         return count;
     }
 
+    private static void printFailedAssertions(ApiCall call) {
+        for (UnRAVLAssertion a : call.getFailedAssertions()) {
+            logger.error("Failed assertion: " + a.getAssertion());
+        }
+
+    }
+
     /**
      * Run all scripts in the directory, but expect an UnRAVLException. This
      * should be used to test invalid scripts. Each script runs independently in
-     * its own environment. 
+     * its own environment.
      * 
      * TODO: Add boolean recursive option
      *
@@ -196,7 +207,7 @@ public class JUnitWrapper {
     /**
      * Run all scripts in the directory which match a pattern, but expect an
      * UnRAVLException. This should be used to test invalid scripts. Each script
-     * runs independently in its own environment. 
+     * runs independently in its own environment.
      * 
      * TODO: Add boolean recursive option
      *
