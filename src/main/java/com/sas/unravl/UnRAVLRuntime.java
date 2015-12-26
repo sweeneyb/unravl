@@ -479,4 +479,10 @@ public class UnRAVLRuntime {
         env.remove(key);
     }
 
+    public void reset() {
+        failedAssertionCount = 0;
+        calls.clear();
+        canceled = false;
+    }
+
 }

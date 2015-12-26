@@ -161,6 +161,7 @@ public class JUnitWrapper {
                 rt.execute(scriptFile);
                 for (ApiCall call : rt.getApiCalls()) {
                     if (call.getFailedAssertions().size() > 0)
+                        printFailedAssertions(call);
                         throw new AssertionError("script " + scriptFile
                                 + " should have had 0 assertion failures.");
                 }
@@ -174,6 +175,13 @@ public class JUnitWrapper {
             throw new AssertionError(caught.getMessage());
         }
         return count;
+    }
+
+    private static void printFailedAssertions(ApiCall call) {
+        for (UnRAVLAssertion a : call.getFailedAssertions()) {
+            logger.warn("Failed assertion: " + a.getAssertion());
+        }
+        
     }
 
     /**
