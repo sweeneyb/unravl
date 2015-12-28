@@ -1,5 +1,5 @@
 [
-	{
+	{   "name" : "second of five assertions will fail, thus three skipped",
 		"assert":[
 			"true == true",
 			"true == false",
@@ -10,6 +10,7 @@
 
 	},
 	{
+		"name" : "Assertion in previous test failed, ths two assertions in this test should be skipped",
 		"assert":[
 			"assertNotNull('this test, therefore this assertion, should be skipped')",
 			"assertNotNull('as will this one')"

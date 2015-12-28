@@ -255,6 +255,7 @@ public class UnRAVLRuntime {
             } catch (UnRAVLAssertionException e) {
                 logger.error(e.getMessage() + " while running UnRAVL script "
                         + label);
+                
                 incrementFailedAssertionCount();
             } catch (RuntimeException rte) {
                 if (rte.getCause() instanceof UnRAVLException) { // tunneled
@@ -396,54 +397,12 @@ public class UnRAVLRuntime {
 
     public int report() {
         int failed = (calls.size() == 0 ? 1 : 0);
-        String separator = "";
         for (ApiCall call : calls) {
-            UnRAVL script = call.getScript();
-            String title = "Script '"
-                    + script.getName()
-                    + "' "
-                    + (call.getMethod() == null ? "<no method>" : script
-                            .getMethod().toString()) + " "
-                    + (call.getURI() == null ? "<no URI>" : call.getURI());
-            System.out.print(separator);
-            for (int i = title.length(); i > 0; i--)
-                System.out.print('-');
-            System.out.println();
-            System.out.println(title);
-
-            if (call.getException() != null) {
-                System.out.println("Caught exception running test "
-                        + script.getName() + " " + call.getMethod() + " "
-                        + call.getURI());
-                System.out.println(call.getException().getMessage());
-                System.out.flush();
-                failed++;
-            }
-            report(call.getPassedAssertions(), "Passed");
-            failed += report(call.getFailedAssertions(), "Failed");
-            report(call.getSkippedAssertions(), "Skipped");
-            separator = System.getProperty("line.separator").toString();
+            failed += call.getFailedAssertions().size();
         }
         if (canceled)
             System.out.println("UnRAVL script execution was canceled.");
         return failed;
-    }
-
-    private int report(List<UnRAVLAssertion> as, String label) {
-        if (as.size() > 0) {
-            System.out.println(as.size() + " " + label + ":");
-            for (UnRAVLAssertion a : as) {
-                System.out.println(label + " " + a.getStage().getName() + " "
-                        + a);
-                System.out.flush();
-                UnRAVLAssertionException e = a.getUnRAVLAssertionException();
-                if (e != null) {
-                    System.out.println(e.getClass().getName() + " "
-                            + e.getMessage());
-                }
-            }
-        }
-        return as.size();
     }
 
     public List<ApiCall> getApiCalls() {
@@ -468,7 +427,6 @@ public class UnRAVLRuntime {
             logger.warn("Replacing template " + name);
         }
         getTemplates().put(name, template);
-
     }
 
     public boolean hasTemplate(String name) {

@@ -37,7 +37,7 @@ import org.apache.log4j.Logger;
  * execute methods.
  * <p>
  * This class only executes a single UnRAVL test, represented by a JSON object.
- * It does not execute a JSON array of scripts; use UnRAVLRuntime 
+ * It does not execute a JSON array of scripts; use UnRAVLRuntime
  * 
  * TODO: This class is too large and does too much. Refactor.
  *
@@ -273,7 +273,11 @@ public class UnRAVL {
 
     public ApiCall run() throws UnRAVLException, IOException {
         ApiCall apiCall = new ApiCall(this);
-        return apiCall.run();
+        try {
+            return apiCall.run();
+        } finally {
+            apiCall.report(System.out);
+        }
     }
 
     /** Stop execution. */
