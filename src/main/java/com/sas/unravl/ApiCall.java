@@ -25,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -302,8 +303,7 @@ public class ApiCall {
                             "Could not instantiate extractor " + key
                                     + " using class " + ec.getName(), e1);
                 } catch (RuntimeException e1) {
-                    throw new UnRAVLException(
-                            e1.getMessage(), e1);
+                    throw new UnRAVLException(e1.getMessage(), e1);
                 }
             }
         } finally {
@@ -439,23 +439,25 @@ public class ApiCall {
         executeAPIWithRestTemplate(restTemplate);
     }
 
-    private void executeAPIWithRestTemplate(RestTemplate restTemplate) throws UnRAVLException {
-        //authenticate first, since this may add new (Authentication) headers
+    private void executeAPIWithRestTemplate(RestTemplate restTemplate)
+            throws UnRAVLException {
+        // authenticate first, since this may add new (Authentication) headers
         try {
             authenticate();
         } catch (IOException e) {
             throwException(e);
         }
-    
-        // Use RequestCallback and ResponseExtractor 
+
+        // Use RequestCallback and ResponseExtractor
         // to handle all request bodies, including binary.
         // RestTemplate.exchange can't handle binary byte[] body
         final RequestCallback requestCallback = new RequestCallback() {
-    
+
             @Override
             public void doWithRequest(final ClientHttpRequest request)
                     throws IOException {
-                final HttpHeaders headers = mapHeaders(script.getRequestHeaders());
+                final HttpHeaders headers = mapHeaders(script
+                        .getRequestHeaders());
                 request.getHeaders().putAll(headers);
                 if (requestStream != null)
                     Binary.copy(requestStream, request.getBody());
@@ -495,7 +497,8 @@ public class ApiCall {
             // this happens if the host name cannot be resolved.
             assertStatus(e.getStatusCode().value());
         } catch (ResourceAccessException e) {
-            // execute can also throw ResourceAccessException if host does not resolve.
+            // execute can also throw ResourceAccessException if host does not
+            // resolve.
             assertStatus(HttpStatus.NOT_FOUND.value());
         } catch (RestClientException e) {
             // execute can also throw RestClientException
@@ -506,7 +509,7 @@ public class ApiCall {
                                        // throw NestedRuntimeException
             throwException(e);
         }
-    
+
     }
 
     private class InternalResponse {
@@ -574,7 +577,7 @@ public class ApiCall {
                 return null;
             requestBody = new ByteArrayOutputStream();
             try {
-                Binary.copy(requestStream, requestBody); 
+                Binary.copy(requestStream, requestBody);
             } catch (IOException e) {
                 logger.error(e);
             }
@@ -582,7 +585,7 @@ public class ApiCall {
         }
         return requestBody;
     }
-    
+
     public InputStream getRequestStream() {
         return requestStream;
     }
@@ -603,8 +606,8 @@ public class ApiCall {
         this.responseHeaders = responseHeaders;
     }
 
-    private void assertStatus(int httpStatusCode) throws UnRAVLAssertionException,
-            UnRAVLException {
+    private void assertStatus(int httpStatusCode)
+            throws UnRAVLAssertionException, UnRAVLException {
         this.httpStatus = httpStatusCode;
         StatusAssertion sa = new StatusAssertion();
         sa.setScript(script);
@@ -823,4 +826,47 @@ public class ApiCall {
         return skippedAssertions;
     }
 
+    /**
+     * Print a report of the API call to a print stream (System.out)
+     * 
+     * @param out
+     *            the report destination
+     */
+    public void report(PrintStream out) {
+        UnRAVL script = getScript(); //@formatter:off
+        String title = "Script '" + script.getName() + "' "
+                + (getMethod() == null ? "<no method>" : getMethod().toString())
+                + " " + (getURI() == null ? "<no URI>" : getURI()); //@formatter:on
+        out.println();
+        for (int i = title.length(); i > 0; i--)
+            out.print('-');
+        out.println();
+        out.println(title);
+
+        if (getException() != null) {
+            out.println("Caught exception running test " + title);
+            out.println(getException().getMessage());
+        }
+        report(getPassedAssertions(), "Passed", out);
+        report(getFailedAssertions(), "Failed", out);
+        report(getSkippedAssertions(), "Skipped", out);
+
+        out.flush();
+    }
+
+    private void report(List<UnRAVLAssertion> as, String label, PrintStream out) {
+        out.println(as.size() + " " + label + ":");
+        if (as.size() > 0) {
+            for (UnRAVLAssertion a : as) {
+                out.println(label + " " + a.getStage().getName() + " "
+                        + a);
+                out.flush();
+                UnRAVLAssertionException e = a.getUnRAVLAssertionException();
+                if (e != null) {
+                    out.println(e.getClass().getName() + " "
+                            + e.getMessage());
+                }
+            }
+        }
+    }
 }
