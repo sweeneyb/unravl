@@ -38,6 +38,7 @@ public class TextRequestBodyGenerator extends BaseUnRAVLRequestBodyGenerator {
         JsonNode value = body.get("text");
         Text request = new Text(script, value);
         String requestBody = request.text();
+        requestBody = script.expand(requestBody);
         script.bind("requestBody", requestBody);
         return new ByteArrayInputStream(Text.utf8(requestBody));
     }
