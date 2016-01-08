@@ -530,7 +530,7 @@ public class ApiCall {
     private HttpHeaders mapHeaders(List<Header> requestHeaders) {
         HttpHeaders headers = new HttpHeaders();
         for (Header h : requestHeaders)
-            headers.add(h.getName(), h.getValue());
+            headers.add(h.getName(), getScript().expand(h.getValue()));
         return headers;
     }
 
