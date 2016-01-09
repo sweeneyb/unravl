@@ -265,7 +265,10 @@ public class UnRAVL {
             return;
         for (Map.Entry<String, JsonNode> h : Json.fields(headersNode)) {
             String string = h.getKey();
-            String val = expand(h.getValue().asText());
+            // Do not expand headers here; do so in ApiCall.mapHeaders(List<Header> requestHeaders)
+            // This method is called before "env" is evaluated,
+            // so expansion here is premature.
+            String val = h.getValue().asText();
             BasicHeader header = new BasicHeader(string, val);
             headers.add(header);
         }
