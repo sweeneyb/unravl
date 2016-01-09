@@ -1,0 +1,11 @@
+{
+   "name" : "expect assertion failure on json response body.",
+   "GET" : "/hello.json",
+   "assert" :   [ 
+     { "doc" : "This test script should fail because the mock server returns greeting 'Hello', not 'Goodbye'" },
+     { "json" :
+       { "greeting" : "Goodbye",
+         "addressee" : "World" }
+     }
+   ]
+}

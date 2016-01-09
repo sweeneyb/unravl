@@ -16,7 +16,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 public class TestSimplifyJsonBody extends TestBase {
