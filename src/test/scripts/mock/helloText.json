@@ -1,0 +1,8 @@
+
+{
+   "name" : "mock /hello.txt returns 'Hello, World!'",
+   "GET" : "/hello.txt",
+   "assert" : [ { "text" : "Hello, World!" },
+                { "headers" : { "Content-Type" : "text/plain" } }
+              ]
+}

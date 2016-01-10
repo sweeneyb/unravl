@@ -59,6 +59,8 @@ import org.springframework.web.client.RestTemplate;
  */
 public class ApiCall {
 
+    private static final String AUTHORIZATION = "Authorization";
+    private static final String MASK = "************";
     private static final Logger logger = Logger.getLogger(ApiCall.class);
     private static final String JSON_GENERATOR_KEY = "json";
 
@@ -529,8 +531,11 @@ public class ApiCall {
     // Convert from Apache Headers Spring Headers
     private HttpHeaders mapHeaders(List<Header> requestHeaders) {
         HttpHeaders headers = new HttpHeaders();
-        for (Header h : requestHeaders)
-            headers.add(h.getName(), getScript().expand(h.getValue()));
+        for (Header h : requestHeaders) {
+            String value = getScript().expand(h.getValue());
+            logger.info(String.format("Request heder: %s: %s", h.getName(), possiblyMaskedHeaderValue(h)));
+            headers.add(h.getName(), value);
+        }
         return headers;
     }
 
@@ -767,11 +772,8 @@ public class ApiCall {
             logger.info(headersLabel);
             Header hs[] = mapHeaders(headers);
             for (Header h : hs) {
-                if (h.getName() == "Authorization") // Don't log easily decoded
-                                                    // credentials
-                    logger.info(h.getName() + ": ************");
-                else
-                    logger.info(h);
+                // Don't log easily decoded credentials
+                logger.info(h.getName() + ": " + possiblyMaskedHeaderValue(h) );
             }
         }
         MediaType contentType = headers.getContentType();
@@ -808,6 +810,10 @@ public class ApiCall {
             } catch (IOException e) {
                 logger.error(e);
             }
+    }
+
+    private String possiblyMaskedHeaderValue(Header h) {
+        return h.getName().equalsIgnoreCase(AUTHORIZATION) ? MASK : h.getValue();
     }
 
     public UnRAVL getScript() {

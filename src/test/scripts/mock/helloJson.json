@@ -1,0 +1,10 @@
+{
+   "name" : "mock /hello.son returns 'Hello' 'World'",
+   "GET" : "/hello.json",
+   "assert" : [ { "json" :
+                   { "greeting" : "Hello",
+                     "addressee" : "World" } 
+                   },
+                { "headers" : { "Content-Type" : "application/json" } }
+              ]
+}

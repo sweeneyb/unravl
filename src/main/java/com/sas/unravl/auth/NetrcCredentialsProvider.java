@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
  * machine <em>qualified.hostname</em> login <em>userid-for-host</em> password <em>password-for-host</em> port <em>port-number</em>
  * </pre>
  * <p>
- * Items must appeaqr in this order. You may use <code>user</code> instead of
+ * Items must appear in this order. You may use <code>user</code> instead of
  * <code>login</code>.
  * </p>
  * <p>

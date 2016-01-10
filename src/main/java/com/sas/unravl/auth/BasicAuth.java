@@ -1,6 +1,7 @@
 // Copyright (c) 2014, SAS Institute Inc., Cary, NC, USA, All Rights Reserved
 package com.sas.unravl.auth;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.UnRAVL;
@@ -72,10 +73,13 @@ public class BasicAuth extends BaseUnRAVLAuth {
                         "basic auth requires an HTTP method and URI");
             // TODO: allow the value to be a string; use that host name or
             // location for credential lookup
-            boolean enabled = Json.firstFieldValue(getScriptlet())
-                    .booleanValue();
-            if (!enabled)
+            JsonNode authVal = Json.firstFieldValue(getScriptlet());
+            if (!authVal.isBoolean()) {
+                throw new UnRAVLException("Value of \"auth\" must be boolean. Found: " + authVal);
+            }
+            if (!authVal.booleanValue())
                 return;
+            
             if (getScriptlet().get("mock") != null)
                 mock = getScriptlet().get("mock").booleanValue();
             // Note: the URI should already be expanded at this point
@@ -110,7 +114,7 @@ public class BasicAuth extends BaseUnRAVLAuth {
         // script
         getScript().addRequestHeader(
                 new BasicHeader("Authorization", "Basic " + creds));
-        logger.info("\"basic\" auth added 'Authorization: Basic ******' header");
+        logger.info("\"basic\" auth added 'Authorization: Basic ********' header");
     }
 
 }

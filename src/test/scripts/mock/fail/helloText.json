@@ -1,0 +1,6 @@
+
+{
+   "name" : "mock /hello.txt returns 'Hello, World!'. Thus, this test should fail",
+   "GET" : "/hello.txt",
+   "assert" : { "text" : "Hello, Wally World!" }
+}

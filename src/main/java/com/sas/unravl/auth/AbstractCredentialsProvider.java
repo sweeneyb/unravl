@@ -56,9 +56,16 @@ abstract public class AbstractCredentialsProvider implements
             boolean mock) throws IOException {
         if (mock)
             return mockCredentials();
-        String userName = Json.stringFieldOr(auth, "login", null);
-        String password = Json.stringFieldOr(auth, "password", null);
+        String userName = credentialValue(auth, "login");
+        if (userName == null)
+            userName = credentialValue(auth, "user");
+        String password = credentialValue(auth, "password");
         return getHostCredentials(host, userName, password, mock);
+    }
+
+    private String credentialValue(ObjectNode auth, String key) {
+        String val =Json.stringFieldOr(auth, key, null);
+        return val == null ? null : runtime.expand(val);
     }
 
     /**

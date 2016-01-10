@@ -12,7 +12,6 @@ import com.jayway.jsonpath.spi.mapper.JacksonMappingProvider;
 import com.jayway.jsonpath.spi.mapper.MappingProvider;
 import com.sas.unravl.annotations.UnRAVLAssertionPlugin;
 import com.sas.unravl.annotations.UnRAVLExtractorPlugin;
-import com.sas.unravl.assertions.UnRAVLAssertion;
 import com.sas.unravl.assertions.UnRAVLAssertionException;
 import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
 import com.sas.unravl.util.Json;

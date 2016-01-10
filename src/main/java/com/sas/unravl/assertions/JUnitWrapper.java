@@ -220,6 +220,11 @@ public class JUnitWrapper {
      */
     public static void tryScriptsInDirectory(Map<String, Object> env,
             String directoryName, String pattern) {
+        tryScriptsInDirectory(null, env, directoryName, pattern);
+    }
+
+    public static void tryScriptsInDirectory(UnRAVLRuntime runtime,
+            Map<String, Object> env, String directoryName, String pattern) {
         File dir = new File(directoryName);
         ArrayList<String> fileNames = new ArrayList<String>();
         FilenameFilter filter = pattern == null ? unravlScriptFile
@@ -230,7 +235,7 @@ public class JUnitWrapper {
                 if (!file.isDirectory())
                     fileNames.add(file.getAbsolutePath());
             }
-            int count = JUnitWrapper.tryScriptFiles(env,
+            int count = JUnitWrapper.tryScriptFiles(runtime == null ? new UnRAVLRuntime(env) : runtime, 
                     fileNames.toArray(new String[fileNames.size()]));
             System.out.println(String.format("Tried %s scripts in %s%s", count,
                     directoryName, pattern == null ? "" : " matching pattern "
@@ -253,12 +258,16 @@ public class JUnitWrapper {
      */
     public static int tryScriptFiles(Map<String, Object> env,
             String... scriptFileNames) {
+        return tryScriptFiles(new UnRAVLRuntime(env), scriptFileNames);
+    }
+
+    public static int tryScriptFiles(UnRAVLRuntime rt,
+            String... scriptFileNames) {
         int count = 0;
-        // for now, assume each command line arg is an UnRAVL script
         for (String scriptFile : scriptFileNames) {
             try {
                 count++;
-                UnRAVLRuntime runtime = new UnRAVLRuntime(env);
+                UnRAVLRuntime runtime = rt == null ? new UnRAVLRuntime() : rt;
                 runtime.execute(scriptFile);
 
                 if (runtime.getFailedAssertionCount() > 0) {
