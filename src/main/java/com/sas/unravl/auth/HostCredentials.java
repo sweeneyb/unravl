@@ -8,7 +8,7 @@ package com.sas.unravl.auth;
  * 
  * @author David.Biesack@sas.com
  */
-public final class HostCredentials {
+public class HostCredentials {
 
     private String userName;
 

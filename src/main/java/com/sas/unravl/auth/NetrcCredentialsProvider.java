@@ -34,13 +34,13 @@ import org.apache.log4j.Logger;
  * machine <em>qualified.hostname</em> login <em>userid-for-host</em> password <em>password-for-host</em> port <em>port-number</em>
  * </pre>
  * <p>
- * Key/Value pairs may be in any order.
- * Lines may use <code>user</code> instead of <code>login</code>;
- * lines may use <code>host</code> instead of <code>machine</code>.
+ * Key/Value pairs may be in any order. Lines may use <code>user</code> instead
+ * of <code>login</code>; lines may use <code>host</code> instead of
+ * <code>machine</code>.
  * </p>
  * <p>
- * Passwords with whitespace in them must be quoted with double quotes.
- * Thus, passwords may not contain double quote characters.
+ * Passwords with whitespace in them must be quoted with double quotes. Thus,
+ * passwords may not contain double quote characters.
  * 
  * @author DavidBiesack@sas.com
  */
@@ -60,7 +60,8 @@ public class NetrcCredentialsProvider extends AbstractCredentialsProvider {
     private static final int KEY_GROUP = 1;
     private static final int QUOTED_VAL_GROUP = 3;
     private static final int UNQUOTED_VAL_GROUP = 4;
-    static final Logger logger = Logger.getLogger(NetrcCredentialsProvider.class);
+    static final Logger logger = Logger
+            .getLogger(NetrcCredentialsProvider.class);
 
     /*
      * (non-Javadoc)
@@ -106,16 +107,16 @@ public class NetrcCredentialsProvider extends AbstractCredentialsProvider {
         // Also, the loop below would need to read all rows, not stop when a
         // match is found. So we don't cache and simply read the file each time
         // it is needed
-        
-        try (BufferedReader reader = new BufferedReader(new FileReader(netrc))){
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(netrc))) {
             for (String line = reader.readLine(); line != null; line = reader
                     .readLine()) {
                 if (line.trim().startsWith("#"))
                     continue;
                 Matcher m = KEY_VALUE.matcher(line);
-                String lHost = null, lPort = null, lLogin = null, lPassword = null;
+                String lHost = null, lPort = null, lLogin = null, lPassword = null, lClientId = null, lClientSecret = null, lAccessToken = null;
                 while (m.find()) {
-                    String key = m.group(KEY_GROUP);
+                    String key = m.group(KEY_GROUP).toLowerCase();
                     String val = m.group(QUOTED_VAL_GROUP);
                     if (val == null)
                         val = m.group(UNQUOTED_VAL_GROUP);
@@ -134,20 +135,33 @@ public class NetrcCredentialsProvider extends AbstractCredentialsProvider {
                     case "password":
                         lPassword = val;
                         break;
-                   default:
-                       logger.warn("Ignoring unknown key " + key + " in netrc file");
+                    case "clientid":
+                        lClientId = val;
+                        break;
+                    case "clientsecret":
+                        lClientSecret = val;
+                        break;
+                    case "accesstoken":
+                        lAccessToken = val;
+                        break;
+                    default:
+                        logger.warn("Ignoring unknown key " + key
+                                + " in netrc file");
                     }
                 }
-                    if (host.equals(lHost)
-                            && Objects.equals(port, lPort)) {
-                        if (login == null || lLogin.equals(login)) {
-                            login = lLogin;
-                            password = lPassword;
+                if (host.equals(lHost) && Objects.equals(port, lPort)) {
+                    if (login == null || lLogin.equals(login)) {
+                        login = lLogin;
+                        password = lPassword;
+                        if (lClientId != null || lClientSecret != null || lAccessToken != null)
+                            return credentials(login, password, lClientId,
+                                    lClientSecret, lAccessToken);
+                        else
                             return credentials(login, password);
-                        }
                     }
                 }
-        } 
+            }
+        }
         return null;
     }
 

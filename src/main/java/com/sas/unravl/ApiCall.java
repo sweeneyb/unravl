@@ -479,6 +479,7 @@ public class ApiCall {
 
         long start = System.currentTimeMillis();
         try {
+            logger.info(method.name() + " " + getURI());
             InternalResponse response = restTemplate.execute(getURI(),
                     HttpMethod.valueOf(method.name()), requestCallback,
                     responseExtractor);

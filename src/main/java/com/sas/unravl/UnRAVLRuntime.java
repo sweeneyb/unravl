@@ -323,10 +323,12 @@ public class UnRAVLRuntime {
      * alt text may also contain embedded variable expansions.
      *
      * @param text
-     *            an input string
-     * @return the string, with environment variables replaced.
+     *            an input string. May be null.
+     * @return the string, with environment variables replaced. Returns null if the input is null.
      */
     public String expand(String text) {
+        if (text == null)
+            return null;
         if (variableResolver == null) {
             variableResolver = new VariableResolver(getBindings());
         }
