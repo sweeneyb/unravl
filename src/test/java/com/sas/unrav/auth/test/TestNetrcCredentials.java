@@ -35,6 +35,7 @@ public class TestNetrcCredentials {
                 new String[] {"host.withport8080.com:8080", "test.user.b", "test.user.b-secret"},
                 new String[] {"host.whitespace.com", "test.user.c", "test.user.c-secret"},
                 new String[] {"host.special.com", "test.user.d", "test.user.d password"},
+                new String[] {"host.alt.order", "test.user.e", "test.password.e"},
                 });
     } //@formatter:on
 
