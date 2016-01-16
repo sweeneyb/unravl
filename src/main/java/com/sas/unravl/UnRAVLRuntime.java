@@ -358,7 +358,14 @@ public class UnRAVLRuntime implements Cloneable {
         return variableResolver.expand(text);
     }
 
-    public void bind(String varName, Object value) {
+    /**
+     * Bind a value within this runtime's environment. This will add a new
+     * binding if <var>varName</var> is not yet bound, or replace the old binding.
+     * @param varName variable name
+     * @param value variable value
+     * @return this runtime, which allows chaining bind calls.
+     */
+    public UnRAVLRuntime bind(String varName, Object value) {
         if (VariableResolver.isUnicodeCodePointName(varName)) {
             UnRAVLException ue = new UnRAVLException(String.format(
                     "Cannot rebind special Unicode variable %s", varName));
@@ -366,20 +373,34 @@ public class UnRAVLRuntime implements Cloneable {
         }
         env.put(varName, value);
         logger.trace("bind(" + varName + "," + value + ")");
-        resetBindings();
+        return this;
     }
 
-    public boolean bound(String varName) {
-        return env.containsKey(varName);
-    }
 
+    /**
+     * Return the value bound to a variable in this runtime's environment
+     * @param varName the variable name
+     * @return the value bound to the variable
+     */
     public Object binding(String varName) {
         return env.get(varName);
     }
 
     /**
-     * Call this when bindings have changed.
+     * Test if the value bound in this script's environment
+     * @param varName the variable name
+     * @return true iff the variable is bound 
      */
+    public boolean bound(String varName) {
+        return env.containsKey(varName);
+    }
+
+
+    /**
+     * Call this when bindings have changed.
+     * @deprecated no longer needed. This method will be removed in 1.1.0
+     */
+    @Deprecated
     public void resetBindings() {
         // null signals that we need to recreate the resolver after
         // the bindings have changed.

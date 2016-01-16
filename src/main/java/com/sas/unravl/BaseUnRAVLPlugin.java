@@ -14,14 +14,14 @@ public abstract class BaseUnRAVLPlugin implements UnRAVLPlugin {
     /**
      * Extract a boolean value from the current scriptlet. For example, the "basic"
      * auth element 
-     * </pre>
+     * <pre>
      * { "auth" : { "basic" : true } }
      * </pre>
      * can use this to get the boolean value named "basic"
      * @param scriptlet the element inside an UnRAVL script
      * @param optionName the name of the option
-     * @return
-     * @throws UnRAVLException
+     * @return true if th eoption was found and has the value true; otherwise false
+     * @throws UnRAVLException if the value is not a boolean
      */
     protected static boolean booleanOption(ObjectNode scriptlet, String optionName)
             throws UnRAVLException {
@@ -40,14 +40,15 @@ public abstract class BaseUnRAVLPlugin implements UnRAVLPlugin {
     /**
      * Extract a text value from the current scriptlet. For example, the "oath2"
      * auth element 
-     * </pre>
+     * <pre>
      * { "auth" : { "oath2" : "https://www.example.com/auth/token", "query" : "access_token" } }
      * </pre>
      * can use this to get the boolean value named "access_token"
      * @param scriptlet the element inside an UnRAVL script
      * @param optionName the name of the option
-     * @return
-     * @throws UnRAVLException
+     * @param defaultValue value to return if the option is not present
+     * @return the string associated with the options name if found, else the default value
+     * @throws UnRAVLException if the value is not a text node
      */
     protected String stringOption(ObjectNode scriptlet, String optionName, String defaultValue)
             throws UnRAVLException {

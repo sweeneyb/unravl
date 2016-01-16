@@ -9,11 +9,13 @@ and the *`value`* and *`options`* are used to configure that authentication.
 Credentials can be included in the options, or stored
 separately from the script; see [Credentials](#credentials) below.
 
-UnRAVL supports two authentication models,
-* [basic](#basic)
-* [cas](#cas)
+UnRAVL supports three authentication models,
+* [basic](#basic) Basic Authentication
+* [oauth2](#oauth2) OAuth2 Authentication
+* [cas](#cas) Central Authentication Service
 
-Tip: You can put the `"auth"` member in a template and all scripts which inherit from that template will use that authentication method.
+Tip: You can put the `"auth"` member in a template (including
+`implicit.template`) and all scripts which inherit from that template will use that authentication method.
 
 ## basic
 
@@ -24,7 +26,7 @@ via the `.netrc` file (see [Credentials](#credentials) below) and adds an
 
 header to the request.
 
-The basic auth syntax is
+The basic auth syntax is one of:
 ```JSON
   "auth" : { "basic" : true }
   "auth" : { "basic" : true, "login" : "testuserid" }
@@ -33,7 +35,119 @@ The basic auth syntax is
 
 If the *`"password"`* or *`"login"`* id are omitted, they are obtained
 from the credentials file, described below, based on the host
-name of the API call.
+name of the API call. You may use *`"user"`* instead of *`"login"`*.
+
+## oauth2
+
+OAUth2 authentication will authenticate using a separate login or
+authentication service via a REST API call, obtaining
+an *access token* which is then used on the target API call.
+OAUth2 uses two sets of credentials:
+1. client ID and client secret
+2. user ID and password
+
+The form is one of
+```JSON
+  "auth" : { "oauth2" : "oauth-server-URL" }
+  "auth" : { "oauth2" : "oauth-server-URL", options }
+```
+
+You may use the key `"oauth2"`, `"oauth"`, `"OAuth2"`, or `"OAuth"`.
+
+If the credentials are not provided in the *`"oauth2"`* object,
+they are found via the credentials provider, such as the
+`.netrc` file.
+
+The OAuth2 object will POST request to the authentication
+server named by the *`oauth-server-URL`* value. The POST body
+is a `application/x-www-form-urlencoded`
+body constructed by passing corresponding values for the  form parameters
+`grant_type`, `username`, and `password`
+
+UnRAVL will pass the user ID and user password from
+the credentials provider (such as from the line in the `.netrc` file
+that matches the *`oauth-server-URL`* host/machine).
+
+The `POST` call will also use [Basic authentication]](#basic) based on
+the client ID and client secret.
+
+When using `.netrc` credential provider, the `.netrc` file
+may include the two additional fields, `clientId` and `clientSecret`
+(these keys are not case sensitive).
+
+The OAuth2 token server should return a JSON response, which
+must be a valid JSON object. The `access_token` value is
+read from the respnse. The value will be bound in the current
+UnRAVL environment using the name `access_token` (Warning: this
+may replace an existing binding for that variable.)
+
+Next, the OAuth2 object will add a
+```
+Authentication: Basic {access_token}
+```
+header to the current REST API call.
+
+### OAuth2 authentication options
+
+The `"oauth2"` object allows some optional parameters.
+If you want to include credentials directly in the script
+instead of using credentials in the credential provider
+(such as the `.netrc` file), you can pass them:
+
+```
+  "auth" : { "oauth2" : "oauth-server-URL",
+             "user" : "userid-string", "password" : "password-string" }
+```
+or
+```
+  "auth" : { "oauth2" : "oauth-server-URL",
+             "user" : "testuserid", "password" : "testSecret",
+             "clientId" : "client-id-string", "clientSecret" : "client-secret-string" }
+```
+
+If you have a static access token, you can store that in the `.netrc`
+file or include it in the options:
+
+```
+  "auth" : { "oauth2" : "oauth-server-URL",
+             "accessToken" : "access-token-string" }
+```
+In this case, the above `POST` to the *`oauth2-server-URL`* is skipped.
+
+If the API requires the access token passed as a *query parameter*
+instead of the authentication token, add the `"parameter" : "var-name"`
+option to the `"oauth2"` object.
+UnRAVL will add the query parameter to the current URL,
+with the access token.
+
+For example, for
+
+```
+        "GET" : "https://api-ssl.bitly.com/v3/user/link_lookup?link={link}&format=json",
+        "auth" : { "oauth2" : "https://api-ssl.bitly.com/oauth/access_token",
+                   "parameter" : "access_token" }
+```
+
+UnRAVL will add the access token to the URL, such as
+```
+https://api-ssl.bitly.com/v3/user/link_lookup?link={link}&format=json&access_token=6f8dbc338af9
+```
+
+By default, oauth2 will bind the access token string
+as the variable `access_token` in the current environment
+in case you want to use it in other ways via `{access_token}`.
+The caller can choose to bind to a different variable name
+using the `"bindAccessToken" : "varName"` option.
+This is useful if a script is dealing with multiple
+OAUth2 servers or different access tokens for different APIs.
+
+For example, for
+```
+"bindAccessToken" : "bitlyAccessToken"
+```
+option, the oauth2 object will bind the variable
+`bitlyAccessToken` in the environment instead of
+the variable `access_token`.
 
 ## cas
 
@@ -46,9 +160,9 @@ the request URL.
 
 The form is
 ```JSON
-  "auth" : { "cas" : "login-Url" }
-  "auth" : { "cas" : "login-Url", "login" : "testuserid" }
-  "auth" : { "cas" : "login-Url", "login" : "testuserid", "password" : "testSecret" }
+  "auth" : { "cas" : "login-URL" }
+  "auth" : { "cas" : "login-URL", "login" : "testuserid" }
+  "auth" : { "cas" : "login-URL", "login" : "testuserid", "password" : "testSecret" }
 ```
 
 Example:
@@ -69,7 +183,7 @@ like
  GET http://www.example.com/SASMyApi/rest/myEndpoint/myResource?ticket=ST-188763-kEcYVdVfAVYdmEyyfZWg-cas
 
 The TGT is stored in the environment using `&lt;<em>hostname</em>&gt;.TGT`,
-where `&lt;<em>hostname</em>&gt;` is taken from the `login-Url`. The TGT
+where `&lt;<em>hostname</em>&gt;` is taken from the `login-URL`. The TGT
 will be resused in other scripts that call the same host.
 
 ## Credentials
@@ -111,11 +225,23 @@ The port is optional; use this if you want to match
 a test API on a non-default port such as port 8080.
 
 The *hostname* field must *exactly* match the hostname in UnRAVL API
-calls.
+calls (ignoring case).
+
+, the .netrc entry for the token server
+may have the
+
+When using `.netrc` credential provider for OAuth2 authentication,
+the `.netrc` file
+may include the two additional fields, `clientId` and `clientSecret`
+(these keys are not case sensitive). Example:
+
+```
+ host machine api-ssl.bitly.com user bit.ly-user password bit.ly-passwd clientId bit.ly-client-id-string clientSecret bit.ly-client-secret-string
+```
 
 You may also embed the credentials directly inside the authentication element in the script.
 These may be the login id and password (if there are no security issues with directly embedding
-the credentials in the script).
+the plain text credentials in the script, such as when using test users).
 
 ```JSON
   "auth" : { "basic" : true,
@@ -145,11 +271,10 @@ The scripts can then access the credentials from the environment, such as
 or
 
 ```JSON
-  "auth" : { "cas" : "{casUrl}",
+  "auth" : { "oauth2" : "{oauth2Url}",
              "login" : "{hostname.login}",
              "password" : "{hostname.password}" }
 ```
 
 If the `"login"` is embedded but no `"password"`,
 UnRAVL will look up the password for that host/login pair in the `.netrc` file.
-

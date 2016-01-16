@@ -33,10 +33,10 @@ import org.apache.http.message.BasicHeader;
 import org.apache.log4j.Logger;
 
 /**
- * An auth plugin which verifies that the API call is authenticated with Central
- * Authentication Service. This authenticates to obtain a Ticket Granting Ticket
- * (TGT) using the user's credentials stored in .netrc in the current directory,
- * the user's ~/.netrc or %USERPROFILE%\_netrc file (Windows), then uses that
+ * An auth plugin which authenticates with Central Authentication Service. 
+ * This authenticates to obtain a Ticket Granting Ticket
+ * (TGT) using the user's credentials provided by the {@link CredentialsProvider}
+ * which by default is the {@link NetrcCredentialsProvider}. This then uses that
  * TGT to obtain a Service Ticket for the current UnRAVL script API. Optionally,
  * credentials may be enclosed directly in the "cas" element.
  * <p>

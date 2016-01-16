@@ -288,14 +288,37 @@ public class UnRAVL {
         getRuntime().cancel();
     }
 
-    public void bind(String varName, Object value) {
+
+    /**
+     * Bind a value within this script's environment. This will add a new
+     * binding if <var>varName</var> is not yet bound, or replace the old binding.
+     * @param varName the variable name
+     * @param value the variable value
+     * @return this script, which allows chaining bind calls.
+     * @see UnRAVLRuntime#bind(String, Object)
+     */
+    public UnRAVL bind(String varName, Object value) {
         getRuntime().bind(varName, value);
+        return this;
     }
 
+    /**
+     * Return the value bound to a variable in this script's environment
+     * @param varName the variable name
+     * @return the value bound to the variable
+     * @see UnRAVLRuntime#binding(String)
+     */
     public Object binding(String varName) {
         return getRuntime().binding(varName);
     }
 
+
+    /**
+     * Test if the value bound in this script's environment
+     * @param varName the variable name
+     * @return true iff the variable is bound 
+     * @see UnRAVLRuntime#bound(String)
+     */
     public boolean bound(String varName) {
         return getRuntime().bound(varName);
     }

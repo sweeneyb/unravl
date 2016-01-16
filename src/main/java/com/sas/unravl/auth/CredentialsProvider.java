@@ -18,19 +18,21 @@ import java.io.IOException;
 public interface CredentialsProvider {
 
     /**
-     * Get credentials for the host. Note: If reading credentials from a .netrc
-     * file, the credentials are <em>not</em> cached; we reread the .netrc file
-     * each time. (This allows one script to obtain credentials from a service
-     * and store them in .netrc in the current directory.)
-     *
+     * Get credentials for the host.
      * @param host
      *            the host name or host:port string
      * @param auth
      *            The JsonNode containing the auth contents (usually login and
-     *            password)
+     *            password). Examples would be
+     *            <pre>
+     *            { "basic" : true }
+     *            { "oath2" : "https://www.example.com/auth/token" }
+     *            </pre>
      * @param mock
      *            if true, return mock credentials
-     * @return an object containing the user login name and password
+     * @return an object containing the user login name and password.
+     * This may be a {@link OAuth2Credentials} object if the credentials
+     * contain <code>clintId</code>, <code>clientPassword</code>, or <code>accessToken</code>
      * @throws IOException
      *             if we could not read the .netrc file
      */
@@ -53,14 +55,12 @@ public interface CredentialsProvider {
      * @param mock
      *            if true, return mock credentials
      * @return an object containing the user login name and password
-     * @throws FileNotFoundException
-     *             if we could not find a .netrc or _netrc file
      * @throws IOException
-     *             if we could not read the .netrc or _netrc file
+     *             if there is an I/O exception trying to read stored credentials
      */
     public abstract HostCredentials getHostCredentials(String host,
             String userName, String password, boolean mock)
-            throws FileNotFoundException, IOException;
+            throws IOException;
 
     public void setRuntime(UnRAVLRuntime runtime);
 }

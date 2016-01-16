@@ -452,7 +452,7 @@ public class ApiCall {
         }
         // expand the URI after authenticating: OAuth2 or other auth may set env vars that should
         // be expanded in the URI
-        setURI(script.expand(script.getURI()));
+        setURI(script.expand(getURI()));
         // Use RequestCallback and ResponseExtractor
         // to handle all request bodies, including binary.
         // RestTemplate.exchange can't handle binary byte[] body

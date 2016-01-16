@@ -149,7 +149,7 @@ public class NetrcCredentialsProvider extends AbstractCredentialsProvider {
                                 + " in netrc file");
                     }
                 }
-                if (host.equals(lHost) && Objects.equals(port, lPort)) {
+                if (host.equalsIgnoreCase(lHost) && Objects.equals(port, lPort)) {
                     if (login == null || lLogin.equals(login)) {
                         login = lLogin;
                         password = lPassword;
