@@ -1,0 +1,11 @@
+{
+    "name" : "Get OAuth2 access_token.",
+    "POST" : "{oath2TokenUrl}",
+    "auth" : { "basic" : true,
+               "login" : "{clientId}",
+               "password" : "{clientSecret}"
+    },
+    "headers" : { "Content-Type": "application/x-www-form-urlencoded" },
+    "body" : { "text" : "{accessTokenRequestBody}" },
+    "bind" : { "jsonPath" : { "access_token" : "{accessTokenJsonPath}" } }
+}

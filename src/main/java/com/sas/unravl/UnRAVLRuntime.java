@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ import org.springframework.stereotype.Component;
  * @author DavidBiesack@sas.com
  */
 @Component
-public class UnRAVLRuntime {
+public class UnRAVLRuntime implements Cloneable {
 
     private static final Logger logger = Logger.getLogger(UnRAVLRuntime.class);
     private Map<String, Object> env; // script variables
@@ -66,6 +67,10 @@ public class UnRAVLRuntime {
         this(new LinkedHashMap<String, Object>());
     }
 
+    /**
+     * Instantiate a new runtime with the given environment
+     * @param environment name/value bindings
+     */
     public UnRAVLRuntime(Map<String, Object> environment) {
         configure();
         this.env = environment;
@@ -74,6 +79,24 @@ public class UnRAVLRuntime {
             bind(e.getKey().toString(), e.getValue());
         bind("failedAssertionCount", Integer.valueOf(0));
         resetBindings();
+    }
+    
+
+    /**
+     * Instantiate a new runtime with the environment of the input runtime instance.
+     * The environment is copied, but the new runtime gets its own empty list
+     * of calls, scripts, and templates.
+     * @param runtime an existing Runtime (may not be null)
+     */
+    public UnRAVLRuntime(UnRAVLRuntime runtime) {
+        env = new LinkedHashMap<String, Object>();
+        env.putAll(runtime.env);
+        calls = new ArrayList<ApiCall>();
+        scripts = new LinkedHashMap<String, UnRAVL>();
+        canceled = false;
+        variableResolver = new VariableResolver(env);
+        templates = new LinkedHashMap<String, UnRAVL>();
+        setScriptLanguage(runtime.getScriptLanguage());
     }
 
     /**

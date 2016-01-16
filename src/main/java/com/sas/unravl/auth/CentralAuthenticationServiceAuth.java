@@ -44,14 +44,15 @@ import org.apache.log4j.Logger;
  *
  * <pre>
  * "auth" : { "cas" : <em>logon-URL</em> }
- * "auth" : { "cas" : <em>logon-URL</em>, "login" : "myuserid" }
- * "auth" : { "cas" : <em>logon-URL</em>, "login" : "userid", "password" : "mySecret" }
+ * "auth" : { "cas" : <em>logon-URL</em>, "login" : "myUserId" }
+ * "auth" : { "cas" : <em>logon-URL</em>, "login" : "myUserId", "password" : "mySecret" }
  * "auth" : { "cas" : <em>logon-URL</em>, "mock" : <em>boolean-value</em>
  * </pre>
  *
  * where <em>logon-URL</em> is a string containing the URL of the ticket
  * granting ticket authentication API, such as
- * <code>"http://www.example.com/SASLogon/v1/tickets"</code>
+ * <pre>
+ * { "cas" : "http://www.example.com/SASLogon/v1/tickets" }</pre>
  * <p>
  * The service ticket is appended as a query parameter to the end of the URI as
  * <code>&amp;ticket=&lt;<em>service-ticket</em>&gt;</code> or
@@ -60,7 +61,7 @@ import org.apache.log4j.Logger;
  * <code>&lt;<em>hostname</em>&gt;.TGT</code> where hostname is taken from the
  * logon-URL value in the JSON specification
  * <p>
- * If mock is true, this precondition will create a mock service ticket.
+ * If mock is true, this auth object will create a mock service ticket.
  *
  * @author DavidBiesack@sas.com
  */
@@ -158,6 +159,7 @@ public class CentralAuthenticationServiceAuth extends BaseUnRAVLAuth {
             return "ST-18-umUeNL4yUkWHES2VdtKki5mFzatga43kNNCe3niguLWaUxl1aK-cas";
         CloseableHttpClient httpclient = HttpClients.createDefault();
         try {
+            // TODO: make this call via UnRAVL, not HttpPost
             HttpPost post = new HttpPost();
             post.setURI(new URI(tgt));
             Header requestHeaders[] = new Header[] { new BasicHeader(
