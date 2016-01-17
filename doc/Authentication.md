@@ -39,6 +39,11 @@ name of the API call. You may use *`"user"`* instead of *`"login"`*.
 
 ## oauth2
 
+OAuth2 is a fairly complex authentication and authorization protocol,
+with many variations. UnRAVL supports a simple OAuth2 model;
+more variations such as three-legged authentication may be added
+in the future by extending the configuration.
+
 OAUth2 authentication will authenticate using a separate login or
 authentication service via a REST API call, obtaining
 an *access token* which is then used on the target API call.
@@ -183,7 +188,7 @@ like
  GET http://www.example.com/SASMyApi/rest/myEndpoint/myResource?ticket=ST-188763-kEcYVdVfAVYdmEyyfZWg-cas
 
 The TGT is stored in the environment using `&lt;<em>hostname</em>&gt;.TGT`,
-where `&lt;<em>hostname</em>&gt;` is taken from the `login-URL`. The TGT
+*where `&lt;<em>hostname</em>&gt;` is taken from the `login-URL`. The TGT
 will be resused in other scripts that call the same host.
 
 ## Credentials
