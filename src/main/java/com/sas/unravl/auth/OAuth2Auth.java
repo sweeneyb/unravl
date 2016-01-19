@@ -57,7 +57,6 @@ import org.apache.log4j.Logger;
 @UnRAVLAuthPlugin({ "oauth", "oauth2", "OAuth", "OAuth2" })
 public class OAuth2Auth extends BaseUnRAVLAuth {
 
-    private static final String DEFAULT_OAUTH_FORM_ENCODED_REQUEST_BODY = "grant_type=password&username={encodedUserId}&password={encodedPassword}";
     private static final String DEFAULT_ACCESS_TOKEN_JSON_PATH = "$.access_token";
     private static final String DEFAULT_OATH_SCRIPT_RESOURCE = "/com/sas/unravl/auth/get-oauth-token.unravl";
     private static final String OAUTH_SCRIPT_KEY = "OAauth2Script";
@@ -65,8 +64,6 @@ public class OAuth2Auth extends BaseUnRAVLAuth {
     private static final Logger logger = Logger.getLogger(OAuth2Auth.class);
     
     private static String ACCESS_TOKEN_JSON_PATH_KEY = "accessTokenJsonPath";
-
-    private static final String ACCESS_TOKEN_REQUEST_BODY_KEY = "accessTokenRequestBody";
     
     @Override
     public void authenticate(UnRAVL script, ObjectNode oauthSpec, ApiCall call)
@@ -121,7 +118,7 @@ public class OAuth2Auth extends BaseUnRAVLAuth {
     }
 
     // If the oauth2 object options includes a "parameter" : "paramName",
-    // add a query parameter to the URI using the paramater name
+    // add a query parameter to the URI using the parameter name
     private void addOptionalQueryParameter(ObjectNode auth, String access_token)
             throws UnRAVLException {
         // if client specifies a query parameter, we will add it to the request URI
@@ -166,31 +163,34 @@ public class OAuth2Auth extends BaseUnRAVLAuth {
      * Get the access token. If it is part of the credentials for the OAuth2
      * host, return that static access token.
      * <p>
-     * If a cached token exists, retrun it.
+     * If a cached token exists, return it.
      * </p>
      * <p>
-     * Otherwise, se UnRAVL to run an REST API POST call to the authentication
+     * Otherwise, use UnRAVL to run an REST API POST call to the authentication
      * server to get an OAAth access token. The default call uses Basic
      * Authentication using with the clientId and clientSecret to authenticate.
-     * The default request body is
+     * The default request body is a <code>application/x-www-form-urlencoded</code> form
      * </p>
      * 
      * <pre>
-     * grant_type=password&username={encodedUserId}&password={encodedPassword}
+     *  { "grant_type" : "password",
+          "username" : "{userId}",
+          "password" : "{password}" }
      * </pre>
+     * 
      * <p>
-     * where <code>encodedUserId</code> and <code>encodedPassword</code> are
-     * form encoded values of the user id and password for the OAth auth server.
+     * where <code>userId</code> and <code>password</code> are
+     * the user id and password associated with the OAth authentication server hostname.
      * The client ID, client password, user ID and password are read from the
      * {@link CredentialsProvider}, normally the
      * {@link NetrcCredentialsProvider}. See that class for the format of the
-     * .netrc file.
+     * <code>.netrc</code> file.
      * <p>
      * The UnRAVL script is found via the classpath at
      * <code>/com/sas/unravl/auth/get-oauth-token.unravl</code> (the default
      * resource is in the UnRAVL jar) but this resource path can be changed by
-     * the text option <code>"getOauthScript" : "/paths/to/unravl/script"</code>
-     * . The UnRAVL script should invoke the POST to the authentication server,
+     * the text option <code>"OAauth2Script" : "/paths/to/unravl/script"</code>
+     * in the <code>"oath2"</code> element. The UnRAVL script should invoke the POST to the authentication server,
      * then extract and bind the variable <code>access_token</code> from the
      * response.
      * </p>
@@ -244,16 +244,13 @@ public class OAuth2Auth extends BaseUnRAVLAuth {
             return cacheAccessToken(user, host, access_token);
         }
 
-        // Else, use UnRAVL to POST a request to the server to generate an
+        // Else, use UnRAVL to send a request to the server to generate an
         // access_token
 
         String oAuthScriptResourcePath = stringOption(getScriptlet(),
                 OAUTH_SCRIPT_KEY, DEFAULT_OATH_SCRIPT_RESOURCE);
         String accessTokenJsonPath = stringOption(getScriptlet(),
                 ACCESS_TOKEN_JSON_PATH_KEY, DEFAULT_ACCESS_TOKEN_JSON_PATH);
-        String accessTokenRequestBody = stringOption(getScriptlet(),
-                ACCESS_TOKEN_REQUEST_BODY_KEY,
-                DEFAULT_OAUTH_FORM_ENCODED_REQUEST_BODY);
 
         // We need a new runtime because we don't want this script to
         // be recorded in the calling runtime's history of scripts, or these
@@ -264,18 +261,13 @@ public class OAuth2Auth extends BaseUnRAVLAuth {
 
         // TODO: convert  the UnRAVL to use { "body" : { "form" : { name : value, ... }}}
         // so we don't have to deal with encodedUserId etc.
-        String encodedUserId = urlEncode(creds.getUserName());
-        String encodedPassword = urlEncode(creds.getPassword());
-        tokenRuntime // uh, is it worth defining constants for these keys?
+        tokenRuntime // Hmmmm, is it worth defining constants for these keys?
                 .bind("oath2TokenUrl", authTokenURI.toString())
                 .bind("clientId", creds.getClientId())
                 .bind("clientSecret", creds.getClientSecret())
                 .bind("userId", creds.getUserName())
                 .bind("password", creds.getPassword())
-                .bind("encodedUserId", encodedUserId)
-                .bind("encodedPassword", encodedPassword)
-                .bind(ACCESS_TOKEN_REQUEST_BODY_KEY,
-                        tokenRuntime.expand(accessTokenRequestBody));
+                .bind(ACCESS_TOKEN_JSON_PATH_KEY, accessTokenJsonPath  );
         ObjectMapper mapper = new ObjectMapper();
         try (InputStream in = getClass().getResourceAsStream(
                 oAuthScriptResourcePath)) {
@@ -290,11 +282,4 @@ public class OAuth2Auth extends BaseUnRAVLAuth {
         return cacheAccessToken(user, host, access_token);
     }
 
-    private static String urlEncode(String string) throws UnRAVLException {
-        try {
-            return java.net.URLEncoder.encode(string, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new UnRAVLException(e.getMessage(), e);
-        }
-    }
 }

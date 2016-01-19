@@ -5,7 +5,8 @@
                "login" : "{clientId}",
                "password" : "{clientSecret}"
     },
-    "headers" : { "Content-Type": "application/x-www-form-urlencoded" },
-    "body" : { "text" : "{accessTokenRequestBody}" },
+    "body" : { "form" : { "grant_type" : "password",
+                          "username" : "{userId}",
+                          "password" : "{password}" } },
     "bind" : { "jsonPath" : { "access_token" : "{accessTokenJsonPath}" } }
 }
