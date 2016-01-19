@@ -1,25 +1,32 @@
 This page describes the various forms for supplying a request
 body in [UnRAVL](Reference.md) scripts.
 
-There are three different forms for creating the request body within a script:
+There are four different forms for creating the request body within a script:
 
-* `["body" : { "json" : json-request-body }](#json)`
-* `["body" : { "text" : text-request-body }](#text)`
-* `["body" : { "binary" : binary-request-body }](#binary)`
+* [`"body" : { "json" : json-request-body }`](#json)
+* [`"body" : { "text" : text-request-body }`](#text)
+* [`"body" : { "binary" : binary-request-body }`](#binary)
+* [`"body" : { "form" : form-request-body }`](#form)
 
 As a convenience, you can also use the shortcut form
 for a JSON request body:
 
-* `["body" : json-request-body](#json)`
+* [`"body" : json-request-body`](#json)
 
 ## json
 
-To pass JSON, simply supply the JSON object or array:
+To pass JSON, simply supply the JSON object or array. For example:
 
 ```
 {
   "POST" : "http://www.example.com/api",
-  "body" : { "json" : json-request-body }
+  "body" : { "json" :
+             { "command" : "start",
+               "port" : 80,
+               "args" : [ "--verbose", "--output-file=/tmp/out.dat" ],
+               "validate" : true
+             }
+           }
 }
 ```
 
@@ -53,12 +60,14 @@ In addition, if the value of `"body"` does not match any other body generator, s
 * `{ "json" : *json-body-specification* }`
 * `{ "text" : *text-body-specification* }`
 * `{ "binary" : *binary-body-specification* }`
+* `{ "form" : *form-body-specification* }`
 then the entire value of the `"body"` item is used as a JSON body.
 
-=== Examples ===
+### Examples
 ```JSON
   "body" : { "x" : 0, "y" : 1, "z" : -1 }
-```is processed as if it were
+```
+is processed as if it were
 ```JSON
   "body" : { "json": { "x" : 0, "y" : 1, "z" : -1 } }
 ```
@@ -119,12 +128,45 @@ external files or URLs that contain XML content.
 
 ## binary
 
-This form is for passing binary data as the request body.
+The *`"binary"`* element is for passing binary data as the request body.
 
 ```JSON
-  "binary" : array-of-bytes
+  { "binary" : array-of-bytes }
+```
+```JSON
+  { "binary" : "@binary-file-or-url" }
 ```
 
+such as
 ```JSON
-  "binary" : "@binary-file-or-url"
+  { "binary" : [85, 110, 82, 65, 86, 76, 82, 111, 99, 107, 115, 33] }
 ```
+
+## form
+
+The *`"form"`* element is used to POST
+`application/x-www-form-urlencoded`
+data.
+
+The form body may be passed in a number of ways:
+an embedded JSON object consisting of *n* `"name"` : *`value`* pairs;
+a reference to a variable in the environment that contains
+such data; a reference to a resource or file that contains
+such JSON, or a simple string that contains
+`application/x-www-form-urlencoded` formatted data.
+```JSON
+  { "form" : { "name" : "value", "name" : "value" } }
+```
+```JSON
+  { "form" : "varName" }
+```
+```JSON
+  { "form" : "@file-or-url-containing-JSON" }
+```
+```JSON
+  { "form" : "name=url-encoded-value1&b=name2=url-encoded-value2" }
+```
+
+The *`"form"`* element will add a
+`Content-Type` header with the value
+`application/x-www-form-urlencoded`.
