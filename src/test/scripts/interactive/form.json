@@ -1,0 +1,49 @@
+[
+    { "name" : "implicit.template",
+      "env" : { "bar" : "Bar!",
+                "url" : "http://httpbin.org/post",
+                "stringWithSpaces" : "string with spaces",
+                "encoded" : "foo=Bar!&url=xxx&stringWithQuotes=string+with+quotes"
+              },
+      "POST" : "http://httpbin.org/post",
+      "bind" : [
+          { "json" : "responseBody" },
+          { "groovy" : { "form" : "responseBody.form" } }
+      ],
+      "assert" : [
+          "form.foo.textValue() == bar",
+          "form.url.textValue() == url",
+          "form.stringWithSpaces.textValue() == stringWithSpaces"
+      ]
+    },
+
+    {
+        "name" : "Test POST for data, input from embedded JSON",
+        "body" : { "form" :
+                   { "foo" : "{bar}",
+                     "url" : "{url}",
+                     "stringWithSpaces" : "{stringWithSpaces}"
+                   }
+                 }
+    },
+
+    {
+        "name" : "Test POST for data; input from a variable",
+        "body" : { "form" : "form" }
+    },
+
+    {
+        "name" : "Test POST for data; input from inline text",
+        "body" : { "form" : "foo=Bar%21&stringWithSpaces=string+with+spaces&url=http%3A%2F%2Fhttpbin.org%2Fpost" }
+    },
+
+    {
+        "if" : false,
+        "name" : "Test POST for data; input from inline text. Not yet implemented.",
+        "body" : { "form" : "encoded" }
+    }
+
+]
+
+
+
