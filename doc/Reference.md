@@ -14,7 +14,7 @@ making the API call. You can assert:
 1. The result body matches expected JSON, text or other data
 1. Specific headers exist with specific values
 1. HTTP status code is a specific value or is in a specific set
-1. A groovy expression, testing elements of the response or environment, is true
+1. A Groovy expression, testing elements of the response or environment, is true
 1. others
 
 UnRAVL also supports extracting data from a REST API call's results,
@@ -159,7 +159,7 @@ UnRAVL will also bind the values in the test's template `"env"` block, if one is
 
 Variables bound in the environment may be used elsewhere in UnRAVL
 tests: for building inputs or request headers or request bodies, or for validating the API
-with assertions. See [Environment](#Environment) below for details on how variables
+with assertions. See [Environment](#environment) below for details on how variables
 may be used.
 
 ### preconditions
@@ -204,7 +204,7 @@ Condition may be:
 * true : (the JSON true literal). The test will continue.
 * false : (the JSON false literal). The test will stop executing.
 * string: the value can be the name of UnRAVL environment variable which can be a Boolean object or a JSON BooleanNode value; if true, the test executes.
-* If none of the above match, the value is evaluated as a Groovy expression and if true, the test executes.
+* If none of the above match, the value is evaluated as a Groovy ( or JavaScript) expression and if true, the test executes.
 
 
 Execute the test unconditionally.
@@ -319,7 +319,7 @@ Examples:
 ]
 ```
 
-The *`URL`* is subject to [environment substitution](#Environment):
+The *`URL`* is subject to [environment substitution](#environment):
 
 For example,
 ```JSON
@@ -379,16 +379,15 @@ for specific assertion values. This is done by referring to bindings
 to the script.
 
 Variable names should be simple identifiers, so that they can be referenced
-in Groovy code. However, UnRAVL also imports all system variables and
-operating system environmentvariables, so some environment variables
+in Groovy (or JavaScript) code. However, UnRAVL also imports all system variables, so some environment variables
 may exist with names such as `os.name`, `user.name` and `user.dir`. Hwoever,
-such variables are not available in Groovy scripts (but Groovy can directly access Java system properties via `System.getProperty(name)`.
+such variables are not available in Groovy (or JavaScript) scripts (but Groovy can directly access Java system properties via `System.getProperty(name)`.
 
 An environment binding is *referenced* by using the `{varName}`
 notation. (Do not use leading or trailing whitespace.)
 The value of that binding is substituted.
-(However, Groovy scripts do not need the braces as the environment bindings
-are made directly available as Groovy variables.)
+(However, Groovy or JavaScript scripts do not need the braces as the environment bindings
+are made directly available as script variables.)
 
 If a variable is not bound, this notation passes through; that is
 the value of `{undefinedVariable}`
@@ -398,8 +397,6 @@ is `{undefinedVariable}`.
 
 * system properties
   * at startup, all Java system properties (including values passed via `-Dprop=value`) are bound
-* operating system environment variables
-  * at startup, all operating system environment variables are bound
 * `name`
   * the name of the currently executing script (from the `"name"` element of the script)
 * `unravlScript`
@@ -525,14 +522,14 @@ using them to invoke an API call, and binding values from the API results.
 
 Here, the response body is saved in a file in the output directory with a file name based on the test name,
 for later analysis/use, or for creating a benchmark for later validation.
-The specific values from the body are bound to environment variables, actualElevation, actualLat, actualLong,
-and actualStatus which may be used in assertions later.
+The specific values from the body are bound to environment variables, `actualElevation`, `actualLat`, `actualLong`,
+and `actualStatus` which may be used in assertions later.
 
 The values in the current environment are passed
-to the Groovy scripts as Groovy bindings, so the `{varName}` notation is not needed
+to the Groovy (or JavaScript) scripts as script language bindings, so the `{varName}` notation is not needed
 in the expressions. If you use `{varName}` in a groovy expression, it will be substituted
-before Groovy is interpreted, so it is useful to *generate* the Groovy source,
-or to inject content into  Groovy string literals.
+before the script is interpreted, so it is useful to *generate* the script source,
+or to inject content into string literals.
 
 Note how the literal value `"OK"` may be quoted `'OK'`
 in the Groovy assertion `"'OK' == actualStatus"`.
