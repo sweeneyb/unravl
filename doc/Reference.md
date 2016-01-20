@@ -733,11 +733,15 @@ Run UnRAVL as:
     src\main\bin\unravl.bat src\test\scripts\hello.json # from Windows
 ```
 
-You may set system properties to configure UnRAVL
-by setting the `UNRAVL_OPT` environment variable
+You may set system properties to configure UnRAVL or initialize the UnRAVL
+[environment](#Environment) variables by setting the `UNRAVL_OPT` environment variable
 before running the scripts. For example, for Linux:
 ```bash
-export UNRAVL_OPT="-Dapi.host=www.example.com -Dapi.port=8080"
+export UNRAVL_OPT='-Dapi.host=www.example.com -Dapi.port=8080 -Dkeys="a b c"'
+```
+or from Windows:
+```winbatch
+set UNRAVL_OPT=-Dapi.host=www.example.com -Dapi.port=8080 -Dkeys="a b c"
 ```
 
 If you wish to deploy UnRAVL outside the build
