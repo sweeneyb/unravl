@@ -31,15 +31,19 @@ public class TestExpand extends TestBase {
     public void testMap() throws UnRAVLException {
         UnRAVL script = TestBase.scriptFixture();
         String in = "{ 's' : 'string', 'b' : true, 'i' : 123, 'd': 3.14159, "
-                + " 'a' : [ '{time}', 'is the time for {which}', '{who} to come to the aid', 'of their {where}' ],"
-                + " 'o' : { 'x' : '{which} {where}s' } }";
-        JsonNode from = TestBase.mockJson(in);
-        String out = script.expand(in);
-        JsonNode expected = TestBase.mockJson(out);
-        JsonNode to = Json.expand(from, script);
-        assertEquals(expected, to);
+                + " '{unboundVar|a}' : [ '{" + TIME_KEY + "}', 'is the time for {" + WHICH_KEY + "}', '{" + WHO_KEY + "} to come to the aid', 'of their {" + WHERE_KEY + "}' ],"
+                + " '{" + WHERE_KEY + "}' : { 'x' : '{" + WHICH_KEY + "} {" + WHERE_KEY + "}s' } }";
+
+        String outExpected = "{ 's' : 'string', 'b' : true, 'i' : 123, 'd': 3.14159, "
+                + " 'a' : [ '" + TIME_VAL + "', 'is the time for " + WHICH_VAL + "', '" + WHO_VAL + " to come to the aid', 'of their " + WHERE_VAL + "' ],"
+                + " '" + WHERE_VAL + "' : { 'x' : '" + WHICH_VAL + " " + WHERE_VAL + "s' } }";
+        JsonNode actual = Json.expand(TestBase.mockJson(in), script);
+        System.out.println(actual);
+        JsonNode expected = TestBase.mockJson(outExpected);
+        assertEquals(expected, actual);
     }
 
+    
     // No conditional assignment for 'env' binding
     @Test
     public void testNoConditionalAssignmentForEnvBinding()

@@ -106,7 +106,7 @@ public class Json {
                     ObjectNode from = (ObjectNode) node;
                     ObjectNode to = new ObjectNode(jnf);
                     for (Map.Entry<String, JsonNode> f : Json.fields(from)) {
-                        to.set(f.getKey(), this.apply(f.getValue()));
+                        to.set(script.expand(f.getKey()), this.apply(f.getValue()));
                     }
                     return to;
                 } else
