@@ -1,0 +1,13 @@
+{
+     "name" : "test env variable expansion",
+     "env" : { "key" : "issue61",
+               "value" : "Perform substitution in names",
+               "actual" : { "{key}" : "{value}" },
+               "expected" : { "issue61" : "Perform substitution in names" }
+              },
+     "assert" : [ "actual == expected",
+                  "actual.toString().contains(key)",
+                  "actual.toString().contains(value)",
+                  "actual.issue61.textValue() == value"
+                  ]
+}
