@@ -100,27 +100,24 @@ instead of using credentials in the credential provider
 (such as the `.netrc` file), you can pass them:
 
 ```
-  "auth" : { "oauth2" : "oauth-server-URL",
-             "user" : "userid-string", "password" : "password-string" }
+    "user" : "userid-string", "password" : "password-string"
 ```
 or
 ```
-  "auth" : { "oauth2" : "oauth-server-URL",
-             "user" : "testuserid", "password" : "testSecret",
-             "clientId" : "client-id-string", "clientSecret" : "client-secret-string" }
+    "user" : "testuserid", "password" : "testSecret",
+    "clientId" : "client-id-string", "clientSecret" : "client-secret-string"
 ```
 
 If you have a static access token, you can store that in the `.netrc`
 file or include it in the options:
 
 ```
-  "auth" : { "oauth2" : "oauth-server-URL",
-             "accessToken" : "access-token-string" }
+    "accessToken" : "access-token-string"
 ```
 In this case, the above `POST` to the *`oauth2-server-URL`* is skipped.
 
 If the API requires the access token passed as a *query parameter*
-instead of the authentication token, add the `"parameter" : "var-name"`
+instead of the `Authentication: Bearer` request eader, add the `"parameter" : "var-name"`
 option to the `"oauth2"` object.
 UnRAVL will add the query parameter to the current URL,
 with the access token.

@@ -55,7 +55,7 @@ public class NetrcCredentialsProvider extends AbstractCredentialsProvider {
     // matches: identifier unquoted-text-without-spaces
     // matches: identifier "quoted-text with possible spaces"
     private static final Pattern KEY_VALUE = Pattern
-            .compile("\\s*(\\w+)\\s+(\"([^\"]+)\"|([^\\s]+))");
+            .compile("\\s*(\\w+)\\s+(\"([^\"]*)\"|([^\\s]+))");
     // pattern match groups:
     private static final int KEY_GROUP = 1;
     private static final int QUOTED_VAL_GROUP = 3;
