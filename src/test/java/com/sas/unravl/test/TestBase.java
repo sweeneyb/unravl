@@ -12,6 +12,15 @@ import org.junit.Test;
 
 public class TestBase {
 
+    protected static final String WHO_VAL = "hackers";
+    protected static final Integer WHICH_VAL = Integer.valueOf(16);
+    protected static final String WHERE_VAL = "API";
+    protected static final String TIME_VAL = "Mon, Aug 4, 2014";
+    protected static final String WHO_KEY = "who";
+    protected static final String WHICH_KEY = "which";
+    protected static final String WHERE_KEY = "where";
+    protected static final String TIME_KEY = "time";
+
     public static UnRAVL scriptFixture() {
         UnRAVLRuntime r = new UnRAVLRuntime(envFixture());
         UnRAVL script = new UnRAVL(r);
@@ -34,10 +43,10 @@ public class TestBase {
 
     public static HashMap<String, Object> envFixture() {
         HashMap<String, Object> env = new HashMap<String, Object>();
-        env.put("time", "Mon, Aug 4, 2014");
-        env.put("where", "API");
-        env.put("which", Integer.valueOf(16));
-        env.put("who", "hackers");
+        env.put(TIME_KEY, TIME_VAL);
+        env.put(WHERE_KEY, WHERE_VAL);
+        env.put(WHICH_KEY, WHICH_VAL);
+        env.put(WHO_KEY, WHO_VAL);
         return env;
     }
 
