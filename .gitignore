@@ -10,3 +10,4 @@
 .gradle
 /bin/
 temp.json
+src/test/auth

@@ -10,6 +10,8 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.log4j.Logger;
+
 /**
  * Provides authentication credentials for an UnRAVL script.
  * <p>
@@ -32,11 +34,12 @@ import java.util.regex.Pattern;
  * machine <em>qualified.hostname</em> login <em>userid-for-host</em> password <em>password-for-host</em> port <em>port-number</em>
  * </pre>
  * <p>
- * Items must appear in this order. You may use <code>user</code> instead of
- * <code>login</code>.
+ * Key/Value pairs may be in any order. Lines may use <code>user</code> instead
+ * of <code>login</code>; lines may use <code>host</code> instead of
+ * <code>machine</code>.
  * </p>
  * <p>
- * Passwords with whitespace in them must be quoted with double quotes.
+ * Passwords with whitespace in them must be quoted with double quotes. Thus,
  * passwords may not contain double quote characters.
  * 
  * @author DavidBiesack@sas.com
@@ -49,17 +52,16 @@ public class NetrcCredentialsProvider extends AbstractCredentialsProvider {
     public NetrcCredentialsProvider() {
     }
 
-    // This regex pattern matches the .netrc file format, described in the
-    // javadoc comment above
-    // examples are in src/test/data/.netrc
-    static final Pattern NETRC = Pattern
-            .compile("^\\s*machine\\s+([^\\s]+)\\s+(login|user)\\s+([^\\s]+)\\s+password\\s+(\"([^\"]+)\"|([^\\s]+))(\\s+port\\s+([\\d]+))?.*$");
-    // groups: 1 2 3 4 5 5 6 6 7 8 8
-    static final int MACHINE_GROUP = 1;
-    static final int USER_GROUP = 3;
-    static final int QUOTED_PASSWORD_GROUP = 5;
-    static final int UNQUOTED_PASSWORD_GROUP = 6;
-    static final int PORT_GROUP = 8;
+    // matches: identifier unquoted-text-without-spaces
+    // matches: identifier "quoted-text with possible spaces"
+    private static final Pattern KEY_VALUE = Pattern
+            .compile("\\s*(\\w+)\\s+(\"([^\"]*)\"|([^\\s]+))");
+    // pattern match groups:
+    private static final int KEY_GROUP = 1;
+    private static final int QUOTED_VAL_GROUP = 3;
+    private static final int UNQUOTED_VAL_GROUP = 4;
+    static final Logger logger = Logger
+            .getLogger(NetrcCredentialsProvider.class);
 
     /*
      * (non-Javadoc)
@@ -101,43 +103,66 @@ public class NetrcCredentialsProvider extends AbstractCredentialsProvider {
         // is a security issue; we should probably encrypt the cached content.
         // Also, if we do cache the file content, we would still have to check
         // the modification time stamp of the file, in case it has been updated
-        // since
-        // we cached the content.
+        // since we cached the content.
         // Also, the loop below would need to read all rows, not stop when a
         // match is found. So we don't cache and simply read the file each time
         // it is needed
-        BufferedReader reader = null;
-        reader = new BufferedReader(new FileReader(netrc));
-        try {
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(netrc))) {
             for (String line = reader.readLine(); line != null; line = reader
                     .readLine()) {
-                Matcher m = NETRC.matcher(line);
-                if (m.matches()) {
-                    String netrchost = m.group(MACHINE_GROUP);
-                    String netrcport = m.group(PORT_GROUP);
-                    if (host.equals(netrchost)
-                            && Objects.equals(port, netrcport)) {
-                        if (login == null || m.group(USER_GROUP).equals(login)) {
-                            login = m.group(USER_GROUP);
-                            password = password(m);
+                if (line.trim().startsWith("#"))
+                    continue;
+                Matcher m = KEY_VALUE.matcher(line);
+                String lHost = null, lPort = null, lLogin = null, lPassword = null, lClientId = null, lClientSecret = null, lAccessToken = null;
+                while (m.find()) {
+                    String key = m.group(KEY_GROUP).toLowerCase();
+                    String val = m.group(QUOTED_VAL_GROUP);
+                    if (val == null)
+                        val = m.group(UNQUOTED_VAL_GROUP);
+                    switch (key) {
+                    case "login":
+                    case "user":
+                        lLogin = val;
+                        break;
+                    case "host":
+                    case "machine":
+                        lHost = val;
+                        break;
+                    case "port":
+                        lPort = val;
+                        break;
+                    case "password":
+                        lPassword = val;
+                        break;
+                    case "clientid":
+                        lClientId = val;
+                        break;
+                    case "clientsecret":
+                        lClientSecret = val;
+                        break;
+                    case "accesstoken":
+                        lAccessToken = val;
+                        break;
+                    default:
+                        logger.warn("Ignoring unknown key " + key
+                                + " in netrc file");
+                    }
+                }
+                if (host.equalsIgnoreCase(lHost) && Objects.equals(port, lPort)) {
+                    if (login == null || lLogin.equals(login)) {
+                        login = lLogin;
+                        password = lPassword;
+                        if (lClientId != null || lClientSecret != null || lAccessToken != null)
+                            return credentials(login, password, lClientId,
+                                    lClientSecret, lAccessToken);
+                        else
                             return credentials(login, password);
-                        }
                     }
                 }
             }
-        } finally {
-            if (reader != null)
-                reader.close();
         }
         return null;
     }
 
-    private String password(Matcher m) {
-        if (m.end(QUOTED_PASSWORD_GROUP) > m.start(QUOTED_PASSWORD_GROUP))
-            return m.group(QUOTED_PASSWORD_GROUP);
-        if (m.end(UNQUOTED_PASSWORD_GROUP) > m.start(UNQUOTED_PASSWORD_GROUP))
-            return m.group(UNQUOTED_PASSWORD_GROUP);
-        throw new AssertionError(
-                "Regular expression did not match password in .netrc line.");
-    }
 }

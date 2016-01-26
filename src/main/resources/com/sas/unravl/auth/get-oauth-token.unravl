@@ -1,0 +1,12 @@
+{
+    "name" : "Get OAuth2 access_token.",
+    "POST" : "{oath2TokenUrl}",
+    "auth" : { "basic" : true,
+               "login" : "{clientId}",
+               "password" : "{clientSecret}"
+    },
+    "body" : { "form" : { "grant_type" : "password",
+                          "username" : "{userId}",
+                          "password" : "{password}" } },
+    "bind" : { "jsonPath" : { "access_token" : "{accessTokenJsonPath}" } }
+}

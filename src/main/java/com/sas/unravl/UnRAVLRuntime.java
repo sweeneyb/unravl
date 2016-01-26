@@ -24,6 +24,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ import org.springframework.stereotype.Component;
  * @author DavidBiesack@sas.com
  */
 @Component
-public class UnRAVLRuntime {
+public class UnRAVLRuntime implements Cloneable {
 
     private static final Logger logger = Logger.getLogger(UnRAVLRuntime.class);
     private Map<String, Object> env; // script variables
@@ -66,6 +67,10 @@ public class UnRAVLRuntime {
         this(new LinkedHashMap<String, Object>());
     }
 
+    /**
+     * Instantiate a new runtime with the given environment
+     * @param environment name/value bindings
+     */
     public UnRAVLRuntime(Map<String, Object> environment) {
         configure();
         this.env = environment;
@@ -74,6 +79,24 @@ public class UnRAVLRuntime {
             bind(e.getKey().toString(), e.getValue());
         bind("failedAssertionCount", Integer.valueOf(0));
         resetBindings();
+    }
+    
+
+    /**
+     * Instantiate a new runtime with the environment of the input runtime instance.
+     * The environment is copied, but the new runtime gets its own empty list
+     * of calls, scripts, and templates.
+     * @param runtime an existing Runtime (may not be null)
+     */
+    public UnRAVLRuntime(UnRAVLRuntime runtime) {
+        env = new LinkedHashMap<String, Object>();
+        env.putAll(runtime.env);
+        calls = new ArrayList<ApiCall>();
+        scripts = new LinkedHashMap<String, UnRAVL>();
+        canceled = false;
+        variableResolver = new VariableResolver(env);
+        templates = new LinkedHashMap<String, UnRAVL>();
+        setScriptLanguage(runtime.getScriptLanguage());
     }
 
     /**
@@ -323,17 +346,26 @@ public class UnRAVLRuntime {
      * alt text may also contain embedded variable expansions.
      *
      * @param text
-     *            an input string
-     * @return the string, with environment variables replaced.
+     *            an input string. May be null.
+     * @return the string, with environment variables replaced. Returns null if the input is null.
      */
     public String expand(String text) {
+        if (text == null)
+            return null;
         if (variableResolver == null) {
             variableResolver = new VariableResolver(getBindings());
         }
         return variableResolver.expand(text);
     }
 
-    public void bind(String varName, Object value) {
+    /**
+     * Bind a value within this runtime's environment. This will add a new
+     * binding if <var>varName</var> is not yet bound, or replace the old binding.
+     * @param varName variable name
+     * @param value variable value
+     * @return this runtime, which allows chaining bind calls.
+     */
+    public UnRAVLRuntime bind(String varName, Object value) {
         if (VariableResolver.isUnicodeCodePointName(varName)) {
             UnRAVLException ue = new UnRAVLException(String.format(
                     "Cannot rebind special Unicode variable %s", varName));
@@ -341,20 +373,34 @@ public class UnRAVLRuntime {
         }
         env.put(varName, value);
         logger.trace("bind(" + varName + "," + value + ")");
-        resetBindings();
+        return this;
     }
 
-    public boolean bound(String varName) {
-        return env.containsKey(varName);
-    }
 
+    /**
+     * Return the value bound to a variable in this runtime's environment
+     * @param varName the variable name
+     * @return the value bound to the variable
+     */
     public Object binding(String varName) {
         return env.get(varName);
     }
 
     /**
-     * Call this when bindings have changed.
+     * Test if the value bound in this script's environment
+     * @param varName the variable name
+     * @return true iff the variable is bound 
      */
+    public boolean bound(String varName) {
+        return env.containsKey(varName);
+    }
+
+
+    /**
+     * Call this when bindings have changed.
+     * @deprecated no longer needed. This method will be removed in 1.1.0
+     */
+    @Deprecated
     public void resetBindings() {
         // null signals that we need to recreate the resolver after
         // the bindings have changed.

@@ -436,20 +436,23 @@ public class ApiCall {
             return;
         }
         setMethod(script.getMethod());
-        setURI(script.expand(script.getURI()));
         RestTemplate restTemplate = getRuntime().getPlugins().getRestTemplate();
         executeAPIWithRestTemplate(restTemplate);
     }
 
     private void executeAPIWithRestTemplate(RestTemplate restTemplate)
             throws UnRAVLException {
-        // authenticate first, since this may add new (Authentication) headers
+        // authenticate first, since this may add new (Authentication) headers.
+        // Set the expanded URI first, since auth nodes may access it
+        setURI(script.expand(script.getURI()));
         try {
             authenticate();
         } catch (IOException e) {
             throwException(e);
         }
-
+        // expand the URI after authenticating: OAuth2 or other auth may set env vars that should
+        // be expanded in the URI
+        setURI(script.expand(getURI()));
         // Use RequestCallback and ResponseExtractor
         // to handle all request bodies, including binary.
         // RestTemplate.exchange can't handle binary byte[] body
@@ -479,6 +482,7 @@ public class ApiCall {
 
         long start = System.currentTimeMillis();
         try {
+            logger.info(method.name() + " " + getURI());
             InternalResponse response = restTemplate.execute(getURI(),
                     HttpMethod.valueOf(method.name()), requestCallback,
                     responseExtractor);
@@ -533,7 +537,7 @@ public class ApiCall {
         HttpHeaders headers = new HttpHeaders();
         for (Header h : requestHeaders) {
             String value = getScript().expand(h.getValue());
-            logger.info(String.format("Request heder: %s: %s", h.getName(), possiblyMaskedHeaderValue(h)));
+            logger.info(String.format("Request header: %s: %s", h.getName(), possiblyMaskedHeaderValue(h)));
             headers.add(h.getName(), value);
         }
         return headers;
