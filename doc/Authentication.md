@@ -95,6 +95,9 @@ header to the current REST API call.
 ### OAuth2 authentication options
 
 The `"oauth2"` object allows some optional parameters.
+
+#### Credentials
+
 If you want to include credentials directly in the script
 instead of using credentials in the credential provider
 (such as the `.netrc` file), you can pass them:
@@ -107,6 +110,7 @@ or
     "user" : "testuserid", "password" : "testSecret",
     "clientId" : "client-id-string", "clientSecret" : "client-secret-string"
 ```
+#### Static access token
 
 If you have a static access token, you can store that in the `.netrc`
 file or include it in the options:
@@ -116,24 +120,37 @@ file or include it in the options:
 ```
 In this case, the above `POST` to the *`oauth2-server-URL`* is skipped.
 
-If the API requires the access token passed as a *query parameter*
-instead of the `Authentication: Bearer` request eader, add the `"parameter" : "var-name"`
-option to the `"oauth2"` object.
-UnRAVL will add the query parameter to the current URL,
-with the access token.
+#### Alternate access_token query parameter
+
+By default the OAuth2 authentication will also add the `access_token`
+as a query parameter `?access_token=access-token-string`.
+If the service requires a different query parameter, use
+the `"parameter"` option
+
+```
+    "parameter" : "access-token-query-param-name"
+```
 
 For example, for
 
 ```
-        "GET" : "https://api-ssl.bitly.com/v3/user/link_lookup?link={link}&format=json",
-        "auth" : { "oauth2" : "https://api-ssl.bitly.com/oauth/access_token",
-                   "parameter" : "access_token" }
+        "GET" : "https://my-api-auth.com/api/resources/res-22939",
+        "auth" : { "oauth2" : "https://my-api-auth.com/oauth/token",
+                   "parameter" : "auth-token" }
 ```
 
-UnRAVL will add the access token to the URL, such as
+UnRAVL will add the access token to the URL as `auth-token` instead of `access_token`, such as:
 ```
-https://api-ssl.bitly.com/v3/user/link_lookup?link={link}&format=json&access_token=6f8dbc338af9
+https://my-api-auth.com/api/resources/res-22939&auth-token=6f8dbc338af9
 ```
+
+Use
+```
+   "parameter" : ""
+```
+to suppress the access token parameter.
+
+#### Alternate access_token environment parameter
 
 By default, oauth2 will bind the access token string
 as the variable `access_token` in the current environment
@@ -229,17 +246,16 @@ a test API on a non-default port such as port 8080.
 The *hostname* field must *exactly* match the hostname in UnRAVL API
 calls (ignoring case).
 
-, the .netrc entry for the token server
-may have the
-
 When using `.netrc` credential provider for OAuth2 authentication,
-the `.netrc` file
-may include the two additional fields, `clientId` and `clientSecret`
-(these keys are not case sensitive). Example:
+the `.netrc` file may include the additional fields, `clientId`, `clientSecret`
+and accessToken (these keys are not case sensitive).
+For example:
 
 ```
- host machine api-ssl.bitly.com user bit.ly-user password bit.ly-passwd clientId bit.ly-client-id-string clientSecret bit.ly-client-secret-string
+ host machine my.api.auth.com user my-api-userid password my-api-passwd clientId my-api-client-id clientSecret my-api-client-secret
 ```
+
+(Use double quotes around values that contain embedded spaces).
 
 You may also embed the credentials directly inside the authentication element in the script.
 These may be the login id and password (if there are no security issues with directly embedding

@@ -537,7 +537,7 @@ public class ApiCall {
         HttpHeaders headers = new HttpHeaders();
         for (Header h : requestHeaders) {
             String value = getScript().expand(h.getValue());
-            logger.info(String.format("Request heder: %s: %s", h.getName(), possiblyMaskedHeaderValue(h)));
+            logger.info(String.format("Request header: %s: %s", h.getName(), possiblyMaskedHeaderValue(h)));
             headers.add(h.getName(), value);
         }
         return headers;

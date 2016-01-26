@@ -131,14 +131,16 @@ public class OAuth2Auth
         logger.info("\"oauth2\" auth added 'Authorization: Bearer " + access_token + "' header");
     }
 
-    // If the oauth2 object options includes a "parameter" : "paramName",
-    // add a query parameter to the URI using the parameter name
+    // Add an access_token={access_token} query parameter to the URI using the parameter name.
+    // Default is to use the name access_token . 
+    // Use "parameter" : "" to change the parameter name. 
+    // Use "parameter" : "" to suppress it.
     private void addOptionalQueryParameter(ObjectNode auth, String access_token)
         throws UnRAVLException
     {
         // if client specifies a query parameter, we will add it to the request URI
-        String queryParm = stringOption(auth, "parameter", null);
-        if (queryParm != null)
+        String queryParm = stringOption(auth, "parameter", "access_token");
+        if (queryParm != null && !"".equals(queryParm))
         {
             StringBuilder uri = new StringBuilder(getCall().getURI());
             String delim = (uri.indexOf("?") == -1) ? "?" : "&";
