@@ -134,14 +134,14 @@ the `"parameter"` option
 For example, for
 
 ```
-        "GET" : "https://my-api-auth.com/api/resources/res-22939",
-        "auth" : { "oauth2" : "https://my-api-auth.com/oauth/token",
+        "GET" : "https://my-api.com/api/resources/res-22939",
+        "auth" : { "oauth2" : "https://my-api.com/oauth/token",
                    "parameter" : "auth-token" }
 ```
 
 UnRAVL will add the access token to the URL as `auth-token` instead of `access_token`, such as:
 ```
-https://my-api-auth.com/api/resources/res-22939&auth-token=6f8dbc338af9
+https://my-api.com/api/resources/res-22939&auth-token=6f8dbc338af9
 ```
 
 Use
