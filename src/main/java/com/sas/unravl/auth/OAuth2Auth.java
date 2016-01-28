@@ -48,7 +48,7 @@ import org.apache.log4j.Logger;
  * 
  * <h2>Options</h2> The "oath2" object supports several options to configure the OAUth2
  * authentication. See
- * <a href='https://github.com/sassoftware/unravl/blob/master/doc/Authentication.md#oath2'>
+ * <a href='https://github.com/sassoftware/unravl/blob/master/doc/Authentication.md#oauth2'>
  * Authentication: oauth2</a> for complete details.
  * <p>
  * This auth module may be accessed with either the name <code>"oauth2"</code>,
@@ -61,6 +61,7 @@ public class OAuth2Auth
     extends BaseUnRAVLAuth
 {
 
+    private static final String PARAMETER_KEY = "parameter";
     private static final String ACCESS_TOKEN = "access_token";
     private static final String BIND_ACCESS_TOKEN_KEY = "bindAccessToken";
     private static final String DEFAULT_ACCESS_TOKEN_JSON_PATH = "$.access_token";
@@ -139,7 +140,16 @@ public class OAuth2Auth
         throws UnRAVLException
     {
         // if client specifies a query parameter, we will add it to the request URI
-        String queryParm = stringOption(auth, "parameter", "access_token");
+        JsonNode p = auth.get(PARAMETER_KEY);
+        String queryParm;
+        if (p!= null && p.isBoolean()) {
+            if (p.booleanValue())
+                queryParm = ACCESS_TOKEN;
+            else
+                return;
+        } else {
+           queryParm = stringOption(auth, PARAMETER_KEY, ACCESS_TOKEN);
+        }
         if (queryParm != null && !"".equals(queryParm))
         {
             StringBuilder uri = new StringBuilder(getCall().getURI());
@@ -267,16 +277,15 @@ public class OAuth2Auth
         UnRAVLRuntime tokenRuntime = new UnRAVLRuntime(getScript().getRuntime());
         tokenRuntime.bind(ACCESS_TOKEN_JSON_PATH_KEY, accessTokenJsonPath);
 
-        // TODO: convert the UnRAVL to use { "body" : { "form" : { name : value, ... }}}
-        // so we don't have to deal with encodedUserId etc.
+        // @formatter:off
         tokenRuntime // Hmmmm, is it worth defining constants for these keys?
-        .bind("oath2TokenUrl",
-              authTokenURI.toString()).bind("clientId",
-                                            creds.getClientId()).bind("clientSecret",
-                                                                      creds.getClientSecret()).bind("userId",
-                                                                                                    creds.getUserName()).bind("password",
-                                                                                                                              creds.getPassword()).bind(ACCESS_TOKEN_JSON_PATH_KEY,
-                                                                                                                                                        accessTokenJsonPath);
+        .bind("oath2TokenUrl", authTokenURI.toString())
+        .bind("clientId",      creds.getClientId())
+        .bind("clientSecret",  creds.getClientSecret())
+        .bind("userId",        creds.getUserName())
+        .bind("password",       creds.getPassword())
+        .bind(ACCESS_TOKEN_JSON_PATH_KEY, accessTokenJsonPath);
+        //@formatter:on
         ObjectMapper mapper = new ObjectMapper();
         try (InputStream in = openScriptStream(oAuthScriptResourcePath))
         {
