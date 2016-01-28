@@ -180,8 +180,25 @@ public class ApiCall {
             authenticate(script.getTemplate()); // recurse on template
             return;
         }
-        ObjectNode spec = Json.object(auth);
-        String authKey = spec.fields().next().getKey();
+        if (auth.isBoolean()) {
+            if (auth.booleanValue() ) {
+                throw new UnRAVLException(
+                        "\"auth\" : true is invalid. Only \"auth\" : false is allowed (to disable inherited authentication.)");
+            } else {
+                logger.info("authentication disabled in script.");
+                return;
+            }
+        }
+        ObjectNode spec = null;
+        // If "auth" value is just a string and not an object, such as "auth" : "basic", 
+        // convert to "auth" : { "basic" : true } to enable that auth type
+        if (auth.isTextual())  
+        {
+            spec = Json.jsonNodeFactory().objectNode();
+            spec.put(auth.textValue(), true);
+        } else 
+            spec = Json.object(auth);
+        String authKey = Json.firstFieldName(spec);
         Class<? extends UnRAVLAuth> authClass = getPlugins().getAuth().get(
                 authKey);
         try {

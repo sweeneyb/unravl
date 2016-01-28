@@ -68,6 +68,9 @@ public class BasicAuth extends BaseUnRAVLAuth {
     void authenticateAndAddAuthenticationHeader(ObjectNode auth)
             throws UnRAVLException {
         try {
+            // TODO: generalize this check and push it into BaseUnRAVLAuth
+            // It should also use a getEffectiveURI() and getEffectiveMethod()
+            // which walk templates in case the script does not have them.
             if (getScript().getURI() == null || getScript().getMethod() == null)
                 throw new UnRAVLException(
                         "basic auth requires an HTTP method and URI");
