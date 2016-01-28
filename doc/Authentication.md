@@ -148,7 +148,7 @@ https://my-api.com/api/resources/res-22939&auth-token=6f8dbc338af9
 
 Use
 ```
-   "parameter" : ""
+   "parameter" : false
 ```
 to suppress the access token parameter.
 
@@ -238,7 +238,7 @@ Example:
     "auth" : false
   }
 ]
-```  
+```
 ## Credentials
 
 For best security, the credentials for authentication are stored in
