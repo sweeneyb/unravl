@@ -13,6 +13,7 @@ UnRAVL supports three authentication models,
 * [basic](#basic) Basic Authentication
 * [oauth2](#oauth2) OAuth2 Authentication
 * [cas](#cas) Central Authentication Service
+* [none](#none) No authentication
 
 Tip: You can put the `"auth"` member in a template (including
 `implicit.template`) and all scripts which inherit from that template will use that authentication method.
@@ -28,6 +29,7 @@ header to the request.
 
 The basic auth syntax is one of:
 ```JSON
+  "auth" : "basic"
   "auth" : { "basic" : true }
   "auth" : { "basic" : true, "login" : "testuserid" }
   "auth" : { "basic" : true, "login" : "testuserid", "password" : "testSecret" }
@@ -205,6 +207,38 @@ The TGT is stored in the environment using `&lt;<em>hostname</em>&gt;.TGT`,
 *where `&lt;<em>hostname</em>&gt;` is taken from the `login-URL`. The TGT
 will be resused in other scripts that call the same host.
 
+## None
+
+You may also disable authentication with
+```
+   "auth" : false
+```
+This is useful if you define authentication in a [template](Templates.md) (including `implicit.template`)
+which is used in multiple UnRAVL scripts, but you wish to make an unauthenticated call.
+Use `"auth" : false` to disable the inherited authentication.
+
+Example:
+```JSON
+[
+  {
+    "name" : "implicit.template",
+    "auth" : { "OAuth2" : "https://my-api.com/auth/tokens" }
+  },
+  {
+    "name" : "GET a resource using authentication defined in the implicit template",
+    "GET" : "https://my-api.com/api/some/resource"
+  },
+  {
+    "name" : "DELETE a resource using authentication defined in the implicit template",
+    "DELETE" : "https://my-api.com/api/some/resource"
+  },
+  {
+    "name" : "GET a static resource without using authentication, overrideing the auth in the implicit template",
+    "GET" : "https://my-api.com/api/static-resources/logo.png",
+    "auth" : false
+  }
+]
+```  
 ## Credentials
 
 For best security, the credentials for authentication are stored in
