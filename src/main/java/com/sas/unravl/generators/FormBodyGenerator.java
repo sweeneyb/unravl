@@ -105,8 +105,8 @@ public class FormBodyGenerator extends BaseUnRAVLRequestBodyGenerator {
         }
         String bodyText = body.toString();
         script.bind("requestBody", bodyText);
-        script.addRequestHeader(
-                new BasicHeader("Content-Type", "application/x-www-form-urlencoded"));
+        script.addRequestHeader(new BasicHeader("Content-Type",
+                "application/x-www-form-urlencoded"));
         return new ByteArrayInputStream(Text.utf8(bodyText));
     }
 
@@ -117,8 +117,11 @@ public class FormBodyGenerator extends BaseUnRAVLRequestBodyGenerator {
         try {
             String delim = "";
             for (Entry<String, JsonNode> x : Json.fields(inputJson)) {
-                body.append(delim).append(x.getKey()).append("=")
-                        .append(URLEncoder.encode(x.getValue().asText(), "UTF-8"));
+                body.append(delim)
+                        .append(x.getKey())
+                        .append("=")
+                        .append(URLEncoder.encode(x.getValue().asText(),
+                                "UTF-8"));
                 delim = "&";
             }
         } catch (UnsupportedEncodingException e) {

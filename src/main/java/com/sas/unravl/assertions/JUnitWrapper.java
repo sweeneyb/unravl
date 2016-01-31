@@ -235,7 +235,8 @@ public class JUnitWrapper {
                 if (!file.isDirectory())
                     fileNames.add(file.getAbsolutePath());
             }
-            int count = JUnitWrapper.tryScriptFiles(runtime == null ? new UnRAVLRuntime(env) : runtime, 
+            int count = JUnitWrapper.tryScriptFiles(
+                    runtime == null ? new UnRAVLRuntime(env) : runtime,
                     fileNames.toArray(new String[fileNames.size()]));
             System.out.println(String.format("Tried %s scripts in %s%s", count,
                     directoryName, pattern == null ? "" : " matching pattern "

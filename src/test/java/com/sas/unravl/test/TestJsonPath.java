@@ -33,7 +33,8 @@ public class TestJsonPath {
         Object jo;
         if (node instanceof ObjectNode)
             jo = m.convertValue(node, Map.class);
-        else // (node instanceof ArrayNode)
+        else
+            // (node instanceof ArrayNode)
             jo = m.convertValue(node, List.class);
         // JsonPath parses strings into java.util.Map and java.util.List
         // objects.
@@ -53,7 +54,7 @@ public class TestJsonPath {
         ArrayNode an = m.valueToTree(a);
         assertNotNull(on);
         assertNotNull(an);
-        assertEquals(2,on.size());
+        assertEquals(2, on.size());
         assertEquals(6, an.size());
     }
 }

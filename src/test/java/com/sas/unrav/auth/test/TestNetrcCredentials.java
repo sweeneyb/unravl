@@ -29,17 +29,23 @@ public class TestNetrcCredentials {
 
     @Parameters(name = "{index} host {0}, expect user {1}, password {2}")
     public static Collection<Object[]> testCases() {
-        
-        return Arrays.asList(new Object[][] { //@formatter:off
-                // this test data should match src/test/netrc/.netrc
-                new String[] {"simple.host.com","test.user.a", "test.user.a-secret", null, null},
-                new String[] {"host.withport8080.com:8080", "test.user.b", "test.user.b-secret", null, null},
-                new String[] {"host.whitespace.com", "test.user.c", "test.user.c-secret", null, null},
-                new String[] {"host.special.com", "test.user.d", "test.user.d password", null, null},
-                new String[] {"host.alt.order", "test.user.e", "test.password.e", null, null},
-                new String[] {"auth.server1", "OAuthUser-1", "OAuth2 password 1", "0x0123456789abcdef", "0xgfedcba9876543210" }
-                });
-    } //@formatter:on
+
+        return Arrays.asList(new Object[][] { // @formatter:off
+                        // this test data should match src/test/netrc/.netrc
+                        new String[] { "simple.host.com", "test.user.a",
+                                "test.user.a-secret", null, null },
+                        new String[] { "host.withport8080.com:8080",
+                                "test.user.b", "test.user.b-secret", null, null },
+                        new String[] { "host.whitespace.com", "test.user.c",
+                                "test.user.c-secret", null, null },
+                        new String[] { "host.special.com", "test.user.d",
+                                "test.user.d password", null, null },
+                        new String[] { "host.alt.order", "test.user.e",
+                                "test.password.e", null, null },
+                        new String[] { "auth.server1", "OAuthUser-1",
+                                "OAuth2 password 1", "0x0123456789abcdef",
+                                "0xgfedcba9876543210" } });
+    } // @formatter:on
 
     static String userHome = null;
 
@@ -63,8 +69,9 @@ public class TestNetrcCredentials {
     String expectedClientId;
     String expectedClientSecret;
 
-    public TestNetrcCredentials(String hostName, String expectedUserName, String expectedPassword, String expectedClientId,
-    String expectedClientSecret) {
+    public TestNetrcCredentials(String hostName, String expectedUserName,
+            String expectedPassword, String expectedClientId,
+            String expectedClientSecret) {
         this.hostName = hostName;
         this.expectedUserName = expectedUserName;
         this.expectedPassword = expectedPassword;
@@ -84,8 +91,7 @@ public class TestNetrcCredentials {
         nc.setRuntime(rt);
 
         ObjectNode node = (ObjectNode) Json.parse("{ \"basic\" : true }");
-        HostCredentials cred = nc.getHostCredentials(hostName, node,
-                false);
+        HostCredentials cred = nc.getHostCredentials(hostName, node, false);
         assertEquals(expectedUserName, cred.getUserName());
         assertEquals(expectedPassword, cred.getPassword());
         if (cred instanceof OAuth2Credentials) {

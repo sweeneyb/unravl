@@ -70,8 +70,7 @@ public class UnRAVLPlugins {
      * @param credentialsProvider
      *            the instance which can get userid/password for a host
      */
-    public void setCredentialsProvider(
-            CredentialsProvider credentialsProvider) {
+    public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
         this.credentialsProvider = credentialsProvider;
     }
 
@@ -194,20 +193,23 @@ public class UnRAVLPlugins {
     // that follows redirect for HEAD calls. The default
     // SimpleClientHttpRequestFactory only follows redirects
     // for GET.
-    // see http://stackoverflow.com/questions/29418583/follow-302-redirect-using-spring-resttemplate
-    private RestTemplate newRestTemplate()
-    {
-        RestTemplate rt = new RestTemplate(new SimpleClientHttpRequestFactory() {
-            @Override
-            protected void prepareConnection(HttpURLConnection connection, String httpMethod) throws IOException {
-                
-                super.prepareConnection(connection, httpMethod);
+    // see
+    // http://stackoverflow.com/questions/29418583/follow-302-redirect-using-spring-resttemplate
+    private RestTemplate newRestTemplate() {
+        RestTemplate rt = new RestTemplate(
+                new SimpleClientHttpRequestFactory() {
+                    @Override
+                    protected void prepareConnection(
+                            HttpURLConnection connection, String httpMethod)
+                            throws IOException {
 
-                if ("HEAD".equals(httpMethod)) {
-                    connection.setInstanceFollowRedirects(true);
-                }
-            }
-        });
+                        super.prepareConnection(connection, httpMethod);
+
+                        if ("HEAD".equals(httpMethod)) {
+                            connection.setInstanceFollowRedirects(true);
+                        }
+                    }
+                });
         return rt;
     }
 

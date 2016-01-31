@@ -181,7 +181,7 @@ public class ApiCall {
             return;
         }
         if (auth.isBoolean()) {
-            if (auth.booleanValue() ) {
+            if (auth.booleanValue()) {
                 throw new UnRAVLException(
                         "\"auth\" : true is invalid. Only \"auth\" : false is allowed (to disable inherited authentication.)");
             } else {
@@ -190,13 +190,13 @@ public class ApiCall {
             }
         }
         ObjectNode spec = null;
-        // If "auth" value is just a string and not an object, such as "auth" : "basic", 
+        // If "auth" value is just a string and not an object, such as "auth" :
+        // "basic",
         // convert to "auth" : { "basic" : true } to enable that auth type
-        if (auth.isTextual())  
-        {
+        if (auth.isTextual()) {
             spec = Json.jsonNodeFactory().objectNode();
             spec.put(auth.textValue(), true);
-        } else 
+        } else
             spec = Json.object(auth);
         String authKey = Json.firstFieldName(spec);
         Class<? extends UnRAVLAuth> authClass = getPlugins().getAuth().get(
@@ -467,7 +467,8 @@ public class ApiCall {
         } catch (IOException e) {
             throwException(e);
         }
-        // expand the URI after authenticating: OAuth2 or other auth may set env vars that should
+        // expand the URI after authenticating: OAuth2 or other auth may set env
+        // vars that should
         // be expanded in the URI
         setURI(script.expand(getURI()));
         // Use RequestCallback and ResponseExtractor
@@ -554,7 +555,8 @@ public class ApiCall {
         HttpHeaders headers = new HttpHeaders();
         for (Header h : requestHeaders) {
             String value = getScript().expand(h.getValue());
-            logger.info(String.format("Request header: %s: %s", h.getName(), possiblyMaskedHeaderValue(h)));
+            logger.info(String.format("Request header: %s: %s", h.getName(),
+                    possiblyMaskedHeaderValue(h)));
             headers.add(h.getName(), value);
         }
         return headers;
@@ -794,7 +796,7 @@ public class ApiCall {
             Header hs[] = mapHeaders(headers);
             for (Header h : hs) {
                 // Don't log easily decoded credentials
-                logger.info(h.getName() + ": " + possiblyMaskedHeaderValue(h) );
+                logger.info(h.getName() + ": " + possiblyMaskedHeaderValue(h));
             }
         }
         MediaType contentType = headers.getContentType();
@@ -834,7 +836,8 @@ public class ApiCall {
     }
 
     private String possiblyMaskedHeaderValue(Header h) {
-        return h.getName().equalsIgnoreCase(AUTHORIZATION) ? MASK : h.getValue();
+        return h.getName().equalsIgnoreCase(AUTHORIZATION) ? MASK : h
+                .getValue();
     }
 
     public UnRAVL getScript() {
@@ -860,10 +863,12 @@ public class ApiCall {
      *            the report destination
      */
     public void report(PrintStream out) {
-        UnRAVL script = getScript(); //@formatter:off
-        String title = "Script '" + script.getName() + "' "
+        UnRAVL script = getScript(); // @formatter:off
+        String title = "Script '"
+                + script.getName()
+                + "' "
                 + (getMethod() == null ? "<no method>" : getMethod().toString())
-                + " " + (getURI() == null ? "<no URI>" : getURI()); //@formatter:on
+                + " " + (getURI() == null ? "<no URI>" : getURI()); // @formatter:on
         out.println();
         for (int i = title.length(); i > 0; i--)
             out.print('-');
@@ -885,13 +890,11 @@ public class ApiCall {
         out.println(as.size() + " " + label + ":");
         if (as.size() > 0) {
             for (UnRAVLAssertion a : as) {
-                out.println(label + " " + a.getStage().getName() + " "
-                        + a);
+                out.println(label + " " + a.getStage().getName() + " " + a);
                 out.flush();
                 UnRAVLAssertionException e = a.getUnRAVLAssertionException();
                 if (e != null) {
-                    out.println(e.getClass().getName() + " "
-                            + e.getMessage());
+                    out.println(e.getClass().getName() + " " + e.getMessage());
                 }
             }
         }

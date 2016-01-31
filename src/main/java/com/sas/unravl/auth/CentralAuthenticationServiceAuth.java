@@ -33,12 +33,12 @@ import org.apache.http.message.BasicHeader;
 import org.apache.log4j.Logger;
 
 /**
- * An auth plugin which authenticates with Central Authentication Service. 
- * This authenticates to obtain a Ticket Granting Ticket
- * (TGT) using the user's credentials provided by the {@link CredentialsProvider}
- * which by default is the {@link NetrcCredentialsProvider}. This then uses that
- * TGT to obtain a Service Ticket for the current UnRAVL script API. Optionally,
- * credentials may be enclosed directly in the "cas" element.
+ * An auth plugin which authenticates with Central Authentication Service. This
+ * authenticates to obtain a Ticket Granting Ticket (TGT) using the user's
+ * credentials provided by the {@link CredentialsProvider} which by default is
+ * the {@link NetrcCredentialsProvider}. This then uses that TGT to obtain a
+ * Service Ticket for the current UnRAVL script API. Optionally, credentials may
+ * be enclosed directly in the "cas" element.
  * <p>
  * This auth element is specified via
  *
@@ -51,8 +51,10 @@ import org.apache.log4j.Logger;
  *
  * where <em>logon-URL</em> is a string containing the URL of the ticket
  * granting ticket authentication API, such as
+ * 
  * <pre>
- * { "cas" : "http://www.example.com/SASLogon/v1/tickets" }</pre>
+ * { "cas" : "http://www.example.com/SASLogon/v1/tickets" }
+ * </pre>
  * <p>
  * The service ticket is appended as a query parameter to the end of the URI as
  * <code>&amp;ticket=&lt;<em>service-ticket</em>&gt;</code> or

@@ -64,7 +64,7 @@ abstract public class AbstractCredentialsProvider implements
     }
 
     private String credentialValue(ObjectNode auth, String key) {
-        String val =Json.stringFieldOr(auth, key, null);
+        String val = Json.stringFieldOr(auth, key, null);
         return val == null ? null : runtime.expand(val);
     }
 
@@ -105,14 +105,12 @@ abstract public class AbstractCredentialsProvider implements
         return new HostCredentials(runtime.expand(login),
                 runtime.expand(password));
     }
-    
-    protected HostCredentials credentials(String login, String password, String clientId, String clientSecret, String accessToken) {
-        return new OAuth2Credentials(
-                runtime.expand(login),
-                runtime.expand(password),
-                runtime.expand(clientId),
-                runtime.expand(clientSecret),
-                runtime.expand(accessToken));
+
+    protected HostCredentials credentials(String login, String password,
+            String clientId, String clientSecret, String accessToken) {
+        return new OAuth2Credentials(runtime.expand(login),
+                runtime.expand(password), runtime.expand(clientId),
+                runtime.expand(clientSecret), runtime.expand(accessToken));
     }
 
 }

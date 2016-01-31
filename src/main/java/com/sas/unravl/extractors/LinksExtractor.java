@@ -122,13 +122,14 @@ import org.apache.log4j.Logger;
  * Note that "link" may be used instead of "links"; this is clearer for
  * extracting a single link.
  * <p>
- * An extra option, <code>"unwrap" : true</code>
- * may be used to unwrap the Jackson <code>ObjectNode</code> values from
- * the links into a <code>java.util.Map</code>. For example:
+ * An extra option, <code>"unwrap" : true</code> may be used to unwrap the
+ * Jackson <code>ObjectNode</code> values from the links into a
+ * <code>java.util.Map</code>. For example:
  * 
  * <pre>
  *  { "link" : { "self" : "self" }, "unwrap" : true }
  * </pre>
+ * 
  * <h3>Extracting just the href value from links</h3>
  * <p>
  * If the extractor is used with the key "hrefs" or "href" instead of "links",
@@ -432,7 +433,7 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
                         String.format(
                                 "responseBody is not bound to a JSON object in %s extractor: %s",
                                 key(root), f));
-            } 
+            }
         } else {
             if (fromNode.isTextual()) {
                 String where = fromNode.textValue();

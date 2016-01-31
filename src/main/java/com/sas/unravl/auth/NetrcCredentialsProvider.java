@@ -153,7 +153,8 @@ public class NetrcCredentialsProvider extends AbstractCredentialsProvider {
                     if (login == null || lLogin.equals(login)) {
                         login = lLogin;
                         password = lPassword;
-                        if (lClientId != null || lClientSecret != null || lAccessToken != null)
+                        if (lClientId != null || lClientSecret != null
+                                || lAccessToken != null)
                             return credentials(login, password, lClientId,
                                     lClientSecret, lAccessToken);
                         else
