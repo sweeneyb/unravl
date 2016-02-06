@@ -30,8 +30,7 @@ public class TestSimplifyJsonBody extends TestBase {
 
     @Test
     public void testObjectWithoutJsonKey() throws Exception {
-        assertRequestBodyJson("{'name':'value'}",
-                "{'body':{'name':'value'}}");
+        assertRequestBodyJson("{'name':'value'}", "{'body':{'name':'value'}}");
 
     }
 
@@ -241,7 +240,8 @@ public class TestSimplifyJsonBody extends TestBase {
 
     private String getRequestBodyContent(ApiCall apiCall)
             throws UnRAVLException {
-        apiCall.run(); // These calls may not have a method (PUT or POST) that will consume the requestStream
+        apiCall.run(); // These calls may not have a method (PUT or POST) that
+                       // will consume the requestStream
         if (apiCall.getRequestStream() == null) {
             return null;
         }
@@ -252,7 +252,8 @@ public class TestSimplifyJsonBody extends TestBase {
             requestBodyString = baos.toString("UTF-8");
             return requestBodyString;
         } catch (UnsupportedEncodingException e) {
-            throw new UnRAVLException(e.getMessage());// should not happen; UTF-8 should exist
+            throw new UnRAVLException(e.getMessage());// should not happen;
+                                                      // UTF-8 should exist
         } catch (IOException e) {
             throw new UnRAVLException(e.getMessage());
         }

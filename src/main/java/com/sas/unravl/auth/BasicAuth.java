@@ -78,11 +78,12 @@ public class BasicAuth extends BaseUnRAVLAuth {
             // location for credential lookup
             JsonNode authVal = Json.firstFieldValue(getScriptlet());
             if (!authVal.isBoolean()) {
-                throw new UnRAVLException("Value of \"auth\" must be boolean. Found: " + authVal);
+                throw new UnRAVLException(
+                        "Value of \"auth\" must be boolean. Found: " + authVal);
             }
             if (!authVal.booleanValue())
                 return;
-            
+
             if (getScriptlet().get("mock") != null)
                 mock = getScriptlet().get("mock").booleanValue();
             // Note: the URI should already be expanded at this point

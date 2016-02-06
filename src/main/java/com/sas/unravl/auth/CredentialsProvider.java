@@ -4,7 +4,6 @@ package com.sas.unravl.auth;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sas.unravl.UnRAVLRuntime;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
@@ -19,20 +18,23 @@ public interface CredentialsProvider {
 
     /**
      * Get credentials for the host.
+     * 
      * @param host
      *            the host name or host:port string
      * @param auth
      *            The JsonNode containing the auth contents (usually login and
      *            password). Examples would be
+     * 
      *            <pre>
      *            { "basic" : true }
      *            { "oath2" : "https://www.example.com/auth/token" }
-     *            </pre>
+     * </pre>
      * @param mock
      *            if true, return mock credentials
-     * @return an object containing the user login name and password.
-     * This may be a {@link OAuth2Credentials} object if the credentials
-     * contain <code>clintId</code>, <code>clientPassword</code>, or <code>accessToken</code>
+     * @return an object containing the user login name and password. This may
+     *         be a {@link OAuth2Credentials} object if the credentials contain
+     *         <code>clintId</code>, <code>clientPassword</code>, or
+     *         <code>accessToken</code>
      * @throws IOException
      *             if we could not read the .netrc file
      */
@@ -56,11 +58,11 @@ public interface CredentialsProvider {
      *            if true, return mock credentials
      * @return an object containing the user login name and password
      * @throws IOException
-     *             if there is an I/O exception trying to read stored credentials
+     *             if there is an I/O exception trying to read stored
+     *             credentials
      */
     public abstract HostCredentials getHostCredentials(String host,
-            String userName, String password, boolean mock)
-            throws IOException;
+            String userName, String password, boolean mock) throws IOException;
 
     public void setRuntime(UnRAVLRuntime runtime);
 }

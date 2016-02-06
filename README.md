@@ -49,7 +49,7 @@ This can be captured in JSON using the UnRAVL syntax
 This is a fully functioning UnRAVL script. Besides executing the call, UnRAVL will also validate
 that the call returns a 2xx level HTTP status code, indicating success in one form or another.
 
-However, that is not highly useful. 
+However, that is not highly useful.
 This particular REST call should return the JSON body:
 ```JSON
 {
@@ -95,7 +95,7 @@ the result matches the expected JSON and that the HTTP response is 200:
 }
 ```
 
-This shows invoking an API using the GET method. `"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"` are the allowed HTTP verbs. 
+This shows invoking an API using the GET method. `"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"` are the allowed HTTP verbs.
 For `POST`, `PUT` and `PATCH`, you can also pass a request body.
 
 Next, we verify the result with a set of assertions:
@@ -150,7 +150,7 @@ an alternate approach would be to perform more specific assertions for data elem
 
 UnRAVL scripts also have an *environment*, which is a set of name/value pairs or variables.
 You can set variables explicitly, or bind them based on the result of API calls.
-For example, the above binds the JSON response body to a JsonNode (using the 
+For example, the above binds the JSON response body to a JsonNode (using the
 [Jackson](https://github.com/FasterXML/jackson)
 library for JSON) named `response`. (See [`"json"`](doc/Bind.md#json)
 for details.) This variable may be used to compare nested
@@ -159,7 +159,7 @@ expression that must evaluate to true for the test to pass.
 (You can also use JavaScript.)
 Groovy expressions can walk JSON structures naturally by accessing object values
 by name, or array items by index. The `doubleValue()` method extracts
-the numeric value of a Jackson [NumericNode](https://fasterxml.github.io/jackson-databind/javadoc/2.2.0/com/fasterxml/jackson/databind/node/NumericNode.html) item. 
+the numeric value of a Jackson [NumericNode](https://fasterxml.github.io/jackson-databind/javadoc/2.2.0/com/fasterxml/jackson/databind/node/NumericNode.html) item.
 
 Most string values in UnRAVL scripts are subject to environment substitution
 which replaces substrings of the form `{varName}` with the value
@@ -171,6 +171,19 @@ To see the full syntax for UnRAVL scripts, refer to [Reference](doc/Reference.md
 
 ## Releases
 
+* [Release v1.1.0](https://github.com/sassoftware/unravl/releases/tag/v1.1.0)
+  * Added [OAuth2](doc/Authentication.md#uath2) authentication
+  * A script can disable inherited authentication
+  * UnRAVL variables are now expanded in JSON object keys, not just in
+    string values
+  * Added a [`"form"`](doc/Body.md#form) body generator
+  * Expand UnRAVL variables in `"basic"` authentication parameters
+  * UnRAVL now follows 3xx redirects for HEAD calls as well as GET calls
+  * Added an `"unwrap"` option for the [`"json"`](doc/Bind.md#json)
+    response extractor and the [`"links"` and `"hrefs"`](doc/Bind.md#links-and-hrefs )
+    extractors
+  * Added the[`"jsonPath"`](doc/Bind.md#jsonPath) body extractor
+  * Various bug fixes
 * [Release v1.0.0](https://github.com/sassoftware/unravl/releases/tag/v1.0.0)
   * Removed deprecated features (equals assertion)
   * Reduced dependency on JUnit. All behaviors, assertions, etc. do not depend on JUnit.

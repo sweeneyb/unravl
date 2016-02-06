@@ -28,7 +28,8 @@ import org.springframework.web.client.RestTemplate;
 public class TestScriptsWithMockServer extends TestBase {
 
     private static final String SRC_TEST_SCRIPTS_MOCK = "src/test/scripts/mock";
-    private static final String SRC_TEST_SCRIPTS_MOCK_FAIL = SRC_TEST_SCRIPTS_MOCK + "/fail";
+    private static final String SRC_TEST_SCRIPTS_MOCK_FAIL = SRC_TEST_SCRIPTS_MOCK
+            + "/fail";
     private RestTemplate restTemplate;
     private MockRestServiceServer mockServer;
 
@@ -60,7 +61,6 @@ public class TestScriptsWithMockServer extends TestBase {
                 "helloJson.json");
         mockServer.verify();
     }
-
 
     @Test
     public void helloJsonFail() throws UnRAVLException {
@@ -95,7 +95,6 @@ public class TestScriptsWithMockServer extends TestBase {
         JUnitWrapper.tryScriptsInDirectory(runtime, null,
                 SRC_TEST_SCRIPTS_MOCK_FAIL, "helloText.json");
     }
-
 
     private void createHelloTextMock() {
         mockServer.expect(requestTo("/hello.txt")).andRespond(

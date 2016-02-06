@@ -3,7 +3,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>com.sas</groupId>
    <artifactId>sas.unravl</artifactId>
-   <version>1.1.0-SNAPSHOT</version>
+   <version>1.1.0</version>
    <description>Uniform REST API Validation Language  (UnRAVL) - a JSON DSL for validating REST APIs</description>
    <url>https://github.com/sassoftware/unravl</url>
    <inceptionYear>2014</inceptionYear>
@@ -77,8 +77,8 @@
             <artifactId>maven-compiler-plugin</artifactId>
             <version>2.5.1</version>
             <configuration>
-               <source>1.6</source>
-               <target>1.6</target>
+               <source>1.7</source>
+               <target>1.7</target>
             </configuration>
          </plugin>
 

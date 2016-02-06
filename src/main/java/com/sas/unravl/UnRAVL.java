@@ -265,7 +265,8 @@ public class UnRAVL {
             return;
         for (Map.Entry<String, JsonNode> h : Json.fields(headersNode)) {
             String string = h.getKey();
-            // Do not expand headers here; do so in ApiCall.mapHeaders(List<Header> requestHeaders)
+            // Do not expand headers here; do so in
+            // ApiCall.mapHeaders(List<Header> requestHeaders)
             // This method is called before "env" is evaluated,
             // so expansion here is premature.
             String val = h.getValue().asText();
@@ -288,12 +289,15 @@ public class UnRAVL {
         getRuntime().cancel();
     }
 
-
     /**
      * Bind a value within this script's environment. This will add a new
-     * binding if <var>varName</var> is not yet bound, or replace the old binding.
-     * @param varName the variable name
-     * @param value the variable value
+     * binding if <var>varName</var> is not yet bound, or replace the old
+     * binding.
+     * 
+     * @param varName
+     *            the variable name
+     * @param value
+     *            the variable value
      * @return this script, which allows chaining bind calls.
      * @see UnRAVLRuntime#bind(String, Object)
      */
@@ -304,7 +308,9 @@ public class UnRAVL {
 
     /**
      * Return the value bound to a variable in this script's environment
-     * @param varName the variable name
+     * 
+     * @param varName
+     *            the variable name
      * @return the value bound to the variable
      * @see UnRAVLRuntime#binding(String)
      */
@@ -312,11 +318,12 @@ public class UnRAVL {
         return getRuntime().binding(varName);
     }
 
-
     /**
      * Test if the value bound in this script's environment
-     * @param varName the variable name
-     * @return true iff the variable is bound 
+     * 
+     * @param varName
+     *            the variable name
+     * @return true iff the variable is bound
      * @see UnRAVLRuntime#bound(String)
      */
     public boolean bound(String varName) {

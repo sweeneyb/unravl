@@ -12,56 +12,70 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public abstract class BaseUnRAVLPlugin implements UnRAVLPlugin {
 
     /**
-     * Extract a boolean value from the current scriptlet. For example, the "basic"
-     * auth element 
+     * Extract a boolean value from the current scriptlet. For example, the
+     * "basic" auth element
+     * 
      * <pre>
      * { "auth" : { "basic" : true } }
      * </pre>
+     * 
      * can use this to get the boolean value named "basic"
-     * @param scriptlet the element inside an UnRAVL script
-     * @param optionName the name of the option
-     * @return true if th eoption was found and has the value true; otherwise false
-     * @throws UnRAVLException if the value is not a boolean
+     * 
+     * @param scriptlet
+     *            the element inside an UnRAVL script
+     * @param optionName
+     *            the name of the option
+     * @return true if th eoption was found and has the value true; otherwise
+     *         false
+     * @throws UnRAVLException
+     *             if the value is not a boolean
      */
-    protected static boolean booleanOption(ObjectNode scriptlet, String optionName)
-            throws UnRAVLException {
-                JsonNode val = scriptlet.get(optionName);
-                if (val == null)
-                    return false;
-                if (val.isBoolean())
-                    return val.booleanValue();
-                String msg = String.format(
-                        "%s option in %s must be a Boolean value; found %s",
-                        optionName, key(scriptlet), val);
-                throw new UnRAVLException(msg);
-            }
-    
+    protected static boolean booleanOption(ObjectNode scriptlet,
+            String optionName) throws UnRAVLException {
+        JsonNode val = scriptlet.get(optionName);
+        if (val == null)
+            return false;
+        if (val.isBoolean())
+            return val.booleanValue();
+        String msg = String.format(
+                "%s option in %s must be a Boolean value; found %s",
+                optionName, key(scriptlet), val);
+        throw new UnRAVLException(msg);
+    }
 
     /**
      * Extract a text value from the current scriptlet. For example, the "oath2"
-     * auth element 
+     * auth element
+     * 
      * <pre>
      * { "auth" : { "oath2" : "https://www.example.com/auth/token", "query" : "access_token" } }
      * </pre>
+     * 
      * can use this to get the boolean value named "access_token"
-     * @param scriptlet the element inside an UnRAVL script
-     * @param optionName the name of the option
-     * @param defaultValue value to return if the option is not present
-     * @return the string associated with the options name if found, else the default value
-     * @throws UnRAVLException if the value is not a text node
+     * 
+     * @param scriptlet
+     *            the element inside an UnRAVL script
+     * @param optionName
+     *            the name of the option
+     * @param defaultValue
+     *            value to return if the option is not present
+     * @return the string associated with the options name if found, else the
+     *         default value
+     * @throws UnRAVLException
+     *             if the value is not a text node
      */
-    protected String stringOption(ObjectNode scriptlet, String optionName, String defaultValue)
-            throws UnRAVLException {
-                JsonNode val = scriptlet.get(optionName);
-                if (val == null)
-                    return defaultValue;
-                if (val.isTextual())
-                    return val.textValue();
-                String msg = String.format(
-                        "%s option in %s must be a text value; found %s",
-                        optionName, key(scriptlet), val);
-                throw new UnRAVLException(msg);
-            }
+    protected String stringOption(ObjectNode scriptlet, String optionName,
+            String defaultValue) throws UnRAVLException {
+        JsonNode val = scriptlet.get(optionName);
+        if (val == null)
+            return defaultValue;
+        if (val.isTextual())
+            return val.textValue();
+        String msg = String.format(
+                "%s option in %s must be a text value; found %s", optionName,
+                key(scriptlet), val);
+        throw new UnRAVLException(msg);
+    }
 
     /**
      * Returns the name of this extractor. THis is the name (key) of the first

@@ -106,7 +106,8 @@ public class Json {
                     ObjectNode from = (ObjectNode) node;
                     ObjectNode to = new ObjectNode(jnf);
                     for (Map.Entry<String, JsonNode> f : Json.fields(from)) {
-                        to.set(script.expand(f.getKey()), this.apply(f.getValue()));
+                        to.set(script.expand(f.getKey()),
+                                this.apply(f.getValue()));
                     }
                     return to;
                 } else
@@ -388,7 +389,6 @@ public class Json {
     public static ObjectNode wrap(@SuppressWarnings("rawtypes") Map val) {
         return mapper.valueToTree(val);
     }
-
 
     // Convert a Java List to a JSON ArrayNode
     public static ObjectNode wrap(@SuppressWarnings("rawtypes") List val) {

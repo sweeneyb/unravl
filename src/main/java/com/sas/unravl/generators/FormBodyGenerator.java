@@ -21,12 +21,12 @@ import org.apache.log4j.Logger;
 /**
  * Generates a <code>application/x-www-form-urlencoded</code> request body for
  * this API call. The node can have one of several forms:
- * 
+ *
  * <pre>
  * { "form" : json-object }
  * { "form" : "@file-or-url" }
  * { "form" : "varName" }
- * { "form" : "name=encoded-&name=encoded-value&name=encoded-value" }
+ * { "form" : "name=encoded-&amp;name=encoded-value&amp;name=encoded-value" }
  * </pre>
  * <p>
  * In the first form the request body is derived from a JSON object. Each value
@@ -55,9 +55,9 @@ import org.apache.log4j.Logger;
  * The form body is bound in the current environment as a string named
  * "requestBody".
  * <p>
- * 
+ *
  * @author David.Biesack@sas.com
- * 
+ *
  */
 @UnRAVLRequestBodyGeneratorPlugin("form")
 public class FormBodyGenerator extends BaseUnRAVLRequestBodyGenerator {
@@ -105,8 +105,8 @@ public class FormBodyGenerator extends BaseUnRAVLRequestBodyGenerator {
         }
         String bodyText = body.toString();
         script.bind("requestBody", bodyText);
-        script.addRequestHeader(
-                new BasicHeader("Content-Type", "application/x-www-form-urlencoded"));
+        script.addRequestHeader(new BasicHeader("Content-Type",
+                "application/x-www-form-urlencoded"));
         return new ByteArrayInputStream(Text.utf8(bodyText));
     }
 
@@ -117,8 +117,11 @@ public class FormBodyGenerator extends BaseUnRAVLRequestBodyGenerator {
         try {
             String delim = "";
             for (Entry<String, JsonNode> x : Json.fields(inputJson)) {
-                body.append(delim).append(x.getKey()).append("=")
-                        .append(URLEncoder.encode(x.getValue().asText(), "UTF-8"));
+                body.append(delim)
+                        .append(x.getKey())
+                        .append("=")
+                        .append(URLEncoder.encode(x.getValue().asText(),
+                                "UTF-8"));
                 delim = "&";
             }
         } catch (UnsupportedEncodingException e) {
