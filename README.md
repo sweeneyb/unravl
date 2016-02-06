@@ -172,7 +172,7 @@ To see the full syntax for UnRAVL scripts, refer to [Reference](doc/Reference.md
 ## Releases
 
 * [Release v1.1.0](https://github.com/sassoftware/unravl/releases/tag/v1.1.0)
-  * Added [OAuth2](doc/Authentication.md#uath2) authentication
+  * Added [OAuth2](doc/Authentication.md#oauth2) authentication
   * A script can disable inherited authentication
   * UnRAVL variables are now expanded in JSON object keys, not just in
     string values
