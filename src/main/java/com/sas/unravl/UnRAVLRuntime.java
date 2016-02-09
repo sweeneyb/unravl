@@ -381,7 +381,7 @@ public class UnRAVLRuntime implements Cloneable {
         env.put(varName, value);
         logger.trace("bind(" + varName + "," + value + ")"
         + ((value instanceof String) ? "" : 
-            " " + value.getClass().getName()));
+            " " + (value == null ? "null" : value.getClass().getName())));
         return this;
     }
 
