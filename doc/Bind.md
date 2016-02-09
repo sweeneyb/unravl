@@ -106,7 +106,8 @@ Binds values from the JSON response by extracting data via their
 
 ```
  { "jsonPath" : { map-of-var-path-pairs } }
- { "jsonPath" : { map-of-var-path-pairs }, "from" : "varname" }
+ { "jsonPath" : { map-of-var-path-pairs }, "from" : "varName" }
+ { "jsonPath" : { map-of-var-path-pairs }, "unwrap" : "true" }
 ```
 
 The first form binds from the JSON response.
@@ -120,6 +121,17 @@ The value of that variable should be a JSON object
 (such as from an `"env"` element or a previous
 `"json"` or other extractor) or a `Map<String,Object>`
 or `List<Object>`.
+
+The `"wrap"` option may be used with either form.
+By default, the `"jsonPath"` extractor will
+return Java `Map` or `List` objects.
+Use `"wrap" : true` to wrap the results of the JSON Path
+expression as Jackson `JsonNode` objects. A `Map`
+will be wrapped as a `ObjectNode`; a `List` will
+be wrapped as an `ArrayNode`, and scalar values
+wrapped as `DoubleNode`, `IntegerNode`, `TextNode`, `BooleanNode`,
+`NullNode`, according to the type of the item result
+of the JSON Path.
 
 ```JSON
 { "jsonPath" : {
