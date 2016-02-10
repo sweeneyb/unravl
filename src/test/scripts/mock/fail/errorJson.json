@@ -1,0 +1,11 @@
+{
+   "name" : "expect an error object and 400 status",
+   "GET" : "/error.json",
+   "assert" :   [ 
+     { "doc" : "This test script should fail because the mock server returns an error response (JSON) and 400 BAD REQUEST at /error.json" },
+     { "json" :
+       { "error" : "BAD REQUEST", "httpStatusCode" : 400 }
+     },
+     { "status" : 400 }
+   ]
+}

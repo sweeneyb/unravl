@@ -2,6 +2,7 @@
 package com.sas.unravl.test;
 
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.sas.unravl.UnRAVLException;
@@ -80,6 +81,17 @@ public class TestScriptsWithMockServer extends TestBase {
                                         .toString(), MediaType.APPLICATION_JSON));
     }
 
+
+    private void createErrorJsonMock() throws UnRAVLException {
+        String responseBody = mockJson("{ 'error' : 'BAD REQUEST', 'httpStatusCode' : 400 }").toString();
+        mockServer
+                .expect(requestTo("/error.json"))
+                .andRespond(
+                        withBadRequest().body(responseBody).contentType(MediaType.APPLICATION_JSON));
+    }
+
+
+
     @Test
     public void helloText() throws UnRAVLException {
         createHelloTextMock();
@@ -121,5 +133,16 @@ public class TestScriptsWithMockServer extends TestBase {
                 withSuccess(new String(new byte[] { 0, 1, 2, 3, 4, 5, 6 }),
                         MediaType.APPLICATION_OCTET_STREAM));
     }
+    
+
+    @Test
+    public void errorResponse() throws UnRAVLException {
+
+        createErrorJsonMock();
+        JUnitWrapper.runScriptsInDirectory(runtime, SRC_TEST_SCRIPTS_MOCK_FAIL,
+                "errorJson.json");
+        mockServer.verify();
+    }
+    
 
 }

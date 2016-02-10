@@ -43,6 +43,7 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -474,6 +475,23 @@ public class ApiCall {
         // Use RequestCallback and ResponseExtractor
         // to handle all request bodies, including binary.
         // RestTemplate.exchange can't handle binary byte[] body
+
+        final ResponseErrorHandler ignoreResponseErrors = new ResponseErrorHandler() {
+
+            @Override
+            public void handleError(ClientHttpResponse response)
+                    throws IOException {
+                // NO OP. This is only called if hasError returns true,
+                // but below we always return false, so we can extract the body
+                // and the HTTP status code, even for 4xx and 5xx errors.
+            }
+
+            @Override
+            public boolean hasError(ClientHttpResponse response)
+                    throws IOException {
+                return false;
+            }
+        };
         final RequestCallback requestCallback = new RequestCallback() {
 
             @Override
@@ -501,13 +519,29 @@ public class ApiCall {
         long start = System.currentTimeMillis();
         try {
             logger.info(method.name() + " " + getURI());
-            InternalResponse response = restTemplate.execute(getURI(),
-                    HttpMethod.valueOf(method.name()), requestCallback,
-                    responseExtractor);
+            // create response body and a valid HTTP response code before the
+            // call
+            // so that even on exceptions, we have a non-null response
+            responseBody = new ByteArrayOutputStream();
+            httpStatus = HttpStatus.NOT_IMPLEMENTED.value();
+
+            InternalResponse response = null;
+            // Save the old handler and restore it after the call.
+            // use our ignoreResponseErrors error handler so we
+            // can unconditionally capture the response
+            ResponseErrorHandler handler = restTemplate.getErrorHandler();
+            try {
+                restTemplate.setErrorHandler(ignoreResponseErrors);
+                response = restTemplate.execute(getURI(),
+                        HttpMethod.valueOf(method.name()), requestCallback,
+                        responseExtractor);
+            } finally {
+                restTemplate.setErrorHandler(handler);
+            }
             setResponseHeaders(mapHeaders(response.headers));
             httpStatus = response.status.value();
-            responseBody = new ByteArrayOutputStream();
             responseBody.write(response.responseBody);
+            responseBody.close();
             long end = System.currentTimeMillis();
             logger.info(script.getMethod() + " took " + (end - start)
                     + "ms, returned HTTP status " + response.status);
@@ -517,8 +551,9 @@ public class ApiCall {
         } catch (IOException e) {
             throwException(e);
         } catch (HttpStatusCodeException e) {
-            assertStatus(e.getStatusCode().value());
             // this happens if the host name cannot be resolved.
+            // Should not happen because we use ignoreResponseErrors,
+            // but this and other catch block here are "just in case"
             assertStatus(e.getStatusCode().value());
         } catch (ResourceAccessException e) {
             // execute can also throw ResourceAccessException if host does not
@@ -634,6 +669,9 @@ public class ApiCall {
         this.responseHeaders = responseHeaders;
     }
 
+    // Check that the httpStatusCode matches the expected status
+    // code of the API call. If no explicit status assertion exists,
+    // assert the status is a 2xx code.
     private void assertStatus(int httpStatusCode)
             throws UnRAVLAssertionException, UnRAVLException {
         this.httpStatus = httpStatusCode;
@@ -641,7 +679,7 @@ public class ApiCall {
         sa.setScript(script);
         sa.setScriptlet(STATUS_ASSERTION);
         try {
-            bind("status", new Integer(httpStatusCode));
+            bind("status", Integer.valueOf(httpStatusCode));
             ObjectNode node = statusAssertion();
             if (node != null) {
                 sa.check(script, node, UnRAVLAssertion.Stage.ASSERT, this);
