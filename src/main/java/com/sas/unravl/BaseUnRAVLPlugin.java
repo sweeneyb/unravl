@@ -25,7 +25,7 @@ public abstract class BaseUnRAVLPlugin implements UnRAVLPlugin {
      *            the element inside an UnRAVL script
      * @param optionName
      *            the name of the option
-     * @return true if th eoption was found and has the value true; otherwise
+     * @return true if the option was found and has the value true; otherwise
      *         false
      * @throws UnRAVLException
      *             if the value is not a boolean

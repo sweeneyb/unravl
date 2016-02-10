@@ -81,6 +81,10 @@ public class JsonPathExtractor extends JsonExtractor {
             throws UnRAVLException {
         Object fromObject = getJsonSource(script, scriptlet, call);
         ObjectNode bindings = Json.object(Json.firstFieldValue(scriptlet));
+        // TODO: look for the effective binding
+        // "bind" : [ ..., { "jsonNode" : {}, "wrap" : true }, ...] 
+        // in inherited templates (match only if the value is {}). If true, wrap this one as well.
+        boolean wrap = booleanOption(scriptlet, "wrap");
         for (Map.Entry<String, JsonNode> entry : Json.fields(bindings)) {
             JsonNode path = entry.getValue();
             if (!path.isTextual()) {
@@ -90,6 +94,9 @@ public class JsonPathExtractor extends JsonExtractor {
             }
             String pathString = call.getScript().expand(path.textValue());
             Object value = JsonPath.read(fromObject, pathString);
+            if (wrap) {
+               value = Json.wrap(value);
+            }
             script.bind(entry.getKey(), value);
         }
     }
