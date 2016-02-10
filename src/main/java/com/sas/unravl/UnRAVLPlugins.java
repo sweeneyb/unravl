@@ -23,7 +23,9 @@ import javax.script.ScriptEngineManager;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
 /**
@@ -189,13 +191,36 @@ public class UnRAVLPlugins {
                 : defaultRestTemplate;
     }
 
-    // This RestTemplate uses a custom ClientHttpRequestFactory
-    // that follows redirect for HEAD calls. The default
-    // SimpleClientHttpRequestFactory only follows redirects
-    // for GET.
-    // see
-    // http://stackoverflow.com/questions/29418583/follow-302-redirect-using-spring-resttemplate
-    private RestTemplate newRestTemplate() {
+    /**
+     * This RestTemplate uses a custom ClientHttpRequestFactory that follows
+     * redirect for HEAD calls. The default SimpleClientHttpRequestFactory only
+     * follows redirects for GET. see
+     * <a href='http://stackoverflow.com/questions/29418583/follow-302-redirect-using-spring-resttemplate'>
+     * this StackOverflow question</a>.
+     * <p>
+     * This instance also sets an error handler which ignores all errors, so
+     * that ApiCall can extract the HTTP response code, headers, and response
+     * body.
+     * </p>
+     */
+    public static RestTemplate newRestTemplate() {
+
+        final ResponseErrorHandler ignoreResponseErrors = new ResponseErrorHandler() {
+
+            @Override
+            public void handleError(ClientHttpResponse response)
+                    throws IOException {
+                // NO OP. This is only called if hasError returns true,
+                // but below we always return false, so we can extract the body
+                // and the HTTP status code, even for 4xx and 5xx errors.
+            }
+
+            @Override
+            public boolean hasError(ClientHttpResponse response)
+                    throws IOException {
+                return false;
+            }
+        };
         RestTemplate rt = new RestTemplate(
                 new SimpleClientHttpRequestFactory() {
                     @Override
@@ -210,6 +235,7 @@ public class UnRAVLPlugins {
                         }
                     }
                 });
+        rt.setErrorHandler(ignoreResponseErrors);
         return rt;
     }
 

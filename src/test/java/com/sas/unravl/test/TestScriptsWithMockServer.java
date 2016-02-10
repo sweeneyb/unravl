@@ -36,7 +36,7 @@ public class TestScriptsWithMockServer extends TestBase {
 
     @Before
     public void createMockServer() {
-        restTemplate = new RestTemplate();
+        restTemplate = UnRAVLPlugins.newRestTemplate();
         setRestTemplate(restTemplate);
         mockServer = MockRestServiceServer.createServer(restTemplate);
     }

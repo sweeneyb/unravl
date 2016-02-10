@@ -476,22 +476,6 @@ public class ApiCall {
         // to handle all request bodies, including binary.
         // RestTemplate.exchange can't handle binary byte[] body
 
-        final ResponseErrorHandler ignoreResponseErrors = new ResponseErrorHandler() {
-
-            @Override
-            public void handleError(ClientHttpResponse response)
-                    throws IOException {
-                // NO OP. This is only called if hasError returns true,
-                // but below we always return false, so we can extract the body
-                // and the HTTP status code, even for 4xx and 5xx errors.
-            }
-
-            @Override
-            public boolean hasError(ClientHttpResponse response)
-                    throws IOException {
-                return false;
-            }
-        };
         final RequestCallback requestCallback = new RequestCallback() {
 
             @Override
@@ -524,20 +508,9 @@ public class ApiCall {
             // so that even on exceptions, we have a non-null response
             responseBody = new ByteArrayOutputStream();
             httpStatus = HttpStatus.NOT_IMPLEMENTED.value();
-
-            InternalResponse response = null;
-            // Save the old handler and restore it after the call.
-            // use our ignoreResponseErrors error handler so we
-            // can unconditionally capture the response
-            ResponseErrorHandler handler = restTemplate.getErrorHandler();
-            try {
-                restTemplate.setErrorHandler(ignoreResponseErrors);
-                response = restTemplate.execute(getURI(),
-                        HttpMethod.valueOf(method.name()), requestCallback,
-                        responseExtractor);
-            } finally {
-                restTemplate.setErrorHandler(handler);
-            }
+            InternalResponse response = restTemplate.execute(
+                    getURI(), HttpMethod.valueOf(method.name()),
+                    requestCallback, responseExtractor);
             setResponseHeaders(mapHeaders(response.headers));
             httpStatus = response.status.value();
             responseBody.write(response.responseBody);
@@ -552,8 +525,11 @@ public class ApiCall {
             throwException(e);
         } catch (HttpStatusCodeException e) {
             // this happens if the host name cannot be resolved.
-            // Should not happen because we use ignoreResponseErrors,
-            // but this and other catch block here are "just in case"
+            // This and other exceptions below won't happen with the
+            // default RestTemplate created in UnRAVLPlugins, but may
+            // occur if the client injects their own RestTemplate
+            // instance that uses the default error handler which
+            // throws exceptions.
             assertStatus(e.getStatusCode().value());
         } catch (ResourceAccessException e) {
             // execute can also throw ResourceAccessException if host does not
