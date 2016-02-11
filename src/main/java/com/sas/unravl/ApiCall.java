@@ -492,6 +492,7 @@ public class ApiCall {
             @Override
             public InternalResponse extractData(ClientHttpResponse response)
                     throws IOException {
+                httpStatus = response.getStatusCode().value();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Binary.copy(response.getBody(), baos);
                 return new InternalResponse(response.getStatusCode(),
@@ -511,7 +512,6 @@ public class ApiCall {
                     HttpMethod.valueOf(method.name()), requestCallback,
                     responseExtractor);
             setResponseHeaders(mapHeaders(response.headers));
-            httpStatus = response.status.value();
             responseBody.write(response.responseBody);
             responseBody.close();
             long end = System.currentTimeMillis();
@@ -533,12 +533,12 @@ public class ApiCall {
         } catch (ResourceAccessException e) {
             // execute can also throw ResourceAccessException if host does not
             // resolve.
-            assertStatus(HttpStatus.NOT_FOUND.value());
+            assertStatus(httpStatus);
         } catch (RestClientException e) {
             // execute can also throw RestClientException
             // but that exception does not convey a HTTP status code.
             // We assume 400 if we get RestClientException
-            assertStatus(HttpStatus.BAD_REQUEST.value());
+            assertStatus(httpStatus);
         } catch (RuntimeException e) { // Spring RestTemplate can
                                        // throw NestedRuntimeException
             throwException(e);
