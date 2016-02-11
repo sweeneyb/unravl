@@ -43,7 +43,6 @@ import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -508,9 +507,9 @@ public class ApiCall {
             // so that even on exceptions, we have a non-null response
             responseBody = new ByteArrayOutputStream();
             httpStatus = HttpStatus.NOT_IMPLEMENTED.value();
-            InternalResponse response = restTemplate.execute(
-                    getURI(), HttpMethod.valueOf(method.name()),
-                    requestCallback, responseExtractor);
+            InternalResponse response = restTemplate.execute(getURI(),
+                    HttpMethod.valueOf(method.name()), requestCallback,
+                    responseExtractor);
             setResponseHeaders(mapHeaders(response.headers));
             httpStatus = response.status.value();
             responseBody.write(response.responseBody);
@@ -520,7 +519,7 @@ public class ApiCall {
                     + "ms, returned HTTP status " + response.status);
             log("Response body:", responseBody, "Response headers:",
                     response.headers);
-            assertStatus(response.status.value());
+            assertStatus(httpStatus);
         } catch (IOException e) {
             throwException(e);
         } catch (HttpStatusCodeException e) {

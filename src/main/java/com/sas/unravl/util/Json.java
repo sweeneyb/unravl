@@ -385,30 +385,33 @@ public class Json {
         return result;
     }
 
-    /** 
+    /**
      * Convert a Java Map to a JSON ObjectNode
      *
-     * @param val a Map object
+     * @param val
+     *            a Map object
      * @return a ObjectNode that corresponds to the Map
      */
     public static ObjectNode wrap(@SuppressWarnings("rawtypes") Map val) {
         return mapper.valueToTree(val);
     }
 
-    /** 
+    /**
      * Convert a Java List to a JSON ArrayNode
      *
-     * @param val a List object
+     * @param val
+     *            a List object
      * @return a ArrayNode that corresponds to the Map
      */
     public static ArrayNode wrap(@SuppressWarnings("rawtypes") List val) {
         return mapper.valueToTree(val);
     }
 
-    /** 
+    /**
      * Convert a Java object to a JsonNode
      *
-     * @param val a List, Map, or other object
+     * @param val
+     *            a List, Map, or other object
      * @return a JsonNode that corresponds to the val
      */
     @SuppressWarnings("rawtypes")

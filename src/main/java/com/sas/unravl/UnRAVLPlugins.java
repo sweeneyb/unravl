@@ -13,7 +13,6 @@ import com.sas.unravl.extractors.UnRAVLExtractor;
 import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,10 +20,15 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpHead;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 
@@ -192,16 +196,23 @@ public class UnRAVLPlugins {
     }
 
     /**
-     * This RestTemplate uses a custom ClientHttpRequestFactory that follows
-     * redirect for HEAD calls. The default SimpleClientHttpRequestFactory only
-     * follows redirects for GET. see
-     * <a href='http://stackoverflow.com/questions/29418583/follow-302-redirect-using-spring-resttemplate'>
-     * this StackOverflow question</a>.
+     * This RestTemplate uses HttpComponentsClientHttpRequestFactory that
+     * follows redirect for GET and HEAD calls. We use
+     * HttpComponentsClientHttpRequestFactory because the default
+     * HttpUrlConnection used by Spring throws I/O exceptions from
+     * response.getBody() when the remote call returns 4xx responses, which
+     * means the client can't read the response body that accompanies such
+     * errors. The Apache HTTP Commons implementation of HttpUrlConnection does
+     * not throw such exceptions, so UnRAVL can read the response body in all
+     * cases.
      * <p>
      * This instance also sets an error handler which ignores all errors, so
      * that ApiCall can extract the HTTP response code, headers, and response
      * body.
      * </p>
+     * 
+     * @return a RestTemplate instance to use for making HTTP calls when running
+     *         UnRAVL scripts.
      */
     public static RestTemplate newRestTemplate() {
 
@@ -221,22 +232,23 @@ public class UnRAVLPlugins {
                 return false;
             }
         };
-        RestTemplate rt = new RestTemplate(
-                new SimpleClientHttpRequestFactory() {
-                    @Override
-                    protected void prepareConnection(
-                            HttpURLConnection connection, String httpMethod)
-                            throws IOException {
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        final HttpClient httpClient = HttpClientBuilder.create()
+                .setRedirectStrategy(new UnRAVLRedirectStrategy()).build();
+        factory.setHttpClient(httpClient);
 
-                        super.prepareConnection(connection, httpMethod);
-
-                        if ("HEAD".equals(httpMethod)) {
-                            connection.setInstanceFollowRedirects(true);
-                        }
-                    }
-                });
+        RestTemplate rt = new RestTemplate(factory);
         rt.setErrorHandler(ignoreResponseErrors);
         return rt;
     }
 
+    private static final class UnRAVLRedirectStrategy extends
+            DefaultRedirectStrategy {
+
+        @Override
+        protected boolean isRedirectable(final String method) {
+            return HttpGet.METHOD_NAME.equalsIgnoreCase(method) //
+                    || HttpHead.METHOD_NAME.equalsIgnoreCase(method);
+        }
+    }
 }

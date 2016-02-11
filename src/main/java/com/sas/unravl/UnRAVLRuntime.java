@@ -379,9 +379,13 @@ public class UnRAVLRuntime implements Cloneable {
             throw new RuntimeException(ue);
         }
         env.put(varName, value);
-        logger.trace("bind(" + varName + "," + value + ")"
-        + ((value instanceof String) ? "" : 
-            " " + (value == null ? "null" : value.getClass().getName())));
+        logger.trace("bind("
+                + varName
+                + ","
+                + value
+                + ")"
+                + ((value instanceof String) ? "" : " "
+                        + (value == null ? "null" : value.getClass().getName())));
         return this;
     }
 

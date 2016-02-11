@@ -3,6 +3,7 @@ package com.sas.unravl.test;
 
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withBadRequest;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withStatus;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 import com.sas.unravl.UnRAVLException;
@@ -13,6 +14,7 @@ import com.sas.unravl.assertions.JUnitWrapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
@@ -81,17 +83,6 @@ public class TestScriptsWithMockServer extends TestBase {
                                         .toString(), MediaType.APPLICATION_JSON));
     }
 
-
-    private void createErrorJsonMock() throws UnRAVLException {
-        String responseBody = mockJson("{ 'error' : 'BAD REQUEST', 'httpStatusCode' : 400 }").toString();
-        mockServer
-                .expect(requestTo("/error.json"))
-                .andRespond(
-                        withBadRequest().body(responseBody).contentType(MediaType.APPLICATION_JSON));
-    }
-
-
-
     @Test
     public void helloText() throws UnRAVLException {
         createHelloTextMock();
@@ -143,6 +134,34 @@ public class TestScriptsWithMockServer extends TestBase {
                 "errorJson.json");
         mockServer.verify();
     }
+
+    private void createErrorJsonMock() throws UnRAVLException {
+        String responseBody = mockJson("{ 'error' : 'BAD REQUEST', 'httpStatusCode' : 400 }").toString();
+        mockServer
+                .expect(requestTo("/error.json"))
+                .andRespond(
+                        withBadRequest().body(responseBody).contentType(MediaType.APPLICATION_JSON));
+    }
+    
+
+
+    @Test
+    public void conflictResponse() throws UnRAVLException {
+
+        createConflictMock();
+        JUnitWrapper.runScriptsInDirectory(runtime, SRC_TEST_SCRIPTS_MOCK_FAIL,
+                "conflict.json");
+        mockServer.verify();
+    }
+
+    private void createConflictMock() throws UnRAVLException {
+        String responseBody = mockJson("{ 'error' : 'CONFLICT', 'httpStatusCode' : 409 }").toString();
+        mockServer
+                .expect(requestTo("/conflict.json"))
+                .andRespond(
+                        withStatus(HttpStatus.CONFLICT).body(responseBody).contentType(MediaType.APPLICATION_JSON));
+    }
+
     
 
 }
