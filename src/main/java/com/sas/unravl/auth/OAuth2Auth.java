@@ -46,8 +46,8 @@ import org.apache.log4j.Logger;
  * 
  * <h2>Options</h2> The "oath2" object supports several options to configure the
  * OAUth2 authentication. See <a href=
- * 'https://github.com/sassoftware/unravl/blob/master/doc/Authentication.md#oauth2'
- * > Authentication: oauth2</a> for complete details.
+ * 'https://github.com/sassoftware/unravl/blob/master/doc/Authentication.md#oauth2
+ * ' > Authentication: oauth2</a> for complete details.
  * <p>
  * This auth module may be accessed with either the name <code>"oauth2"</code>,
  * <code>"OAuth2"</code>, <code>"oauth"</code>, <code>"OAuth"</code>.

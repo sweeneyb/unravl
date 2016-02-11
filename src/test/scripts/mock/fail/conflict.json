@@ -1,0 +1,11 @@
+{
+   "name" : "expect an error object and 409 status",
+   "GET" : "/conflict.json",
+   "assert" :   [ 
+     { "doc" : "This test script should fail because the mock server returns an error response (JSON) and 409 COnflict at /error.json" },
+     { "json" :
+       { "error" : "CONFLICT", "httpStatusCode" : 409 }
+     },
+     { "status" : 409 }
+   ]
+}

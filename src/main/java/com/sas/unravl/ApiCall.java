@@ -474,6 +474,7 @@ public class ApiCall {
         // Use RequestCallback and ResponseExtractor
         // to handle all request bodies, including binary.
         // RestTemplate.exchange can't handle binary byte[] body
+
         final RequestCallback requestCallback = new RequestCallback() {
 
             @Override
@@ -491,6 +492,7 @@ public class ApiCall {
             @Override
             public InternalResponse extractData(ClientHttpResponse response)
                     throws IOException {
+                httpStatus = response.getStatusCode().value();
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 Binary.copy(response.getBody(), baos);
                 return new InternalResponse(response.getStatusCode(),
@@ -501,34 +503,42 @@ public class ApiCall {
         long start = System.currentTimeMillis();
         try {
             logger.info(method.name() + " " + getURI());
+            // create response body and a valid HTTP response code before the
+            // call
+            // so that even on exceptions, we have a non-null response
+            responseBody = new ByteArrayOutputStream();
+            httpStatus = HttpStatus.NOT_IMPLEMENTED.value();
             InternalResponse response = restTemplate.execute(getURI(),
                     HttpMethod.valueOf(method.name()), requestCallback,
                     responseExtractor);
             setResponseHeaders(mapHeaders(response.headers));
-            httpStatus = response.status.value();
-            responseBody = new ByteArrayOutputStream();
             responseBody.write(response.responseBody);
+            responseBody.close();
             long end = System.currentTimeMillis();
             logger.info(script.getMethod() + " took " + (end - start)
                     + "ms, returned HTTP status " + response.status);
             log("Response body:", responseBody, "Response headers:",
                     response.headers);
-            assertStatus(response.status.value());
+            assertStatus(httpStatus);
         } catch (IOException e) {
             throwException(e);
         } catch (HttpStatusCodeException e) {
-            assertStatus(e.getStatusCode().value());
             // this happens if the host name cannot be resolved.
+            // This and other exceptions below won't happen with the
+            // default RestTemplate created in UnRAVLPlugins, but may
+            // occur if the client injects their own RestTemplate
+            // instance that uses the default error handler which
+            // throws exceptions.
             assertStatus(e.getStatusCode().value());
         } catch (ResourceAccessException e) {
             // execute can also throw ResourceAccessException if host does not
             // resolve.
-            assertStatus(HttpStatus.NOT_FOUND.value());
+            assertStatus(httpStatus);
         } catch (RestClientException e) {
             // execute can also throw RestClientException
             // but that exception does not convey a HTTP status code.
             // We assume 400 if we get RestClientException
-            assertStatus(HttpStatus.BAD_REQUEST.value());
+            assertStatus(httpStatus);
         } catch (RuntimeException e) { // Spring RestTemplate can
                                        // throw NestedRuntimeException
             throwException(e);
@@ -634,6 +644,9 @@ public class ApiCall {
         this.responseHeaders = responseHeaders;
     }
 
+    // Check that the httpStatusCode matches the expected status
+    // code of the API call. If no explicit status assertion exists,
+    // assert the status is a 2xx code.
     private void assertStatus(int httpStatusCode)
             throws UnRAVLAssertionException, UnRAVLException {
         this.httpStatus = httpStatusCode;
@@ -641,7 +654,7 @@ public class ApiCall {
         sa.setScript(script);
         sa.setScriptlet(STATUS_ASSERTION);
         try {
-            bind("status", new Integer(httpStatusCode));
+            bind("status", Integer.valueOf(httpStatusCode));
             ObjectNode node = statusAssertion();
             if (node != null) {
                 sa.check(script, node, UnRAVLAssertion.Stage.ASSERT, this);
