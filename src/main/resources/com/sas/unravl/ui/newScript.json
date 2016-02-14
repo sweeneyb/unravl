@@ -1,0 +1,24 @@
+{
+    "name": "UnRAVL test",
+    "env": {
+        "url": "http://httpbin.org/get"
+    },
+    "GET": "{url}",
+    "headers": {
+        "Accept": "application/json",
+        "Origin": "UnRAVL.UI"
+    },
+    "bind": [
+        { "jsonPath":
+                    {
+                        "responseUrl": "$.url",
+                        "origin": "$.headers.Origin"
+                    }
+        }
+    ],
+    "assert": [
+        {"status": 200},
+        "responseUrl = url",
+        "origin == 'UnRAVL.UI'"
+    ]
+}

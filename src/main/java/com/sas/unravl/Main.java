@@ -1,5 +1,7 @@
 package com.sas.unravl;
 
+import com.sas.unravl.ui.UnRAVLFrame;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -50,9 +52,16 @@ public final class Main {
         argv = preProcessArgs(argv);
         configureLog4j();
         UnRAVLRuntime.configure();
-        int rc = new Main().run(argv);
-        System.exit(rc);
+        if (ui) {
+            javax.swing.JFrame frame = UnRAVLFrame.main(argv);
+            frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        } else {
+            int rc = new Main().run(argv);
+            System.exit(rc);
+        }
     }
+
+    static boolean ui = false;
 
     // Scan for --v | -verbose | -q | --quiet and set the log4j configuration
     // remove those args from the arg list and return the remainder
@@ -64,6 +73,8 @@ public final class Main {
                 log4j = "log4j-quiet.properties";
             else if (arg.matches("^--?v(erbose)?"))
                 log4j = "log4j-trace.properties";
+            else if (arg.matches("^--?ui?"))
+                ui = true;
             else
                 args.add(arg);
         }

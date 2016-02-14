@@ -17,6 +17,8 @@ import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
 import com.sas.unravl.util.Json;
 import com.sas.unravl.util.VariableResolver;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -61,6 +63,8 @@ public class UnRAVLRuntime implements Cloneable {
     private VariableResolver variableResolver;
     private String scriptLanguage;
     private boolean canceled;
+
+    List<PropertyChangeListener> listeners = new ArrayList<PropertyChangeListener>();
 
     public UnRAVLRuntime() {
         this(new LinkedHashMap<String, Object>());
@@ -250,46 +254,61 @@ public class UnRAVLRuntime implements Cloneable {
     public void execute(List<JsonNode> listOfScripts)
             throws JsonProcessingException, IOException, UnRAVLException {
         canceled = false;
+        executeInternal(listOfScripts);
+    }
+
+    public void executeInternal(List<JsonNode> listOfScripts)
+            throws JsonProcessingException, IOException, UnRAVLException {
+
         for (int i = 0; !isCanceled() && i < listOfScripts.size(); i++) {
             JsonNode root = listOfScripts.get(i);
+            executeInternal(root);
+        }
+    }
+
+    public void executeInternal(JsonNode root) throws JsonProcessingException,
+            IOException, UnRAVLException {
+        if (root.isTextual()) {
+            String ref = root.textValue();
+            if (ref.startsWith(UnRAVL.REDIRECT_PREFIX)) {
+                String sublist = expand(ref.substring(UnRAVL.REDIRECT_PREFIX
+                        .length()));
+                executeInternal(read(sublist));
+                return;
+            }
+        } else if (root.isArray()) {
+            for (JsonNode node : Json.array(root))
+                executeInternal(node);
+            return;
+        }
+
+        String label = "";
+        try {
+            UnRAVL u = null;
             if (root.isTextual()) {
-                String ref = root.textValue();
-                if (ref.startsWith(UnRAVL.REDIRECT_PREFIX)) {
-                    String sublist = expand(ref
-                            .substring(UnRAVL.REDIRECT_PREFIX.length()));
-                    execute(read(sublist));
-                    continue;
+                String name = root.textValue();
+                label = name;
+                u = getScripts().get(name);
+                if (u == null) {
+                    throw new UnRAVLException(String.format(
+                            "No such UnRAVL script named '%s'", name));
                 }
-            }
-            String label = "";
-            try {
-                UnRAVL u = null;
-                if (root.isTextual()) {
-                    String name = root.textValue();
-                    label = name;
-                    u = getScripts().get(name);
-                    if (u == null) {
-                        throw new UnRAVLException(String.format(
-                                "No such UnRAVL script named '%s'", name));
-                    }
-                } else
-                    u = new UnRAVL(this, (ObjectNode) root);
-                label = u.getName();
-                u.run();
-            } catch (UnRAVLAssertionException e) {
-                logger.error(e.getMessage() + " while running UnRAVL script "
-                        + label);
+            } else
+                u = new UnRAVL(this, (ObjectNode) root);
+            label = u.getName();
+            u.run();
+        } catch (UnRAVLAssertionException e) {
+            logger.error(e.getMessage() + " while running UnRAVL script "
+                    + label);
 
-                incrementFailedAssertionCount();
-            } catch (RuntimeException rte) {
-                if (rte.getCause() instanceof UnRAVLException) { // tunneled
-                                                                 // exception
-                    UnRAVLException e = (UnRAVLException) rte.getCause();
-                    throw e;
-                } else
-                    throw rte;
-            }
-
+            incrementFailedAssertionCount();
+        } catch (RuntimeException rte) {
+            if (rte.getCause() instanceof UnRAVLException) { // tunneled
+                                                             // exception
+                UnRAVLException e = (UnRAVLException) rte.getCause();
+                throw e;
+            } else
+                throw rte;
         }
 
     }
@@ -378,7 +397,13 @@ public class UnRAVLRuntime implements Cloneable {
                     "Cannot rebind special Unicode variable %s", varName));
             throw new RuntimeException(ue);
         }
+
+        Object oldValue = binding(varName);
         env.put(varName, value);
+
+        if (!listeners.isEmpty())
+            notifyListeners(new PropertyChangeEvent(this, varName, oldValue,
+                    value));
         logger.trace("bind("
                 + varName
                 + ","
@@ -504,4 +529,19 @@ public class UnRAVLRuntime implements Cloneable {
         canceled = false;
     }
 
+    public PropertyChangeListener addPropertyChangeListener(
+            PropertyChangeListener l) {
+        if (!listeners.contains(l))
+            listeners.add(l);
+        return l;
+    }
+
+    private void notifyListeners(PropertyChangeEvent propertyChangeEvent) {
+        for (PropertyChangeListener l : listeners)
+            try {
+                l.propertyChange(propertyChangeEvent);
+            } catch (Throwable t) {
+                logger.warn(t);
+            }
+    }
 }

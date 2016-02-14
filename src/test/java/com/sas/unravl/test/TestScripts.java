@@ -15,15 +15,17 @@ import org.junit.Test;
 
 public class TestScripts {
 
+    public static final String TEST_SCRIPTS_DIR = "src/test/scripts";
+
     @Test
     public void testScripts() {
         System.out.println(System.getProperty("user.dir"));
-        JUnitWrapper.runScriptsInDirectory(env(), "src/test/scripts");
+        JUnitWrapper.runScriptsInDirectory(env(), TEST_SCRIPTS_DIR);
     }
 
     @Test
     public void testScriptsViaPattern() {
-        JUnitWrapper.runScriptsInDirectory(env(), "src/test/scripts",
+        JUnitWrapper.runScriptsInDirectory(env(), TEST_SCRIPTS_DIR,
                 "GoogleEverestElevation.json");
     }
 
@@ -35,9 +37,9 @@ public class TestScripts {
     @Test
     public void testScriptsWithRuntime() {
         UnRAVLRuntime runtime = new UnRAVLRuntime(env());
-        String[] scripts = new String[] { "src/test/scripts/parts/env.json",
-                "src/test/scripts/parts/assert-env.json",
-                "src/test/scripts/parts/assert-junit.json" };
+        String[] scripts = new String[] { TEST_SCRIPTS_DIR + "/parts/env.json",
+                TEST_SCRIPTS_DIR + "/parts/assert-env.json",
+                TEST_SCRIPTS_DIR + "/parts/assert-junit.json" };
         JUnitWrapper.runScriptFiles(runtime, scripts);
         // now verify that both used the same runtime
         List<ApiCall> calls = runtime.getApiCalls();
