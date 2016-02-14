@@ -15,13 +15,11 @@ Windows:
 unravl.bat -ui
 ```
 
-This will display an UnRAVL interface similar to the following.
-
-There are three tabs in the interface: Source, Output, and Variables.
+There are three tabs in the interface: [Source](#source), [Output](#output), and [Variables](#variables).
 
 ## Source
 
-In this Source tab,
+In this **Source** tab,
 you can enter an UnRAVL script using JSON notation.
 The interface does basic JSON syntax checking as you type,
 highlighting errors. Click the arrow button at the bottom
@@ -31,18 +29,18 @@ left to move the cursor to the first syntax error.
 
 UnRAVL automatically saves the source and restores
 it the next time you start the application.
-Future enhancements will add the normal *File -> Open*,
-*File -> Save* and *File -> Save* as menu operations.
+Future enhancements will add the normal **File -> Open**,
+**File -> Save** and **File -> Save** as menu operations.
 
-If the JSON is valid, the *Run* button will be enabled.
-Click the *Run button to
+If the JSON is valid, the **Run** button will be enabled.
+Click the **Run** button to
 submit the UnRAVL script from the source pane.
 The interface will  automatically switch to the Output tab where you
 can see the results of running the script.
 
 ## Output
 
-The *Output* tab shows the standard output and standard error
+The **Output** tab shows the standard output and standard error
 captured while running the script.
 
 ![The UnRAVL Output tab](UnRAVL-UI-output.png)
@@ -57,23 +55,22 @@ the Output tab.
 
 ## Variables
 
-You may also select the *Variables* tab to view UnRAVL
+You may also select the **Variables** tab to view UnRAVL
 variables. Click on a variable name to see its
-value in the bottom of the *Variables* tab.
+value in the bottom of the **Variables** tab.
 
 ![The UnRAVL Variables tab](UnRAVL-UI-variables.png)
 
 UnRAVL interface will pretty-print JSON objects
-and arrays for variabels that have JSON values
+and arrays for variables that have JSON values
 (but not simple string values, even if they contain
-JSON text.)
+JSON text.) You may only view one variable at a time.
 
-
-If you uncheck the *Show all* checkbox, the variables
+If you uncheck the **Show all** checkbox, the variables
 list will show only variables that were bound or
-modified when the UnRAVL script executed.
+modified when the most recent UnRAVL script executed.
 
-You can also type in a search string and only variables
+You can also type in a **Search:** string and only variables
 whose names contain the search text will be shown.
 Clear the search box to remove the filtering.
 
