@@ -169,6 +169,11 @@ of the named variable from the environment.
 
 To see the full syntax for UnRAVL scripts, refer to [Reference](doc/Reference.md).
 
+## Interactive mode
+
+UnRAVL provides a simple interactive interface for running scripts.
+See [Interactive mode](doc/ui/UI.md) for details.
+
 ## Releases
 
 * [Release v1.1.0](https://github.com/sassoftware/unravl/releases/tag/v1.1.0)
