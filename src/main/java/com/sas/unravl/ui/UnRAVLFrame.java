@@ -51,6 +51,7 @@ import javax.swing.text.Highlighter;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
+import org.springframework.http.HttpStatus;
 import org.apache.http.Header;
 
 /**
@@ -60,7 +61,8 @@ import org.apache.http.Header;
  */
 public class UnRAVLFrame extends JFrame {
 
-    private static final String SCRIPT_SOURCE_PREFERENCE_KEY = "unravl.script.source";
+    private static final String NONE = "<none>"; //NOI18N
+    private static final String SCRIPT_SOURCE_PREFERENCE_KEY = "unravl.script.source"; //NOI18N
     private static final long serialVersionUID = 1L;
     private final UndoManager undoManager;
     private static final int SOURCE_TAB = 0;
@@ -104,15 +106,15 @@ public class UnRAVLFrame extends JFrame {
     }
 
     private void setHeaders(List<Header> headers, JTextArea textArea) {
-        textArea.setText("");
+        textArea.setText(""); //NOI18N
         if (headers != null) {
             for (Header header : headers) {
                 String name = header.getName();
                 String value = header.getValue();
                 textArea.append(name);
-                textArea.append(": ");
+                textArea.append(": "); //NOI18N
                 textArea.append(value);
-                textArea.append("\n");
+                textArea.append("\n"); //NOI18N
             }
             textArea.setCaretPosition(0);
         }
@@ -161,31 +163,31 @@ public class UnRAVLFrame extends JFrame {
     void addHandlers() {
         jsonSourceTextArea.getDocument().addDocumentListener(
                 new DocumentListener() {
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                onSourceChange();
-            }
+                    @Override
+                    public void removeUpdate(DocumentEvent e) {
+                        onSourceChange();
+                    }
 
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                onSourceChange();
-            }
+                    @Override
+                    public void insertUpdate(DocumentEvent e) {
+                        onSourceChange();
+                    }
 
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                onSourceChange();
-            }
-        });
+                    @Override
+                    public void changedUpdate(DocumentEvent e) {
+                        onSourceChange();
+                    }
+                });
 
         InputMap im = jsonSourceTextArea.getInputMap(JComponent.WHEN_FOCUSED);
         ActionMap am = jsonSourceTextArea.getActionMap();
 
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit
-                .getDefaultToolkit().getMenuShortcutKeyMask()), "Undo");
+                .getDefaultToolkit().getMenuShortcutKeyMask()), java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("UNDO.txt"));
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit
-                .getDefaultToolkit().getMenuShortcutKeyMask()), "Redo");
+                .getDefaultToolkit().getMenuShortcutKeyMask()), java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("REDO.txt"));
 
-        am.put("Undo", new AbstractAction() {
+        am.put(java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("UNDO.txt"), new AbstractAction() {
 
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -199,7 +201,7 @@ public class UnRAVLFrame extends JFrame {
                 }
             }
         });
-        am.put("Redo", new AbstractAction() {
+        am.put(java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("REDO.txt"), new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -243,7 +245,8 @@ public class UnRAVLFrame extends JFrame {
     }
 
     /**
-     * @param args the command line arguments
+     * @param args
+     *            the command line arguments
      * @return the JFrame that is created
      */
     public static JFrame main(String args[]) {
@@ -311,7 +314,7 @@ public class UnRAVLFrame extends JFrame {
             try {
 
                 jumpToError.setEnabled(true);
-                prefix = "[" + line + "," + col + "] "; // NOI18N
+                prefix = "[" + line + "," + col + "] "; // NOI18N //NOI18N
                 errLine = line > 0 ? line - 1 : line;
                 errLine = Math.max(0, Math.min(errLine,
                         jsonSourceTextArea.getLineCount() - 1));
@@ -341,57 +344,69 @@ public class UnRAVLFrame extends JFrame {
             Object source = evt.getSource();
             if (source == runtime) {
                 String name = evt.getPropertyName();
-                changedVars.put(name
-                        .substring(UnRAVLRuntime.ENV_PROPERTY_CHANGE_PREFIX
-                                .length()), evt.getNewValue());
+                if (name.startsWith(UnRAVLRuntime.ENV_PROPERTY_CHANGE_PREFIX)) {
+                    changedVars.put(name
+                            .substring(UnRAVLRuntime.ENV_PROPERTY_CHANGE_PREFIX
+                                    .length()), evt.getNewValue());
+                } else {
+                    switch (name) {
+                    case ("calls"): //NOI18N
+                        if (callIndex > runtime.size())
+                            callIndex = 0;
+                        updateCallsTab();
+                    default:
+                        ;
+                    }
+                }
             }
         }
     }
 
     private void updateCallsTab() {
         try {
-            if (runtime == null || runtime.getApiCalls() == null
-                    || runtime.getApiCalls().size() == 0) {
-                previous.setEnabled(false);
-                next.setEnabled(false);
-                updateCall(new ApiCall(new UnRAVL(runtime)));
-                return;
-            }
-            if (callIndex >= runtime.getApiCalls().size()) {
-                next.setEnabled(false);
-                callIndex = runtime.getApiCalls().size() - 1;
+            if (runtime == null || runtime.size() == 0) {
+                // no calls in the runtime: reset the view to empty
+                // create an empty ApiCall. Use a different UnRAVLRuntime so
+                // we don't skew this app's UnRAVLRuntime
+                callIndex = 0;
+                call = new ApiCall(new UnRAVL(new UnRAVLRuntime()));
             } else {
-                next.setEnabled(true);
+                callIndex = Math.min(callIndex, runtime.size() - 1);
+                call = runtime.getApiCalls().get(callIndex);
             }
+            next.setEnabled(callIndex < runtime.size() - 1);
             previous.setEnabled(callIndex > 0);
-            call = runtime.getApiCalls().get(callIndex);
-            updateCall(call);
+            updateCall();
         } catch (UnRAVLException ex) {
-            Logger.getLogger(UnRAVLFrame.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UnRAVLFrame.class.getName()).log(Level.SEVERE,
+                    null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(UnRAVLFrame.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(UnRAVLFrame.class.getName()).log(Level.SEVERE,
+                    null, ex);
         }
     }
 
-    void updateCall(final ApiCall call) {
+    void updateCall() {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 // local vars make debugging easier...
                 UnRAVLFrame f = UnRAVLFrame.this;
-                f.method.setText(call.getMethod() == null ? "" : call
+                ApiCall call = f.call;
+                f.method.setText(call.getMethod() == null ? NONE : call
                         .getMethod().name());
-                f.testName.setText(call.getScript() == null ? "" : call
-                        .getScript().getName());
-                f.url.setText(call.getURI() == null ? "" : call.getURI());
-                f.status.setText(Integer.valueOf(call.getHttpStatus())
-                        .toString()); // TODO: add text, i.e. "200 OK"
+                f.testName.setText((call.getScript() == null
+                        || call.getScript().getName() == null || call
+                        .getScript().getName().trim().length() == 0) ? NONE
+                        : call.getScript().getName());
+                f.url.setText(call.getURI() == null ? NONE : call.getURI());
+                f.responseCode.setText(statusLine(call.getHttpStatus()));
                 setHeaders(call.getScript().getRequestHeaders(),
                         f.requestHeaders);
                 setHeaders(
                         call.getResponseHeaders() == null ? null : Arrays
                                 .asList(call.getResponseHeaders()),
                         f.responseHeaders);
-                String body = call.getResponseBody() == null ? "" : call
+                String body = call.getResponseBody() == null ? "" : call //NOI18N
                         .getResponseBody().toString();
                 if (call.getException() != null) {
                     status.setText(call.getException().getMessage());
@@ -400,8 +415,14 @@ public class UnRAVLFrame extends JFrame {
                     int failed = call.getFailedAssertions().size();
                     int skipped = call.getSkippedAssertions().size();
                     String summary = String
-                            .format("Summary: %d assertions passed, %d failed, %d skipped",
+                            .format(java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("SUMMARY.txt"),
                                     passed, failed, skipped);
+                    if (call.wasCancelled()) {
+                        summary += java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("CANCELLED.txt");
+                    }
+                    if (call.wasSkipped()) {
+                        summary += java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("SKIPPED.txt");
+                    }
                     status.setText(summary);
                 }
                 if (f.prettyPrintOutput.isSelected()) {
@@ -412,6 +433,16 @@ public class UnRAVLFrame extends JFrame {
             }
         });
 
+    }
+
+    protected String statusLine(int httpStatus) {
+        String status = Integer.valueOf(httpStatus).toString();
+        try {
+            return status + " "
+                    + HttpStatus.valueOf(httpStatus).getReasonPhrase(); //NOI18N //NOI18N
+        } catch (IllegalArgumentException e) {
+            return NONE;
+        }
     }
 
     private void updateVarTab() {
@@ -475,8 +506,8 @@ public class UnRAVLFrame extends JFrame {
                     null, ex);
         }
     }
-    // //////////////////// NetBeans IDE Generated code below
-    // ////////////////////////
+
+    // =============== NetBeans IDE Generated code below ================== //
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -515,7 +546,7 @@ public class UnRAVLFrame extends JFrame {
         jLabel6 = new javax.swing.JLabel();
         prettyPrintOutput = new javax.swing.JCheckBox();
         jLabel7 = new javax.swing.JLabel();
-        ressponseCode = new javax.swing.JLabel();
+        responseCode = new javax.swing.JLabel();
         testName = new javax.swing.JLabel();
         previous = new javax.swing.JButton();
         next = new javax.swing.JButton();
@@ -529,9 +560,9 @@ public class UnRAVLFrame extends JFrame {
         variableBinding = new javax.swing.JTextArea();
         position = new javax.swing.JLabel();
 
-        setTitle("UnRAVL Runner");
+        setTitle("null");
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        setName("UnRAVL"); // NOI18N
+        setName("null");
 
         jLabel1.setFont(new java.awt.Font("Lucida Grande", 0, 16)); // NOI18N
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources"); // NOI18N
@@ -606,56 +637,58 @@ public class UnRAVLFrame extends JFrame {
 
         tabs.addTab(bundle.getString("OUTPUT.txt"), jScrollPane2); // NOI18N
 
-        jLabel2.setText("Test name:");
-        jLabel2.setToolTipText("The name of the UnRAVL test");
+        jLabel2.setText(bundle.getString("TEST _NAME.txt")); // NOI18N
+        jLabel2.setToolTipText(bundle.getString("TEST_NAME.txt")); // NOI18N
 
-        method.setText("METHOD");
-        method.setToolTipText("The API call's HTTP method");
+        method.setText(bundle.getString("METHOD.txt")); // NOI18N
+        method.setToolTipText(bundle.getString("METHOD_TOOLTIP.txt")); // NOI18N
 
-        url.setToolTipText("API call URL");
+        url.setToolTipText(bundle.getString("URL_TOOLTIP.txt")); // NOI18N
 
         requestHeaders.setEditable(false);
         requestHeaders.setColumns(20);
         requestHeaders.setRows(5);
+        requestHeaders.setToolTipText(bundle.getString("REQUEST_HEADERS_TOOLTIP.txt")); // NOI18N
         jScrollPane5.setViewportView(requestHeaders);
 
         responseHeaders.setEditable(false);
         responseHeaders.setColumns(20);
         responseHeaders.setRows(5);
-        responseHeaders.setToolTipText("");
+        responseHeaders.setToolTipText("null");
         jScrollPane6.setViewportView(responseHeaders);
 
-        jLabel4.setText("Request headers:");
+        jLabel4.setText(bundle.getString("REQUEST_HEADERS.txt")); // NOI18N
 
         jLabel5.setLabelFor(responseHeaders);
-        jLabel5.setText("Response headers:");
+        jLabel5.setText(bundle.getString("RESPONSE_HEADERS.txt")); // NOI18N
 
         responseBody.setEditable(false);
         responseBody.setColumns(20);
         responseBody.setRows(5);
+        responseBody.setToolTipText(bundle.getString("RESPONSE_BODY_TOOLTIP.txt")); // NOI18N
         jScrollPane7.setViewportView(responseBody);
 
         jLabel6.setLabelFor(responseBody);
-        jLabel6.setText("Response body:");
+        jLabel6.setText(bundle.getString("RESPONSE_BODY.txt")); // NOI18N
 
         prettyPrintOutput.setSelected(true);
-        prettyPrintOutput.setText("Pretty print");
-        prettyPrintOutput.setToolTipText("Pretty print the JSON output");
+        prettyPrintOutput.setText(bundle.getString("PRETTY_PRINT.txt")); // NOI18N
+        prettyPrintOutput.setToolTipText(bundle.getString("PRETTY_PRINT_TOOLTIP.txt")); // NOI18N
         prettyPrintOutput.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 prettyPrintOutputActionPerformed(evt);
             }
         });
 
-        jLabel7.setText("HTTP response code:");
+        jLabel7.setText(bundle.getString("RESPONSE_CODE.txt")); // NOI18N
 
-        ressponseCode.setText("200 OK");
-        ressponseCode.setToolTipText("HTTP response code");
+        responseCode.setText("null");
+        responseCode.setToolTipText(bundle.getString("RESPONSE_CODE.txt")); // NOI18N
 
-        testName.setText("test name");
+        testName.setText(bundle.getString("TEST_NAME.txt")); // NOI18N
 
-        previous.setText("◀");
-        previous.setToolTipText("Previous call");
+        previous.setText(bundle.getString("LEFT_ARROW.txt")); // NOI18N
+        previous.setToolTipText(bundle.getString("PREVIOUS_CALL_TOOLTIP.txt")); // NOI18N
         previous.setEnabled(false);
         previous.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -663,8 +696,8 @@ public class UnRAVLFrame extends JFrame {
             }
         });
 
-        next.setText("▶");
-        next.setToolTipText("Next call");
+        next.setText(bundle.getString("RIGHT_ARROW.txt")); // NOI18N
+        next.setToolTipText(bundle.getString("NEXT_CALL_TOOLTIP.txt")); // NOI18N
         next.setEnabled(false);
         next.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -709,7 +742,7 @@ public class UnRAVLFrame extends JFrame {
                                 .addGap(535, 535, 535)
                                 .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 145, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(12, 12, 12)
-                                .addComponent(ressponseCode, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(responseCode, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 49, Short.MAX_VALUE)
                                 .addComponent(prettyPrintOutput)))))
                 .addContainerGap())
@@ -740,7 +773,7 @@ public class UnRAVLFrame extends JFrame {
                     .addGroup(callsPanelLayout.createSequentialGroup()
                         .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel7)
-                            .addComponent(ressponseCode))
+                            .addComponent(responseCode))
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(callsPanelLayout.createSequentialGroup()
                         .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -885,17 +918,15 @@ public class UnRAVLFrame extends JFrame {
                     .addContainerGap()))
         );
 
-        tabs.getAccessibleContext().setAccessibleName(bundle.getString("VARIABLE.txt")); // NOI18N
-
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void next(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_next
-        if (callIndex < runtime.getApiCalls().size() - 1) {
+    private void next(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_next
+        if (callIndex < runtime.size() - 1) {
             callIndex++;
             updateCallsTab();
         }
-    }//GEN-LAST:event_next
+    }// GEN-LAST:event_next
 
     private void previous(java.awt.event.ActionEvent evt) {
         if (callIndex > 0) {
@@ -919,7 +950,8 @@ public class UnRAVLFrame extends JFrame {
      * Enable/disable buttons and other controls based on whether a script is
      * running or not
      *
-     * @param running true if a script is running
+     * @param running
+     *            true if a script is running
      */
     public void enableControlsForRunState(final boolean running) {
         SwingUtilities.invokeLater(new Runnable() {
@@ -936,6 +968,7 @@ public class UnRAVLFrame extends JFrame {
     public void runScript() {
         setStatusText(resources.getString("RUNNING_TOOLTIP.txt"));
         enableControlsForRunState(true);
+        runtime.resetFailedAssertionCount();
         changedVars = new LinkedHashMap<String, Object>();
         String text = null;
         try {
@@ -967,7 +1000,7 @@ public class UnRAVLFrame extends JFrame {
                 public void run() {
                     status.setText(statusText);
                     outputTextArea.setCaretPosition(0);
-                    callIndex = runtime.getApiCalls().size()-1;
+                    callIndex = runtime.size() - 1;
                     updateCallsTab();
                 }
             });
@@ -987,7 +1020,7 @@ public class UnRAVLFrame extends JFrame {
             int caretpos = editArea.getCaretPosition();
             int l = editArea.getLineOfOffset(caretpos);
             int c = caretpos - editArea.getLineStartOffset(l);
-            String pos = (l + 1) + "," + (c + 1); // NOI18N //NOI18N //NOI18N
+            String pos = (l + 1) + "," + (c + 1); // NOI18N //NOI18N //NOI18N //NOI18N
             // //NOI18N //NOI18N
             position.setText(pos);
 
@@ -1062,8 +1095,8 @@ public class UnRAVLFrame extends JFrame {
     private javax.swing.JTextArea requestHeaders;
     private javax.swing.JButton reset;
     private javax.swing.JTextArea responseBody;
+    private javax.swing.JLabel responseCode;
     private javax.swing.JTextArea responseHeaders;
-    private javax.swing.JLabel ressponseCode;
     private javax.swing.JButton run;
     private javax.swing.JCheckBox showAll;
     private javax.swing.JPanel sourcePanel;
