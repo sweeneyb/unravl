@@ -68,15 +68,16 @@ public final class Main {
     private static String[] preProcessArgs(String[] argv) {
         ArrayList<String> args = new ArrayList<String>();
         String log4j = null;
+        ui = true;
         for (String arg : argv) {
             if (arg.matches("^--?q(uiet)?"))
                 log4j = "log4j-quiet.properties";
             else if (arg.matches("^--?v(erbose)?"))
                 log4j = "log4j-trace.properties";
-            else if (arg.matches("^--?ui?"))
-                ui = true;
-            else
+            else {
                 args.add(arg);
+                ui = false;
+            }
         }
         if (log4j != null)
             System.setProperty("log4j.configuration", log4j);

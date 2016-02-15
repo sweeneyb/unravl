@@ -10,11 +10,23 @@ import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class TestPropertyListener implements PropertyChangeListener {
 
-    HashMap<String, PropertyChangeEvent> changes;
+    HashMap<String, PropertyChangeEvent> changes = new HashMap<String, PropertyChangeEvent>();
+    
+    class OtherListener implements PropertyChangeListener {
+
+        HashMap<String, PropertyChangeEvent> changes = new HashMap<String, PropertyChangeEvent>();
+
+        @Override
+        public void propertyChange(PropertyChangeEvent evt) {
+           changes.put(evt.getPropertyName(), evt);
+        }
+    }
     
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -29,10 +41,34 @@ public class TestPropertyListener implements PropertyChangeListener {
     @Test 
     public void propertyChange() {
         UnRAVLRuntime rt = new UnRAVLRuntime(TestScripts.env());
+        OtherListener other = new OtherListener();
         rt.addPropertyChangeListener(this);
+        rt.addPropertyChangeListener(other);
         JUnitWrapper.runScriptsInDirectory(rt, TestScripts.TEST_SCRIPTS_DIR, "env.json");
-        assertNotNull(changes.get("name"));
-        assertNotNull(changes.get("x"));
+        assertNotNull(changes.get("env.name"));
+        assertNotNull(changes.get("env.x"));
+        assertNotNull(other.changes.get("env.name"));
+        assertNotNull(other.changes.get("env.x"));
+        
+        // now remove the other listener, and verify that it does not see changes
+        
+        rt.removePropertyChangeListener(other);
+        // Reset the listener history
+        changes.clear();
+        other.changes.clear();
+
+        assertNull(changes.get("env.name"));
+        assertNull(changes.get("env.x"));
+
+        assertNull(other.changes.get("env.name"));
+        assertNull(other.changes.get("env.x"));
+
+        JUnitWrapper.runScriptsInDirectory(rt, TestScripts.TEST_SCRIPTS_DIR, "env.json");
+
+        assertNotNull(changes.get("env.name"));
+        assertNotNull(changes.get("env.x"));
+        assertNull(other.changes.get("env.name"));
+        assertNull(other.changes.get("env.x"));
     }
 
 

@@ -3,19 +3,20 @@
 UnRAVL also has a basic user interface which allows you
 to interactively submit UnRAVL scripts and see the results.
 
-Start UnRAVL in interactive mode with the `-ui` command line
-option:
+To start UnRAVL in interactive mode, run the unravl
+start script without any UnRAVL script files on the command line:
 
 Linux and Mac OS X:
 ```
-unravl.sh -ui
+unravl.sh
 ```
 Windows:
 ```
-unravl.bat -ui
+unravl.bat
 ```
 
-There are three tabs in the interface: [Source](#source), [Output](#output), and [Variables](#variables).
+There are four tabs in the interface: [Source](#source),
+[Output](#output), [Calls](#calls), and [Variables](#variables).
 
 ## Source
 
@@ -52,6 +53,19 @@ will appear hear. For example, if the script contains
 ```
 the output from the REST API call will be printed to
 the Output tab.
+
+## Calls
+
+The **Calls** tab shows the history of API calls.
+Use the buttons at the top right to move back and forth
+in the history. The calls tab shows each
+test name, the HTTP method, the URL,
+the request headers, response headers,
+HTTP status code, and the response body.
+
+The **Reset** button clears the API call history
+as well as removing variables defined by the
+tests.
 
 ## Variables
 

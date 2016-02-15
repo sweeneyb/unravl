@@ -17,8 +17,8 @@ import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
 import com.sas.unravl.util.Json;
 import com.sas.unravl.util.VariableResolver;
 
-import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -51,6 +51,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class UnRAVLRuntime implements Cloneable {
 
+    /**
+     * Prefix for property names when firing a PropertyChangeEvent
+     * when a variable is changed via {@link #bind(String, Object)}
+     */
+    public static final String ENV_PROPERTY_CHANGE_PREFIX = "env.";
     private static final Logger logger = Logger.getLogger(UnRAVLRuntime.class);
     private Map<String, Object> env; // script variables
     private Map<String, UnRAVL> scripts = new LinkedHashMap<String, UnRAVL>();
@@ -63,8 +68,6 @@ public class UnRAVLRuntime implements Cloneable {
     private VariableResolver variableResolver;
     private String scriptLanguage;
     private boolean canceled;
-
-    List<PropertyChangeListener> listeners = new ArrayList<PropertyChangeListener>();
 
     public UnRAVLRuntime() {
         this(new LinkedHashMap<String, Object>());
@@ -384,6 +387,13 @@ public class UnRAVLRuntime implements Cloneable {
      * Bind a value within this runtime's environment. This will add a new
      * binding if <var>varName</var> is not yet bound, or replace the old
      * binding.
+     * <p>
+     * THis also fires a <code>PropertyChangeEvent</code> to all listeners,
+     * with the property name being the <var>varName</var> with
+     * <code>{@link #ENV_PROPERTY_CHANGE_PREFIX}</code> prefixed.
+     * For example, on <code>bind("two", Integer.valueOf(2))</code>,
+     * this will fire an event with the property named <code>"env.two"</code>.
+     * </p>
      * 
      * @param varName
      *            variable name
@@ -400,10 +410,8 @@ public class UnRAVLRuntime implements Cloneable {
 
         Object oldValue = binding(varName);
         env.put(varName, value);
-
-        if (!listeners.isEmpty())
-            notifyListeners(new PropertyChangeEvent(this, varName, oldValue,
-                    value));
+        pcs.firePropertyChange(ENV_PROPERTY_CHANGE_PREFIX + varName, oldValue, value);
+        
         logger.trace("bind("
                 + varName
                 + ","
@@ -529,19 +537,14 @@ public class UnRAVLRuntime implements Cloneable {
         canceled = false;
     }
 
-    public PropertyChangeListener addPropertyChangeListener(
-            PropertyChangeListener l) {
-        if (!listeners.contains(l))
-            listeners.add(l);
-        return l;
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        this.pcs.addPropertyChangeListener(listener);
     }
 
-    private void notifyListeners(PropertyChangeEvent propertyChangeEvent) {
-        for (PropertyChangeListener l : listeners)
-            try {
-                l.propertyChange(propertyChangeEvent);
-            } catch (Throwable t) {
-                logger.warn(t);
-            }
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        this.pcs.removePropertyChangeListener(listener);
     }
+
 }
