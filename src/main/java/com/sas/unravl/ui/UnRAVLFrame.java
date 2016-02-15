@@ -560,7 +560,7 @@ public class UnRAVLFrame extends JFrame {
         variableBinding = new javax.swing.JTextArea();
         position = new javax.swing.JLabel();
 
-        setTitle("null");
+        setTitle("UnRAVL"); // NOI18N
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setName("null");
 
@@ -605,6 +605,8 @@ public class UnRAVLFrame extends JFrame {
             }
         });
 
+        tabs.setToolTipText(bundle.getString("SOURCE_TAB.txt")); // NOI18N
+
         jsonSourceTextArea.setColumns(20);
         jsonSourceTextArea.setRows(5);
         jsonSourceTextArea.setToolTipText(bundle.getString("SOURCE_TOOLTIP.txt")); // NOI18N
@@ -637,8 +639,8 @@ public class UnRAVLFrame extends JFrame {
 
         tabs.addTab(bundle.getString("OUTPUT.txt"), jScrollPane2); // NOI18N
 
-        jLabel2.setText(bundle.getString("TEST _NAME.txt")); // NOI18N
-        jLabel2.setToolTipText(bundle.getString("TEST_NAME.txt")); // NOI18N
+        jLabel2.setText(bundle.getString("TEST_NAME.txt")); // NOI18N
+        jLabel2.setToolTipText(bundle.getString("TEST_NAME_TOOLTIP.txt")); // NOI18N
 
         method.setText(bundle.getString("METHOD.txt")); // NOI18N
         method.setToolTipText(bundle.getString("METHOD_TOOLTIP.txt")); // NOI18N
@@ -654,7 +656,7 @@ public class UnRAVLFrame extends JFrame {
         responseHeaders.setEditable(false);
         responseHeaders.setColumns(20);
         responseHeaders.setRows(5);
-        responseHeaders.setToolTipText("null");
+        responseHeaders.setToolTipText(bundle.getString("RESPONSE_HEADERS_TOOLTIP.txt")); // NOI18N
         jScrollPane6.setViewportView(responseHeaders);
 
         jLabel4.setText(bundle.getString("REQUEST_HEADERS.txt")); // NOI18N
@@ -684,8 +686,6 @@ public class UnRAVLFrame extends JFrame {
 
         responseCode.setText("null");
         responseCode.setToolTipText(bundle.getString("RESPONSE_CODE.txt")); // NOI18N
-
-        testName.setText(bundle.getString("TEST_NAME.txt")); // NOI18N
 
         previous.setText(bundle.getString("LEFT_ARROW.txt")); // NOI18N
         previous.setToolTipText(bundle.getString("PREVIOUS_CALL_TOOLTIP.txt")); // NOI18N
