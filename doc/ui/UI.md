@@ -38,20 +38,20 @@ it the next time you start the application.
 Future enhancements will add the normal **File -> Open**,
 **File -> Save** and **File -> Save** as menu operations.
 Note that the UnRAVL script can also reference
-script files on the file system. For example:
+script files on the file system. For example,
+if the source is just
 
 ```JSON
-[
-   "@src/test/scripts/POST-to-create.unravl"
-   "@src/test/scripts/GET-to-read.unravl",
-   "@src/test/scripts/PUT-to-update.unravl",
-   "@src/test/scripts/DELETE-to-delete.unravl"
-]
+"@src/test/scripts/test.unravl"
 ```
 
-If there are JSON syntax errors,
-the text area highlights the first error and the
-nature of the error appears in the status line
+then the interactive mode will execute the UnRAVL
+test in the file `src/test/scripts/test.unravl`,
+relative to the directory where you ran UnRAVL.
+
+If there are JSON syntax errors in the source,
+the interface highlights the first error and the
+nature displays the error message in the status line
 below the text area.
 Click the arrow button at the bottom
 left to move the cursor to the first syntax error.
