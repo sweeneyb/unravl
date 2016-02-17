@@ -4,23 +4,31 @@ import com.fasterxml.jackson.core.JsonLocation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Files;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.UnRAVLRuntime;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseWheelListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -40,6 +48,7 @@ import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.TransferHandler;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditEvent;
@@ -61,8 +70,8 @@ import org.apache.http.Header;
  */
 public class UnRAVLFrame extends JFrame {
 
-    private static final String NONE = "<none>"; //NOI18N
-    private static final String SCRIPT_SOURCE_PREFERENCE_KEY = "unravl.script.source"; //NOI18N
+    private static final String NONE = "<none>"; // NOI18N
+    private static final String SCRIPT_SOURCE_PREFERENCE_KEY = "unravl.script.source"; // NOI18N
     private static final long serialVersionUID = 1L;
     private final UndoManager undoManager;
     private static final int SOURCE_TAB = 0;
@@ -106,17 +115,27 @@ public class UnRAVLFrame extends JFrame {
     }
 
     private void setHeaders(List<Header> headers, JTextArea textArea) {
-        textArea.setText(""); //NOI18N
+        textArea.setText(""); // NOI18N
         if (headers != null) {
             for (Header header : headers) {
                 String name = header.getName();
                 String value = header.getValue();
                 textArea.append(name);
-                textArea.append(": "); //NOI18N
+                textArea.append(": "); // NOI18N
                 textArea.append(value);
-                textArea.append("\n"); //NOI18N
+                textArea.append("\n"); // NOI18N
             }
             textArea.setCaretPosition(0);
+        }
+    }
+
+    private void zoom(int increment) {
+        Font font = jsonSourceTextArea.getFont();
+        if (font.getSize() + increment > 4) {
+            Font resizedFont = new Font(font.getName(), font.getStyle(),
+                    font.getSize() + increment);
+            for (JTextArea ta : textAreas)
+                ta.setFont(resizedFont);
         }
     }
 
@@ -183,36 +202,44 @@ public class UnRAVLFrame extends JFrame {
         ActionMap am = jsonSourceTextArea.getActionMap();
 
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit
-                .getDefaultToolkit().getMenuShortcutKeyMask()), java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("UNDO.txt"));
+                .getDefaultToolkit().getMenuShortcutKeyMask()),
+                java.util.ResourceBundle.getBundle(
+                        "com/sas/unravl/ui/Resources").getString("UNDO.txt"));
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit
-                .getDefaultToolkit().getMenuShortcutKeyMask()), java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("REDO.txt"));
+                .getDefaultToolkit().getMenuShortcutKeyMask()),
+                java.util.ResourceBundle.getBundle(
+                        "com/sas/unravl/ui/Resources").getString("REDO.txt"));
 
-        am.put(java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("UNDO.txt"), new AbstractAction() {
+        am.put(java.util.ResourceBundle
+                .getBundle("com/sas/unravl/ui/Resources").getString("UNDO.txt"),
+                new AbstractAction() {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
 
-                try {
-                    if (undoManager.canUndo()) {
-                        undoManager.undo();
+                        try {
+                            if (undoManager.canUndo()) {
+                                undoManager.undo();
+                            }
+                        } catch (CannotUndoException exp) {
+                            exp.printStackTrace(System.err);
+                        }
                     }
-                } catch (CannotUndoException exp) {
-                    exp.printStackTrace(System.err);
-                }
-            }
-        });
-        am.put(java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("REDO.txt"), new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    if (undoManager.canRedo()) {
-                        undoManager.redo();
+                });
+        am.put(java.util.ResourceBundle
+                .getBundle("com/sas/unravl/ui/Resources").getString("REDO.txt"),
+                new AbstractAction() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            if (undoManager.canRedo()) {
+                                undoManager.redo();
+                            }
+                        } catch (CannotUndoException exp) {
+                            exp.printStackTrace(System.err);
+                        }
                     }
-                } catch (CannotUndoException exp) {
-                    exp.printStackTrace(System.err);
-                }
-            }
-        });
+                });
 
         try {
             jsonSourceTextArea.getDocument().insertString(0, scriptTemplate(),
@@ -223,8 +250,76 @@ public class UnRAVLFrame extends JFrame {
                     null, ex);
         }
 
+        jsonSourceTextArea.setTransferHandler(new TransferHandler() {
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public boolean canImport(TransferHandler.TransferSupport ts) {
+                for (DataFlavor df : ts.getDataFlavors()) {
+                    if (df.isFlavorTextType() || df.isFlavorJavaFileListType()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public boolean importData(TransferHandler.TransferSupport ts) {
+                try {
+                    for (DataFlavor df : ts.getDataFlavors()) {
+                        if (df.isFlavorTextType()) {
+                            String s = (String) ts.getTransferable()
+                                    .getTransferData(DataFlavor.stringFlavor);
+                            jsonSourceTextArea.setText(s);
+                        } else if (df.isFlavorJavaFileListType()) {
+                            @SuppressWarnings("unchecked")
+                            List<File> droppedFiles = (List<File>) ts
+                                    .getTransferable().getTransferData(
+                                            DataFlavor.javaFileListFlavor);
+                            if (droppedFiles != null
+                                    && droppedFiles.size() == 1) {
+                                File f = droppedFiles.get(0);
+                                try {
+                                    String s = Files.toString(f,
+                                            Charset.defaultCharset());
+                                    jsonSourceTextArea.setText(s);
+                                } catch (IOException ex) {
+                                    status.setText(ex.getMessage());
+                                    Logger.getLogger(
+                                            UnRAVLFrame.class.getName()).log(
+                                            Level.SEVERE, null, ex);
+                                }
+                            }
+                            return true;
+                        }
+                    }
+                } catch (UnsupportedFlavorException | IOException ex) {
+                    status.setText(ex.getMessage());
+                    Logger.getLogger(UnRAVLFrame.class.getName()).log(
+                            Level.SEVERE, null, ex);
+                    return false;
+                }
+
+                return false;
+            }
+
+        });
+
+        MouseWheelListener zoomer = new java.awt.event.MouseWheelListener() {
+            public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
+                onZoom(evt);
+            }
+        };
+        textAreas = new JTextArea[] { jsonSourceTextArea, outputTextArea,
+                requestHeaders, responseHeaders, responseBody, variableBinding };
+
+        for (JTextArea ta : textAreas) {
+            ta.addMouseWheelListener(zoomer);
+        }
         clearJsonError();
     }
+
+    JTextArea textAreas[];
 
     private boolean onSourceChange() {
         if (highlightTag != null) {
@@ -350,9 +445,10 @@ public class UnRAVLFrame extends JFrame {
                                     .length()), evt.getNewValue());
                 } else {
                     switch (name) {
-                    case ("calls"): //NOI18N
-                        if (callIndex > runtime.size())
+                    case ("calls"): // NOI18N
+                        if (callIndex > runtime.size()) {
                             callIndex = 0;
+                        }
                         updateCallsTab();
                     default:
                         ;
@@ -406,7 +502,7 @@ public class UnRAVLFrame extends JFrame {
                         call.getResponseHeaders() == null ? null : Arrays
                                 .asList(call.getResponseHeaders()),
                         f.responseHeaders);
-                String body = call.getResponseBody() == null ? "" : call //NOI18N
+                String body = call.getResponseBody() == null ? "" : call // NOI18N
                         .getResponseBody().toString();
                 if (call.getException() != null) {
                     status.setText(call.getException().getMessage());
@@ -414,14 +510,18 @@ public class UnRAVLFrame extends JFrame {
                     int passed = call.getPassedAssertions().size();
                     int failed = call.getFailedAssertions().size();
                     int skipped = call.getSkippedAssertions().size();
-                    String summary = String
-                            .format(java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("SUMMARY.txt"),
-                                    passed, failed, skipped);
+                    String summary = String.format(java.util.ResourceBundle
+                            .getBundle("com/sas/unravl/ui/Resources")
+                            .getString("SUMMARY.txt"), passed, failed, skipped);
                     if (call.wasCancelled()) {
-                        summary += java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("CANCELLED.txt");
+                        summary += java.util.ResourceBundle.getBundle(
+                                "com/sas/unravl/ui/Resources").getString(
+                                "CANCELLED.txt");
                     }
                     if (call.wasSkipped()) {
-                        summary += java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources").getString("SKIPPED.txt");
+                        summary += java.util.ResourceBundle.getBundle(
+                                "com/sas/unravl/ui/Resources").getString(
+                                "SKIPPED.txt");
                     }
                     status.setText(summary);
                 }
@@ -436,10 +536,11 @@ public class UnRAVLFrame extends JFrame {
     }
 
     protected String statusLine(int httpStatus) {
-        String status = Integer.valueOf(httpStatus).toString();
+        String statusLine = Integer.toString(httpStatus);
         try {
-            return status + " "
-                    + HttpStatus.valueOf(httpStatus).getReasonPhrase(); //NOI18N //NOI18N
+            return statusLine + " "
+                    + HttpStatus.valueOf(httpStatus).getReasonPhrase(); // NOI18N
+                                                                        // //NOI18N
         } catch (IllegalArgumentException e) {
             return NONE;
         }
@@ -508,13 +609,13 @@ public class UnRAVLFrame extends JFrame {
     }
 
     // =============== NetBeans IDE Generated code below ================== //
-
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
      * regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
+    // <editor-fold defaultstate="collapsed"
     // <editor-fold defaultstate="collapsed"
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -564,7 +665,7 @@ public class UnRAVLFrame extends JFrame {
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setName("null");
 
-        jLabel1.setFont(new java.awt.Font("Lucida Grande", 0, 16)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Arial Unicode MS", 3, 20)); // NOI18N
         java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources"); // NOI18N
         jLabel1.setText(bundle.getString("UNRAVL_RUNNER.txt")); // NOI18N
 
@@ -588,6 +689,7 @@ public class UnRAVLFrame extends JFrame {
             }
         });
 
+        jumpToError.setFont(new java.awt.Font("Arial Unicode MS", 1, 24)); // NOI18N
         jumpToError.setText(bundle.getString("TEXT_ARROW.txt")); // NOI18N
         jumpToError.setToolTipText(bundle.getString("MOVE_CURSOR_TOOLTIP.txt")); // NOI18N
         jumpToError.addActionListener(new java.awt.event.ActionListener() {
@@ -608,6 +710,7 @@ public class UnRAVLFrame extends JFrame {
         tabs.setToolTipText(bundle.getString("SOURCE_TAB.txt")); // NOI18N
 
         jsonSourceTextArea.setColumns(20);
+        jsonSourceTextArea.setFont(new java.awt.Font("Lucida Console", 0, 13)); // NOI18N
         jsonSourceTextArea.setRows(5);
         jsonSourceTextArea.setToolTipText(bundle.getString("SOURCE_TOOLTIP.txt")); // NOI18N
         jsonSourceTextArea.setInputVerifier(new InputVerifier() {public boolean verify(JComponent input) { return onSourceChange(); }});
@@ -626,13 +729,14 @@ public class UnRAVLFrame extends JFrame {
         );
         sourcePanelLayout.setVerticalGroup(
             sourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 430, Short.MAX_VALUE)
+            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 442, Short.MAX_VALUE)
         );
 
         tabs.addTab(bundle.getString("SOURCE.txt"), sourcePanel); // NOI18N
 
         outputTextArea.setEditable(false);
         outputTextArea.setColumns(20);
+        outputTextArea.setFont(new java.awt.Font("Lucida Console", 0, 13)); // NOI18N
         outputTextArea.setRows(5);
         outputTextArea.setToolTipText(bundle.getString("OUTPUT_TOOLTIP.txt")); // NOI18N
         jScrollPane2.setViewportView(outputTextArea);
@@ -649,12 +753,14 @@ public class UnRAVLFrame extends JFrame {
 
         requestHeaders.setEditable(false);
         requestHeaders.setColumns(20);
+        requestHeaders.setFont(new java.awt.Font("Lucida Console", 0, 13)); // NOI18N
         requestHeaders.setRows(5);
         requestHeaders.setToolTipText(bundle.getString("REQUEST_HEADERS_TOOLTIP.txt")); // NOI18N
         jScrollPane5.setViewportView(requestHeaders);
 
         responseHeaders.setEditable(false);
         responseHeaders.setColumns(20);
+        responseHeaders.setFont(new java.awt.Font("Lucida Console", 0, 13)); // NOI18N
         responseHeaders.setRows(5);
         responseHeaders.setToolTipText(bundle.getString("RESPONSE_HEADERS_TOOLTIP.txt")); // NOI18N
         jScrollPane6.setViewportView(responseHeaders);
@@ -666,6 +772,7 @@ public class UnRAVLFrame extends JFrame {
 
         responseBody.setEditable(false);
         responseBody.setColumns(20);
+        responseBody.setFont(new java.awt.Font("Lucida Console", 0, 13)); // NOI18N
         responseBody.setRows(5);
         responseBody.setToolTipText(bundle.getString("RESPONSE_BODY_TOOLTIP.txt")); // NOI18N
         jScrollPane7.setViewportView(responseBody);
@@ -687,6 +794,7 @@ public class UnRAVLFrame extends JFrame {
         responseCode.setText("null");
         responseCode.setToolTipText(bundle.getString("RESPONSE_CODE.txt")); // NOI18N
 
+        previous.setFont(new java.awt.Font("Arial Unicode MS", 1, 24)); // NOI18N
         previous.setText(bundle.getString("LEFT_ARROW.txt")); // NOI18N
         previous.setToolTipText(bundle.getString("PREVIOUS_CALL_TOOLTIP.txt")); // NOI18N
         previous.setEnabled(false);
@@ -696,6 +804,7 @@ public class UnRAVLFrame extends JFrame {
             }
         });
 
+        next.setFont(new java.awt.Font("Arial Unicode MS", 0, 24)); // NOI18N
         next.setText(bundle.getString("RIGHT_ARROW.txt")); // NOI18N
         next.setToolTipText(bundle.getString("NEXT_CALL_TOOLTIP.txt")); // NOI18N
         next.setEnabled(false);
@@ -754,8 +863,8 @@ public class UnRAVLFrame extends JFrame {
                 .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(testName)
-                    .addComponent(previous)
-                    .addComponent(next))
+                    .addComponent(previous, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(next, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(url, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -779,7 +888,7 @@ public class UnRAVLFrame extends JFrame {
                         .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jLabel6)
                             .addComponent(prettyPrintOutput))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 11, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
                         .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 184, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
@@ -820,7 +929,9 @@ public class UnRAVLFrame extends JFrame {
             }
         });
 
+        variableBinding.setEditable(false);
         variableBinding.setColumns(20);
+        variableBinding.setFont(new java.awt.Font("Lucida Console", 0, 13)); // NOI18N
         variableBinding.setRows(5);
         jScrollPane4.setViewportView(variableBinding);
 
@@ -853,7 +964,7 @@ public class UnRAVLFrame extends JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -909,17 +1020,27 @@ public class UnRAVLFrame extends JFrame {
                 .addGap(8, 8, 8)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(status)
-                    .addComponent(jumpToError))
+                    .addComponent(jumpToError, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                    .addContainerGap(543, Short.MAX_VALUE)
+                    .addContainerGap(567, Short.MAX_VALUE)
                     .addComponent(position)
                     .addContainerGap()))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void onZoom(java.awt.event.MouseWheelEvent evt) {// GEN-FIRST:event_onZoom
+        if (evt.isControlDown()) {
+            if (evt.getWheelRotation() < 0) {
+                zoom(1);
+            } else if (evt.getWheelRotation() > 0) {
+                zoom(-1);
+            }
+        }
+    }// GEN-LAST:event_onZoom
 
     private void next(java.awt.event.ActionEvent evt) {// GEN-FIRST:event_next
         if (callIndex < runtime.size() - 1) {
@@ -1020,7 +1141,8 @@ public class UnRAVLFrame extends JFrame {
             int caretpos = editArea.getCaretPosition();
             int l = editArea.getLineOfOffset(caretpos);
             int c = caretpos - editArea.getLineStartOffset(l);
-            String pos = (l + 1) + "," + (c + 1); // NOI18N //NOI18N //NOI18N //NOI18N
+            String pos = (l + 1) + "," + (c + 1); // NOI18N //NOI18N //NOI18N
+                                                  // //NOI18N
             // //NOI18N //NOI18N
             position.setText(pos);
 
