@@ -199,20 +199,34 @@ public class UnRAVLFrame extends JFrame {
                     }
                 });
 
+        addUndoRedoToSourceTextArea();
+
+        try {
+            jsonSourceTextArea.getDocument().insertString(0, scriptTemplate(),
+                    null);
+            jsonSourceTextArea.setCaretPosition(0);
+        } catch (BadLocationException ex) {
+            Logger.getLogger(UnRAVLFrame.class.getName()).log(Level.SEVERE,
+                    null, ex);
+        }
+
+        addFileDragAndDropToSourceTextArea();
+        addZoomMouseListeners();
+        clearJsonError();
+    }
+
+    public void addUndoRedoToSourceTextArea() {
         InputMap im = jsonSourceTextArea.getInputMap(JComponent.WHEN_FOCUSED);
         ActionMap am = jsonSourceTextArea.getActionMap();
 
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit
                 .getDefaultToolkit().getMenuShortcutKeyMask()),
-                java.util.ResourceBundle.getBundle(
-                        "com/sas/unravl/ui/Resources").getString("UNDO.txt"));
+                resources.getString("UNDO.txt"));
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit
                 .getDefaultToolkit().getMenuShortcutKeyMask()),
-                java.util.ResourceBundle.getBundle(
-                        "com/sas/unravl/ui/Resources").getString("REDO.txt"));
+                resources.getString("REDO.txt"));
 
-        am.put(java.util.ResourceBundle
-                .getBundle("com/sas/unravl/ui/Resources").getString("UNDO.txt"),
+        am.put(resources.getString("UNDO.txt"),
                 new AbstractAction() {
 
                     @Override
@@ -227,8 +241,7 @@ public class UnRAVLFrame extends JFrame {
                         }
                     }
                 });
-        am.put(java.util.ResourceBundle
-                .getBundle("com/sas/unravl/ui/Resources").getString("REDO.txt"),
+        am.put(resources.getString("REDO.txt"),
                 new AbstractAction() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -241,16 +254,9 @@ public class UnRAVLFrame extends JFrame {
                         }
                     }
                 });
+    }
 
-        try {
-            jsonSourceTextArea.getDocument().insertString(0, scriptTemplate(),
-                    null);
-            jsonSourceTextArea.setCaretPosition(0);
-        } catch (BadLocationException ex) {
-            Logger.getLogger(UnRAVLFrame.class.getName()).log(Level.SEVERE,
-                    null, ex);
-        }
-
+    public void addFileDragAndDropToSourceTextArea() {
         jsonSourceTextArea.setTransferHandler(new TransferHandler() {
             private static final long serialVersionUID = 1L;
 
@@ -300,12 +306,13 @@ public class UnRAVLFrame extends JFrame {
                             Level.SEVERE, null, ex);
                     return false;
                 }
-
                 return false;
             }
 
         });
+    }
 
+    public void addZoomMouseListeners() {
         MouseWheelListener zoomer = new java.awt.event.MouseWheelListener() {
             public void mouseWheelMoved(java.awt.event.MouseWheelEvent evt) {
                 onZoom(evt);
@@ -326,7 +333,6 @@ public class UnRAVLFrame extends JFrame {
                 parent.addMouseWheelListener(zoomer);
             }
         }
-        clearJsonError();
     }
 
     JTextArea textAreas[];
@@ -547,18 +553,12 @@ public class UnRAVLFrame extends JFrame {
                     int passed = call.getPassedAssertions().size();
                     int failed = call.getFailedAssertions().size();
                     int skipped = call.getSkippedAssertions().size();
-                    String summary = String.format(java.util.ResourceBundle
-                            .getBundle("com/sas/unravl/ui/Resources")
-                            .getString("SUMMARY.txt"), passed, failed, skipped);
+                    String summary = String.format(resources.getString("SUMMARY.txt"), passed, failed, skipped);
                     if (call.wasCancelled()) {
-                        summary += java.util.ResourceBundle.getBundle(
-                                "com/sas/unravl/ui/Resources").getString(
-                                "CANCELLED.txt");
+                        summary += resources.getString("CANCELLED.txt");
                     }
                     if (call.wasSkipped()) {
-                        summary += java.util.ResourceBundle.getBundle(
-                                "com/sas/unravl/ui/Resources").getString(
-                                "SKIPPED.txt");
+                        summary += resources.getString("SKIPPED.txt");
                     }
                     status.setText(summary);
                 }
@@ -962,7 +962,6 @@ public class UnRAVLFrame extends JFrame {
         jLabel3.setLabelFor(varName);
         jLabel3.setText(bundle.getString("SEARCH.txt")); // NOI18N
 
-        showAll.setSelected(true);
         showAll.setText(bundle.getString("SHOW_ALL.txt")); // NOI18N
         showAll.setToolTipText(bundle.getString("SHOW_ALL_TOOLTIP.txt")); // NOI18N
         showAll.addActionListener(new java.awt.event.ActionListener() {
