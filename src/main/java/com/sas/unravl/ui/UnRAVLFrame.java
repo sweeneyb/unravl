@@ -730,7 +730,6 @@ public class UnRAVLFrame extends JFrame {
 
         jumpToError.setFont(new java.awt.Font("Arial Unicode MS", 1, 24)); // NOI18N
         jumpToError.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/sas/unravl/ui/error-up-orange.png"))); // NOI18N
-        jumpToError.setText(bundle.getString("TEXT_ARROW.txt")); // NOI18N
         jumpToError.setToolTipText(bundle.getString("MOVE_CURSOR_TOOLTIP.txt")); // NOI18N
         jumpToError.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/com/sas/unravl/ui/error-up-grey.png"))); // NOI18N
         jumpToError.addActionListener(new java.awt.event.ActionListener() {
@@ -837,7 +836,6 @@ public class UnRAVLFrame extends JFrame {
 
         previous.setFont(new java.awt.Font("Arial Unicode MS", 1, 24)); // NOI18N
         previous.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/sas/unravl/ui/left-triangle-black.png"))); // NOI18N
-        previous.setText(bundle.getString("LEFT_ARROW.txt")); // NOI18N
         previous.setToolTipText(bundle.getString("PREVIOUS_CALL_TOOLTIP.txt")); // NOI18N
         previous.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/com/sas/unravl/ui/left-triangle-grey.png"))); // NOI18N
         previous.setEnabled(false);
@@ -849,7 +847,6 @@ public class UnRAVLFrame extends JFrame {
 
         next.setFont(new java.awt.Font("Arial Unicode MS", 0, 24)); // NOI18N
         next.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/sas/unravl/ui/right-triangle-black.png"))); // NOI18N
-        next.setText(bundle.getString("RIGHT_ARROW.txt")); // NOI18N
         next.setToolTipText(bundle.getString("NEXT_CALL_TOOLTIP.txt")); // NOI18N
         next.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/com/sas/unravl/ui/right-triangle-grey.png"))); // NOI18N
         next.setEnabled(false);
