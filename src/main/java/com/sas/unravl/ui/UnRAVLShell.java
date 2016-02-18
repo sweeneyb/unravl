@@ -7,9 +7,6 @@ package com.sas.unravl.ui;
 
 import com.sas.unravl.Main;
 
-import javax.swing.JFrame;
-import javax.swing.WindowConstants;
-
 /**
  *
  * @author David.Biesack@sas.com
@@ -17,10 +14,11 @@ import javax.swing.WindowConstants;
 public class UnRAVLShell {
 
     /**
-     * @param args the command line arguments
+     * @param args
+     *            the command line arguments
      */
     public static void main(String[] args) {
-       Main.main(args);
+        Main.main(args);
     }
 
 }
