@@ -3,8 +3,12 @@ package com.sas.unravl;
 import com.sas.unravl.ui.UnRAVLFrame;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Properties;
+
+import javax.swing.JTextArea;
 
 /**
  * The main command-line interface for running {@link UnRAVL} scripts. You can
@@ -50,6 +54,7 @@ public final class Main {
      */
     public static void main(String argv[]) {
         argv = preProcessArgs(argv);
+        rerouteStdoutStderr(); // do this before starting Log4J!
         configureLog4j();
         UnRAVLRuntime.configure();
         if (ui) {
@@ -82,6 +87,45 @@ public final class Main {
         if (log4j != null)
             System.setProperty("log4j.configuration", log4j);
         return args.toArray(new String[args.size()]);
+    }
+    
+    // Manage stdout/stderr which UnRAVLFrame can redirect to a UI text component
+    // such that we can route Log4j console output to the text component
+    private static RedirectedOutputStream out;
+    private static RedirectedOutputStream err;
+
+    /**
+     * An OutputStream that proxies to a PrintStream, allowing dynamic redirection
+     */
+    public static class RedirectedOutputStream extends OutputStream {
+
+        private PrintStream original;
+        public void redirect(PrintStream ps) {
+            original = ps;
+        }
+        public RedirectedOutputStream(PrintStream original) {
+            this.original = original;
+        }
+
+        @Override
+        public void write(int byt) throws IOException {
+            original.write(byt);
+        }
+    }
+    
+    private static void rerouteStdoutStderr() {
+        out = new RedirectedOutputStream(System.out);
+        System.setOut(new PrintStream(out));
+        err = new RedirectedOutputStream(System.err);
+        System.setErr(new PrintStream(err));
+    }
+
+    public static void setOut(PrintStream os) {
+        out.redirect(os);
+    }
+
+    public static void setErr(PrintStream os) {
+        err.redirect(os);
     }
 
     private static void configureLog4j() {
