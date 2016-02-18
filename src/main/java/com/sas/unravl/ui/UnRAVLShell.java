@@ -5,6 +5,8 @@
  */
 package com.sas.unravl.ui;
 
+import com.sas.unravl.Main;
+
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
 
@@ -18,8 +20,7 @@ public class UnRAVLShell {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        JFrame frame = UnRAVLFrame.main(args);
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+       Main.main(args);
     }
 
 }
