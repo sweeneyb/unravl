@@ -175,27 +175,7 @@ UnRAVL provides a simple interactive interface for running scripts.
 See [Interactive mode](doc/ui/UI.md) for details.
 
 ## Releases
-
-* [Release v1.1.0](https://github.com/sassoftware/unravl/releases/tag/v1.1.0)
-  * Added [OAuth2](doc/Authentication.md#oauth2) authentication
-  * A script can disable inherited authentication
-  * UnRAVL variables are now expanded in JSON object keys, not just in
-    string values
-  * Added a [`"form"`](doc/Body.md#form) body generator
-  * Expand UnRAVL variables in `"basic"` authentication parameters
-  * UnRAVL now follows 3xx redirects for HEAD calls as well as GET calls
-  * Added an `"unwrap"` option for the [`"json"`](doc/Bind.md#json)
-    response extractor and the [`"links"` and `"hrefs"`](doc/Bind.md#links-and-hrefs )
-    extractors
-  * Added the[`"jsonPath"`](doc/Bind.md#jsonPath) body extractor
-  * Various bug fixes
-* [Release v1.0.0](https://github.com/sassoftware/unravl/releases/tag/v1.0.0)
-  * Removed deprecated features (equals assertion)
-  * Reduced dependency on JUnit. All behaviors, assertions, etc. do not depend on JUnit.
-* [Release v0.2.1](https://github.com/sassoftware/unravl/releases/tag/v0.2.1) is the current release of UnRAVL.
-  * Added UnRVAL.cancel() support for test scripts and runtime
-  * Added UnRAVL.execute() method to allow running multiple JsonObject scripts
-* [Release v0.2.0](https://github.com/sassoftware/unravl/releases/tag/v0.2.0) is the first public release of UnRAVL.
+See [Releases](doc/Releases.md)
 
 ## Running UnRAVL
 
