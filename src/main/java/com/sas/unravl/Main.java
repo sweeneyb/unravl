@@ -1,8 +1,14 @@
 package com.sas.unravl;
 
+import com.sas.unravl.ui.UnRAVLFrame;
+
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Properties;
+
+import javax.swing.JTextArea;
 
 /**
  * The main command-line interface for running {@link UnRAVL} scripts. You can
@@ -48,28 +54,78 @@ public final class Main {
      */
     public static void main(String argv[]) {
         argv = preProcessArgs(argv);
+        rerouteStdoutStderr(); // do this before starting Log4J!
         configureLog4j();
         UnRAVLRuntime.configure();
-        int rc = new Main().run(argv);
-        System.exit(rc);
+        if (ui) {
+            javax.swing.JFrame frame = UnRAVLFrame.main(argv);
+            frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        } else {
+            int rc = new Main().run(argv);
+            System.exit(rc);
+        }
     }
+
+    static boolean ui = false;
 
     // Scan for --v | -verbose | -q | --quiet and set the log4j configuration
     // remove those args from the arg list and return the remainder
     private static String[] preProcessArgs(String[] argv) {
         ArrayList<String> args = new ArrayList<String>();
         String log4j = null;
+        ui = true;
         for (String arg : argv) {
             if (arg.matches("^--?q(uiet)?"))
                 log4j = "log4j-quiet.properties";
             else if (arg.matches("^--?v(erbose)?"))
                 log4j = "log4j-trace.properties";
-            else
+            else {
                 args.add(arg);
+                ui = false;
+            }
         }
         if (log4j != null)
             System.setProperty("log4j.configuration", log4j);
         return args.toArray(new String[args.size()]);
+    }
+    
+    // Manage stdout/stderr which UnRAVLFrame can redirect to a UI text component
+    // such that we can route Log4j console output to the text component
+    private static RedirectedOutputStream out;
+    private static RedirectedOutputStream err;
+
+    /**
+     * An OutputStream that proxies to a PrintStream, allowing dynamic redirection
+     */
+    public static class RedirectedOutputStream extends OutputStream {
+
+        private PrintStream original;
+        public void redirect(PrintStream ps) {
+            original = ps;
+        }
+        public RedirectedOutputStream(PrintStream original) {
+            this.original = original;
+        }
+
+        @Override
+        public void write(int byt) throws IOException {
+            original.write(byt);
+        }
+    }
+    
+    private static void rerouteStdoutStderr() {
+        out = new RedirectedOutputStream(System.out);
+        System.setOut(new PrintStream(out));
+        err = new RedirectedOutputStream(System.err);
+        System.setErr(new PrintStream(err));
+    }
+
+    public static void setOut(PrintStream os) {
+        out.redirect(os);
+    }
+
+    public static void setErr(PrintStream os) {
+        err.redirect(os);
     }
 
     private static void configureLog4j() {

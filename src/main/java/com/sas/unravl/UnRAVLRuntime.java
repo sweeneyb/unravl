@@ -17,6 +17,8 @@ import com.sas.unravl.generators.UnRAVLRequestBodyGenerator;
 import com.sas.unravl.util.Json;
 import com.sas.unravl.util.VariableResolver;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -49,6 +51,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class UnRAVLRuntime implements Cloneable {
 
+    /**
+     * Prefix for property names when firing a PropertyChangeEvent when a
+     * variable is changed via {@link #bind(String, Object)}
+     */
+    public static final String ENV_PROPERTY_CHANGE_PREFIX = "env.";
     private static final Logger logger = Logger.getLogger(UnRAVLRuntime.class);
     private Map<String, Object> env; // script variables
     private Map<String, UnRAVL> scripts = new LinkedHashMap<String, UnRAVL>();
@@ -60,7 +67,7 @@ public class UnRAVLRuntime implements Cloneable {
     // used to expand variable references {varName} in strings:
     private VariableResolver variableResolver;
     private String scriptLanguage;
-    private boolean canceled;
+    private boolean cancelled;
 
     public UnRAVLRuntime() {
         this(new LinkedHashMap<String, Object>());
@@ -95,7 +102,7 @@ public class UnRAVLRuntime implements Cloneable {
         env.putAll(runtime.env);
         calls = new ArrayList<ApiCall>();
         scripts = new LinkedHashMap<String, UnRAVL>();
-        canceled = false;
+        cancelled = false;
         variableResolver = new VariableResolver(env);
         templates = new LinkedHashMap<String, UnRAVL>();
         setScriptLanguage(runtime.getScriptLanguage());
@@ -161,6 +168,15 @@ public class UnRAVLRuntime implements Cloneable {
         return failedAssertionCount;
     }
 
+    /**
+     * Reset the count of failed assertions. Do this if you wish to run new API
+     * calls with this runtime but previous calls have failed due to assertion
+     * failures
+     */
+    public void resetFailedAssertionCount() {
+        failedAssertionCount = 0;
+    }
+
     public void incrementFailedAssertionCount() {
         failedAssertionCount++;
         bind("failedAssertionCount", Integer.valueOf(failedAssertionCount));
@@ -222,7 +238,7 @@ public class UnRAVLRuntime implements Cloneable {
 
     public UnRAVLRuntime execute(String[] argv) throws UnRAVLException {
         // for now, assume each command line arg is an UnRAVL script
-        canceled = false;
+        cancelled = false;
         for (String scriptFile : argv) {
             try {
                 List<JsonNode> roots = read(scriptFile);
@@ -249,53 +265,68 @@ public class UnRAVLRuntime implements Cloneable {
 
     public void execute(List<JsonNode> listOfScripts)
             throws JsonProcessingException, IOException, UnRAVLException {
-        canceled = false;
+        cancelled = false;
+        executeInternal(listOfScripts);
+    }
+
+    public void executeInternal(List<JsonNode> listOfScripts)
+            throws JsonProcessingException, IOException, UnRAVLException {
+
         for (int i = 0; !isCanceled() && i < listOfScripts.size(); i++) {
             JsonNode root = listOfScripts.get(i);
+            executeInternal(root);
+        }
+    }
+
+    public void executeInternal(JsonNode root) throws JsonProcessingException,
+            IOException, UnRAVLException {
+        if (root.isTextual()) {
+            String ref = root.textValue();
+            if (ref.startsWith(UnRAVL.REDIRECT_PREFIX)) {
+                String sublist = expand(ref.substring(UnRAVL.REDIRECT_PREFIX
+                        .length()));
+                executeInternal(read(sublist));
+                return;
+            }
+        } else if (root.isArray()) {
+            for (JsonNode node : Json.array(root))
+                executeInternal(node);
+            return;
+        }
+
+        String label = "";
+        try {
+            UnRAVL u = null;
             if (root.isTextual()) {
-                String ref = root.textValue();
-                if (ref.startsWith(UnRAVL.REDIRECT_PREFIX)) {
-                    String sublist = expand(ref
-                            .substring(UnRAVL.REDIRECT_PREFIX.length()));
-                    execute(read(sublist));
-                    continue;
+                String name = root.textValue();
+                label = name;
+                u = getScripts().get(name);
+                if (u == null) {
+                    throw new UnRAVLException(String.format(
+                            "No such UnRAVL script named '%s'", name));
                 }
-            }
-            String label = "";
-            try {
-                UnRAVL u = null;
-                if (root.isTextual()) {
-                    String name = root.textValue();
-                    label = name;
-                    u = getScripts().get(name);
-                    if (u == null) {
-                        throw new UnRAVLException(String.format(
-                                "No such UnRAVL script named '%s'", name));
-                    }
-                } else
-                    u = new UnRAVL(this, (ObjectNode) root);
-                label = u.getName();
-                u.run();
-            } catch (UnRAVLAssertionException e) {
-                logger.error(e.getMessage() + " while running UnRAVL script "
-                        + label);
+            } else
+                u = new UnRAVL(this, (ObjectNode) root);
+            label = u.getName();
+            u.run();
+        } catch (UnRAVLAssertionException e) {
+            logger.error(e.getMessage() + " while running UnRAVL script "
+                    + label);
 
-                incrementFailedAssertionCount();
-            } catch (RuntimeException rte) {
-                if (rte.getCause() instanceof UnRAVLException) { // tunneled
-                                                                 // exception
-                    UnRAVLException e = (UnRAVLException) rte.getCause();
-                    throw e;
-                } else
-                    throw rte;
-            }
-
+            incrementFailedAssertionCount();
+        } catch (RuntimeException rte) {
+            if (rte.getCause() instanceof UnRAVLException) { // tunneled
+                                                             // exception
+                UnRAVLException e = (UnRAVLException) rte.getCause();
+                throw e;
+            } else
+                throw rte;
         }
 
     }
 
     public UnRAVLRuntime execute(String scriptFile) throws UnRAVLException {
-        canceled = false;
+        cancelled = false;
         // for now, assume each command line arg is an UnRAVL script
         try {
             List<JsonNode> roots = read(scriptFile);
@@ -311,12 +342,15 @@ public class UnRAVLRuntime implements Cloneable {
     }
 
     public boolean isCanceled() {
-        return canceled;
+        return cancelled;
     }
 
     /** Stop execution. */
     public void cancel() {
-        this.canceled = true;
+        if (!cancelled) {
+            pcs.firePropertyChange("cancelled", Boolean.FALSE, Boolean.TRUE);
+            this.cancelled = true;
+        }
     }
 
     /**
@@ -365,7 +399,15 @@ public class UnRAVLRuntime implements Cloneable {
      * Bind a value within this runtime's environment. This will add a new
      * binding if <var>varName</var> is not yet bound, or replace the old
      * binding.
+     * <p>
+     * THis also fires a <code>PropertyChangeEvent</code> to all listeners, with
+     * the property name being the <var>varName</var> with
+     * <code>{@link #ENV_PROPERTY_CHANGE_PREFIX}</code> prefixed. For example,
+     * on <code>bind("two", Integer.valueOf(2))</code>, this will fire an event
+     * with the property named <code>"env.two"</code>.
+     * </p>
      * 
+     * @see #unbind(String)
      * @param varName
      *            variable name
      * @param value
@@ -378,7 +420,12 @@ public class UnRAVLRuntime implements Cloneable {
                     "Cannot rebind special Unicode variable %s", varName));
             throw new RuntimeException(ue);
         }
+
+        Object oldValue = binding(varName);
         env.put(varName, value);
+        pcs.firePropertyChange(ENV_PROPERTY_CHANGE_PREFIX + varName, oldValue,
+                value);
+
         logger.trace("bind("
                 + varName
                 + ","
@@ -387,6 +434,18 @@ public class UnRAVLRuntime implements Cloneable {
                 + ((value instanceof String) ? "" : " "
                         + (value == null ? "null" : value.getClass().getName())));
         return this;
+    }
+
+    /**
+     * Remove a variable binding from this runtime. This undoes what {@link
+     * #bind(String,Object)} does
+     * 
+     * @param varName
+     *            the name of the variable to remove
+     * @see #bind(String,Object)
+     */
+    public void unbind(String varName) {
+        env.remove(varName);
     }
 
     /**
@@ -461,17 +520,28 @@ public class UnRAVLRuntime implements Cloneable {
         for (ApiCall call : calls) {
             failed += call.getFailedAssertions().size();
         }
-        if (canceled)
+        if (cancelled)
             System.out.println("UnRAVL script execution was canceled.");
         return failed;
     }
 
+    /**
+     * @return a list of the API calls
+     */
     public List<ApiCall> getApiCalls() {
         return calls;
     }
 
+    /**
+     * @return The size of this runtime, which is the number of API calls
+     */
+    public int size() {
+        return calls.size();
+    }
+
     public void addApiCall(ApiCall apiCall) {
         calls.add(apiCall);
+        pcs.firePropertyChange("calls", null, calls);
     }
 
     public UnRAVLPlugins getPlugins() {
@@ -494,14 +564,28 @@ public class UnRAVLRuntime implements Cloneable {
         return getTemplates().containsKey(name);
     }
 
-    public void unbind(String key) {
-        env.remove(key);
+    /**
+     * Reset this instance. This removes the history of calls, turns off the
+     * cancelled flag, and resets the assertion failure count to 0.
+     */
+    public void reset() {
+        resetFailedAssertionCount();
+        calls.clear();
+        if (cancelled) {
+            cancelled = false;
+            pcs.firePropertyChange("cancelled", Boolean.TRUE, Boolean.FALSE);
+        }
+        pcs.firePropertyChange("calls", null, calls);
     }
 
-    public void reset() {
-        failedAssertionCount = 0;
-        calls.clear();
-        canceled = false;
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        this.pcs.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        this.pcs.removePropertyChangeListener(listener);
     }
 
 }

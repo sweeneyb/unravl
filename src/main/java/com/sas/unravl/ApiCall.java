@@ -80,6 +80,7 @@ public class ApiCall {
     private UnRAVLException exception;
     private Method method;
     private String uri;
+    private boolean cancelled = false, skipped = false;
 
     private static final ObjectNode STATUS_ASSERTION = new ObjectNode(
             JsonNodeFactory.instance);
@@ -108,8 +109,7 @@ public class ApiCall {
                     executeAPI();
                     extract();
                     runAssertions(UnRAVLAssertion.Stage.ASSERT);
-                }
-            }
+                }             }
         } catch (UnRAVLException e) {
             throwException(e);
         } catch (IOException e) {
@@ -118,14 +118,25 @@ public class ApiCall {
         return this;
     }
 
-    private boolean isCanceled() {
-        return getScript().getRuntime().isCanceled();
+    private boolean canceled() {
+        cancelled = cancelled || getScript().getRuntime().isCanceled();
+        return cancelled;
     }
+    
+    public boolean wasCancelled() {
+        return cancelled;
+    }
+
+    public boolean wasSkipped() {
+        return skipped;
+    }
+    
 
     private boolean conditionalExecution() throws UnRAVLException {
         Boolean cond = conditionalExecution(getScript());
         if (cond == null)
             cond = Boolean.valueOf(getRuntime().getFailedAssertionCount() == 0);
+        skipped = !cond.booleanValue();
         return cond.booleanValue();
     }
 
@@ -219,7 +230,7 @@ public class ApiCall {
     }
 
     private void defineBody(UnRAVL script) throws UnRAVLException, IOException {
-        if (isCanceled() || script == null)
+        if (canceled() || script == null)
             return;
         JsonNode body = script.getRoot().get("body");
 
@@ -289,7 +300,7 @@ public class ApiCall {
 
     private void extract(UnRAVL script) throws UnRAVLException {
         try {
-            if (isCanceled() || script == null)
+            if (canceled() || script == null)
                 return;
             extract(script.getTemplate());
             JsonNode bind = script.getRoot().get("bind");
@@ -299,7 +310,7 @@ public class ApiCall {
                 bind = Json.wrapInArray(bind);
             }
             for (JsonNode j : Json.array(bind)) {
-                if (isCanceled())
+                if (canceled())
                     return;
                 ObjectNode ob = Json.object(j);
                 Map.Entry<String, JsonNode> first = Json.firstField(ob);
@@ -445,8 +456,10 @@ public class ApiCall {
     }
 
     public void executeAPI() throws UnRAVLException {
-        if (isCanceled())
+        if (canceled()) {
+            cancelled = true;
             return;
+        }
         if (script.getMethod() == null || script.getURI() == null) {
             logger.warn("Warning: Non-template script " + script.getName()
                     + " does not define an HTTP method or URI.");
@@ -708,17 +721,17 @@ public class ApiCall {
 
     private boolean runAssertions(UnRAVL unravl, Stage stage)
             throws UnRAVLException {
-        if (isCanceled() || unravl == null)
+        if (canceled() || unravl == null)
             return true;
         if (!runAssertions(unravl.getTemplate(), stage))
             return false;
-        if (isCanceled())
+        if (canceled())
             return true;
         JsonNode assertionNode = unravl.getRoot().get(stage.getName());
         if (assertionNode == null)
             return true;
         ArrayNode assertions = assertionArray(assertionNode, stage);
-        for (int i = 0; !isCanceled() && i < assertions.size(); i++) {
+        for (int i = 0; !canceled() && i < assertions.size(); i++) {
             JsonNode s = assertions.get(i);
             ObjectNode assertionScriptlet = null;
             UnRAVLAssertion a = null;
@@ -895,6 +908,10 @@ public class ApiCall {
         report(getPassedAssertions(), "Passed", out);
         report(getFailedAssertions(), "Failed", out);
         report(getSkippedAssertions(), "Skipped", out);
+        if (wasCancelled())
+            out.println("This call was cancelled.");
+        if (wasSkipped())
+            out.println("This call was skipped because preconditions.");
 
         out.flush();
     }
