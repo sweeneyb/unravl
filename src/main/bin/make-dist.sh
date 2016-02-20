@@ -6,8 +6,6 @@
 # target is not as easy as I'd like. So I do this with a bash script instead.
 # Run this from the root source directory: ./src/main/bin/make-dist.sh
 
-set -x
-
 VERSION=`grep '^version' build.gradle | sed -e 's/^.*= *//' -e "s/'//g"`
 
 ./gradlew build copyDeps javadoc -x test || exit $? # Skip tests; I should have run tests before this...
@@ -55,5 +53,5 @@ zip -r $DIST/unravl-$VERSION-javadoc.zip *  || exit $?
 
 echo
 echo $0 complete.
-echo distribution zip is ~/dev/unravl/build/dist/unravl-v$VERSION.zip
-echo javadoc is ~/dev/unravl/build/dist/unravl-v$VERSION-javadoc.zip
+echo distribution zip is ~/dev/unravl/build/dist/unravl-$VERSION.zip
+echo javadoc is ~/dev/unravl/build/dist/unravl-$VERSION-javadoc.zip
