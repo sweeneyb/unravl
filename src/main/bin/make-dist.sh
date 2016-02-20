@@ -48,10 +48,10 @@ cp $SRC/src/test/scripts/hello.json $DIST  || exit $?
 cd $DIST
 
 find . -type f -name .DS_Store -exec rm \{\} \;
-zip -r $DIST/unravl-v$VERSION.zip README.md LICENSE bin lib doc hello.json || exit $?
+zip -r $DIST/unravl-$VERSION.zip README.md LICENSE bin lib doc hello.json || exit $?
 
 cd $SRC/build/docs/javadoc
-zip -r $DIST/unravl-v$VERSION-javadoc.zip *  || exit $?
+zip -r $DIST/unravl-$VERSION-javadoc.zip *  || exit $?
 
 echo
 echo $0 complete.

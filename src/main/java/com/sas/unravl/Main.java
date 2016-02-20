@@ -75,6 +75,8 @@ public final class Main {
         String log4j = null;
         ui = true;
         for (String arg : argv) {
+            if (arg.trim().length() == 0) // shell may quote nothing
+                continue;
             if (arg.matches("^--?q(uiet)?"))
                 log4j = "log4j-quiet.properties";
             else if (arg.matches("^--?v(erbose)?"))
