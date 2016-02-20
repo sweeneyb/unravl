@@ -1,15 +1,15 @@
 {
   "name" : "GoogleEverestElevation",
-  "env" : { "lat" : 27.988056, 
-            "lng" : 86.925278, 
+  "env" : { "lat" : 27.988056,
+            "lng" : 86.925278,
             "expectedElevation" : 8815.7158203125,
             "epsilon" : 0.001 },
-            
+
   "GET" : "http://maps.googleapis.com/maps/api/elevation/json?locations={lat},{lng}&sensor=false",
 
   "bind" :
      [
-     	
+
      { "doc" : "Save the response body as a JSON object (a JsonNode) in the environment variable named 'response'" },
      { "json": "response" },
      { "doc" : [ "Parse the Content-Type header and store in the var 'contentType'. ",
@@ -24,12 +24,11 @@
   ],
 
   "assert": [
-  	
+
     { "doc" : "Below are some Groovy scripts to assert actual values match the expected values." },
     "responseType.startsWith('application/json')",
-    "org.junit.Assert.assertEquals(expectedElevation, actualEl,  epsilon)",
-    "org.junit.Assert.assertEquals(lat, actualLat, epsilon)",
-    "org.junit.Assert.assertEquals(lng, response.results[0].location.lng.doubleValue(), epsilon)",
+    "actualLat > 27.98 && actualLat < 27.99",
+    "actualEl > 8815.715 && actualEl < 8815.72",
     "mediaType == 'application/json'",
 	"charset == 'UTF-8'"
     ]

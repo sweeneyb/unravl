@@ -33,10 +33,23 @@ submit the UnRAVL script from the source pane.
 The interface will automatically switch to the Output tab where you
 can see the results of running the script.
 
+Use the `{ }` button to pretty-print the source JSON.
+You can increase/decrease the font size in the source text area
+by using the mouse wheel while holding the Control key.
+(On Apple OS X with a trackpad, use Control and two-finger drag
+gesture.)
+
 UnRAVL automatically saves the source and restores
 it the next time you start the application.
 Future enhancements will add the normal **File -> Open**,
 **File -> Save** and **File -> Save** as menu operations.
+
+You may drag a file from your file explorer into
+the text area to use that source. However, the UI
+does not (yet) warn you if you have unsaved text;
+thhis action will unconditionaly replace the source with
+the text from the file you dropped.
+
 Note that the UnRAVL script can also reference
 script files on the file system. For example,
 if the source is just
@@ -48,13 +61,16 @@ if the source is just
 then the interactive mode will execute the UnRAVL
 test in the file `src/test/scripts/test.unravl`,
 relative to the directory where you ran UnRAVL.
+This is handy of you prefer an JSON external
+editor.
 
 If there are JSON syntax errors in the source,
 the interface highlights the first error and the
-nature displays the error message in the status line
+app displays the error message in the status line
 below the text area.
 Click the arrow button at the bottom
 left to move the cursor to the first syntax error.
+(Caveat: Sometimes the cause of the error is the previous line.)
 
 ## Output
 

@@ -70,12 +70,17 @@ public final class Main {
 
     // Scan for --v | -verbose | -q | --quiet and set the log4j configuration
     // remove those args from the arg list and return the remainder
+    // Print help and exit on -h | --help options.
     private static String[] preProcessArgs(String[] argv) {
         ArrayList<String> args = new ArrayList<String>();
         String log4j = null;
         ui = true;
         for (String arg : argv) {
-            if (arg.matches("^--?q(uiet)?"))
+            if (arg.trim().length() == 0) // Ignore "" on command line
+                continue;
+            else if (arg.matches("^--?h(elp)?"))
+                usage();
+            else if (arg.matches("^--?q(uiet)?"))
                 log4j = "log4j-quiet.properties";
             else if (arg.matches("^--?v(erbose)?"))
                 log4j = "log4j-trace.properties";
@@ -89,6 +94,32 @@ public final class Main {
         return args.toArray(new String[args.size()]);
     }
     
+    private static void usage() {
+        System.out.println("UnRAVL - Uniform REST API Validation Language");
+        System.out.println("Runs one or more UnRAVL script files, which are JSON executable REST API validation specifications.");
+        System.out.println("");
+        System.out.println("Synopsis:");
+        System.out.println("");
+        System.out.println("    unravl.sh [-q|--quiet|-v|--verbose|-h|--help] <script-file>");
+        System.out.println("");
+        System.out.println("Examples:");
+        System.out.println("");
+        System.out.println("    unravl.sh --verbose hello.json");
+        System.out.println("    unravl.sh -q hello.json");
+        System.out.println("");
+        System.out.println("Options:");
+        System.out.println("   -q | --quiet : decrease the logging level.");
+        System.out.println("   -v | --verbose : increase the logging level.");
+        System.out.println("   -h | --help : Display this message and exit.");
+        System.out.println("");
+        System.out.println("If you do not specify any <script-file> options, launch a");
+        System.out.println("user interface from which you can edit and execute scripts.");
+        System.out.println("");
+        System.out.println("See http://www.github.com/sassoftware/unravl");
+        System.exit(1);
+        
+    }
+
     // Manage stdout/stderr which UnRAVLFrame can redirect to a UI text component
     // such that we can route Log4j console output to the text component
     private static RedirectedOutputStream out;
