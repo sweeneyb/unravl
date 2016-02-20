@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # Run UnRAVL's main entry point.
 # Command line arguments are UnRAVL script files to execute:

@@ -1,6 +1,9 @@
+## UnRAVL releases
 
 * [Release v1.2.0](https://github.com/sassoftware/unravl/releases/tag/v1.2.0)
-  * Added a [user interface](ui/UI.md) for running UnRAVL scripts interactively.
+  * Added a [user interface](ui/UI.md) for running UnRAVL scripts
+    interactively.
+  * Added a `"wrap"` option to the [`"jsonPath"`](Bind.md#jsonpath) extractor
 * [Release v1.1.0](https://github.com/sassoftware/unravl/releases/tag/v1.1.0)
   * Added [OAuth2](doc/Authentication.md#oauth2) authentication
   * A script can disable inherited authentication
