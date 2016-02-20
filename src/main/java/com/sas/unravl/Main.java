@@ -70,14 +70,15 @@ public final class Main {
 
     // Scan for --v | -verbose | -q | --quiet and set the log4j configuration
     // remove those args from the arg list and return the remainder
+    // Print help and exit on -h | --help options.
     private static String[] preProcessArgs(String[] argv) {
         ArrayList<String> args = new ArrayList<String>();
         String log4j = null;
         ui = true;
         for (String arg : argv) {
-            if (arg.trim().length() == 0) // shell may quote nothing
+            if (arg.trim().length() == 0) // Ignore "" on command line
                 continue;
-            else if (arg.matches("^--?h(help)?")) // shell may quote nothing
+            else if (arg.matches("^--?h(elp)?"))
                 usage();
             else if (arg.matches("^--?q(uiet)?"))
                 log4j = "log4j-quiet.properties";
@@ -95,13 +96,13 @@ public final class Main {
     
     private static void usage() {
         System.out.println("UnRAVL - Uniform REST API Validation Language");
+        System.out.println("Runs one or more UnRAVL script files, which are JSON executable REST API validation specifications.");
         System.out.println("");
         System.out.println("Synopsis:");
         System.out.println("");
         System.out.println("    unravl.sh [-q|--quiet|-v|--verbose|-h|--help] <script-file>");
         System.out.println("");
-        System.out.println("Runs one or more UnRAVL script files, which are JSON executable REST validation specifications.");
-        System.out.println("For example:");
+        System.out.println("Examples:");
         System.out.println("");
         System.out.println("    unravl.sh --verbose hello.json");
         System.out.println("    unravl.sh -q hello.json");
