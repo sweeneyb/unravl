@@ -77,7 +77,9 @@ public final class Main {
         for (String arg : argv) {
             if (arg.trim().length() == 0) // shell may quote nothing
                 continue;
-            if (arg.matches("^--?q(uiet)?"))
+            else if (arg.matches("^--?h(help)?")) // shell may quote nothing
+                usage();
+            else if (arg.matches("^--?q(uiet)?"))
                 log4j = "log4j-quiet.properties";
             else if (arg.matches("^--?v(erbose)?"))
                 log4j = "log4j-trace.properties";
@@ -91,6 +93,32 @@ public final class Main {
         return args.toArray(new String[args.size()]);
     }
     
+    private static void usage() {
+        System.out.println("UnRAVL - Uniform REST API Validation Language");
+        System.out.println("");
+        System.out.println("Synopsis:");
+        System.out.println("");
+        System.out.println("    unravl.sh [-q|--quiet|-v|--verbose|-h|--help] <script-file>");
+        System.out.println("");
+        System.out.println("Runs one or more UnRAVL script files, which are JSON executable REST validation specifications.");
+        System.out.println("For example:");
+        System.out.println("");
+        System.out.println("    unravl.sh --verbose hello.json");
+        System.out.println("    unravl.sh -q hello.json");
+        System.out.println("");
+        System.out.println("Options:");
+        System.out.println("   -q | --quiet : decrease the logging level.");
+        System.out.println("   -v | --verbose : increase the logging level.");
+        System.out.println("   -h | --help : Display this message and exit.");
+        System.out.println("");
+        System.out.println("If you do not specify any <script-file> options, launch a");
+        System.out.println("user interface from which you can edit and execute scripts.");
+        System.out.println("");
+        System.out.println("See http://www.github.com/sassoftware/unravl");
+        System.exit(1);
+        
+    }
+
     // Manage stdout/stderr which UnRAVLFrame can redirect to a UI text component
     // such that we can route Log4j console output to the text component
     private static RedirectedOutputStream out;
