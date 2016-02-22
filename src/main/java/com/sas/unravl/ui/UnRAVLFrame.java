@@ -62,8 +62,10 @@ import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Document;
 import javax.swing.text.Highlighter;
 import javax.swing.text.Keymap;
+import javax.swing.text.Position;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
@@ -261,6 +263,8 @@ public class UnRAVLFrame extends JFrame {
                 });
     }
 
+    // See tutorial https://docs.oracle.com/javase/tutorial/uiswing/examples/dnd/TextCutPasteProject/src/dnd/TextTransferHandler.java
+    
     public void addFileDragAndDropToSourceTextArea() {
         jsonSourceTextArea.setTransferHandler(new TransferHandler() {
             private static final long serialVersionUID = 1L;
@@ -277,7 +281,26 @@ public class UnRAVLFrame extends JFrame {
 
             @Override
             public int getSourceActions(JComponent c) {
-                return super.getSourceActions(c) | TransferHandler.COPY;
+                return super.getSourceActions(c) | TransferHandler.COPY_OR_MOVE;
+            }
+
+            Position p0 = null, p1 = null;
+            @Override
+            protected void exportDone(JComponent source, Transferable data,
+                    int action) {
+                if (action != MOVE) {
+                    return;
+                }
+
+                if ((p0 != null) && (p1 != null) &&
+                    (p0.getOffset() != p1.getOffset())) {
+                    try {
+                        jsonSourceTextArea.getDocument().remove(p0.getOffset(), 
+                                p1.getOffset() - p0.getOffset());
+                    } catch (BadLocationException e) {
+                        System.out.println("Can't remove text from source.");
+                    }
+                }
             }
 
             @Override
@@ -324,6 +347,17 @@ public class UnRAVLFrame extends JFrame {
                 int end = jsonSourceTextArea.getSelectionEnd();
                 if (start == end) {
                     return null;
+                }
+                Document doc = jsonSourceTextArea.getDocument();
+                if (start == end) {
+                    return null;
+                }
+                try {
+                    p0 = doc.createPosition(start);
+                    p1 = doc.createPosition(end);
+                } catch (BadLocationException e) {
+                    System.out.println(
+                            "Can't create position - unable to remove text from source.");
                 }
                 String data = jsonSourceTextArea.getSelectedText();
                 return new StringSelection(data);
