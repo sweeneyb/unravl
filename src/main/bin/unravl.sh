@@ -14,7 +14,7 @@ fi
 
 $java -Dapp.name=UnRAVL \
       -classpath "$UNRAVL_JAR_DIR/*:$UNRAVL_LIB_DIR/*" \
-      -Xdock:UnRAVL \
+      -Xdock:name=UnRAVL \
       $UNRAVL_OPT \
       com.sas.unravl.Main \
       "$@"
