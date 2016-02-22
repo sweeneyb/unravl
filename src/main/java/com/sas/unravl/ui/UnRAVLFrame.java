@@ -276,6 +276,11 @@ public class UnRAVLFrame extends JFrame {
             }
 
             @Override
+            public int getSourceActions(JComponent c) {
+                return super.getSourceActions(c) | TransferHandler.COPY;
+            }
+
+            @Override
             public boolean importData(TransferHandler.TransferSupport ts) {
                 try {
                     if (ts.isDataFlavorSupported(DataFlavor.stringFlavor)) {
