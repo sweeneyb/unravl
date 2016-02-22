@@ -8,8 +8,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Properties;
 
-import javax.swing.JTextArea;
-
 /**
  * The main command-line interface for running {@link UnRAVL} scripts. You can
  * run via <code>bin/unravl.sh</code> (Linux, Mac OS X) or

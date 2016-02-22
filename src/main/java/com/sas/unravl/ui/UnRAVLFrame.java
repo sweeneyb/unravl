@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.google.common.io.Files;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.Main;
@@ -14,9 +16,12 @@ import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.UnRAVLRuntime;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -37,14 +42,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 
 import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -60,6 +63,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Document;
 import javax.swing.text.Highlighter;
+import javax.swing.text.Keymap;
+import javax.swing.text.Position;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
@@ -76,7 +81,7 @@ public class UnRAVLFrame extends JFrame {
     private static final String NONE = "<none>"; // NOI18N
     private static final String SCRIPT_SOURCE_PREFERENCE_KEY = "unravl.script.source"; // NOI18N
     private static final long serialVersionUID = 1L;
-    private final UndoManager undoManager;
+    private final UndoManager undoManager = new UndoManager();
     private static final int SOURCE_TAB = 0;
     private static final int OUTPUT_TAB = 1;
     private int callIndex = 0;
@@ -85,35 +90,19 @@ public class UnRAVLFrame extends JFrame {
     Preferences prefs = Preferences.userNodeForPackage(this.getClass());
 
     /**
-     * Creates new form UnRAVLFrame
+     * Creates a new UnRAVLFrame
      */
     public UnRAVLFrame() {
-        undoManager = new UndoManager();
         initComponents();
+        addHandlers();
         postInitComponents();
     }
 
     // Additional initialization done after initComponents();
     private void postInitComponents() {
+        jsonSourceTextArea.setText(scriptTemplate());
+        jsonSourceTextArea.setCaretPosition(0);
         tabs.setSelectedIndex(SOURCE_TAB);
-        varName.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                updateVarTab();
-            }
-
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                updateVarTab();
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                updateVarTab();
-            }
-        });
-        jsonSourceTextArea.getDocument().addUndoableEditListener(
-                new MyUndoableEditListener());
         reset();
     }
 
@@ -132,6 +121,8 @@ public class UnRAVLFrame extends JFrame {
         }
     }
 
+    JTextArea textAreas[];
+
     private void zoom(int increment) {
         Font font = jsonSourceTextArea.getFont();
         if (font.getSize() + increment > 4) {
@@ -139,16 +130,6 @@ public class UnRAVLFrame extends JFrame {
                     font.getSize() + increment);
             for (JTextArea ta : textAreas)
                 ta.setFont(resizedFont);
-        }
-    }
-
-    private class MyUndoableEditListener implements UndoableEditListener {
-
-        @Override
-        public void undoableEditHappened(UndoableEditEvent e) {
-            undoManager.addEdit(e.getEdit());
-            // undoAction.updateUndoState();
-            // redoAction.updateRedoState();
         }
     }
 
@@ -160,6 +141,7 @@ public class UnRAVLFrame extends JFrame {
         runtime.addPropertyChangeListener(new RuntimePropertyChangeListener());
         updateVarTab();
         updateCallsTab();
+        outputTextArea.setText("");
     }
 
     public String scriptTemplate() {
@@ -183,6 +165,9 @@ public class UnRAVLFrame extends JFrame {
     private ApiCall call;
 
     void addHandlers() {
+        textAreas = new JTextArea[] { jsonSourceTextArea, outputTextArea,
+                requestHeaders, responseHeaders, responseBody, variableBinding };
+
         jsonSourceTextArea.getDocument().addDocumentListener(
                 new DocumentListener() {
                     @Override
@@ -197,42 +182,44 @@ public class UnRAVLFrame extends JFrame {
 
                     @Override
                     public void changedUpdate(DocumentEvent e) {
-                        onSourceChange();
+                        // onSourceChange();
                     }
                 });
 
-        addUndoRedoToSourceTextArea();
+        varName.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateVarTab();
+            }
 
-        try {
-            jsonSourceTextArea.getDocument().insertString(0, scriptTemplate(),
-                    null);
-            jsonSourceTextArea.setCaretPosition(0);
-        } catch (BadLocationException ex) {
-            Logger.getLogger(UnRAVLFrame.class.getName()).log(Level.SEVERE,
-                    null, ex);
-        }
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateVarTab();
+            }
 
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateVarTab();
+            }
+        });
+
+        addUndoRedo();
         addFileDragAndDropToSourceTextArea();
         addZoomMouseListeners();
-        clearJsonError();
     }
 
-    public void addUndoRedoToSourceTextArea() {
-        InputMap im = jsonSourceTextArea.getInputMap(JComponent.WHEN_FOCUSED);
-        ActionMap am = jsonSourceTextArea.getActionMap();
+    private void addUndoRedo() {
 
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Toolkit
-                .getDefaultToolkit().getMenuShortcutKeyMask()), resources
-                .getString("UNDO.txt"));
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Toolkit
-                .getDefaultToolkit().getMenuShortcutKeyMask()), resources
-                .getString("REDO.txt"));
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        int modifier = toolkit.getMenuShortcutKeyMask();
+        Keymap keymap = jsonSourceTextArea.getKeymap();
 
-        am.put(resources.getString("UNDO.txt"), new AbstractAction() {
+        KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_Z, modifier);
+        keymap.addActionForKeyStroke(ks, new AbstractAction() {
+            private static final long serialVersionUID = 1L;
 
             @Override
             public void actionPerformed(ActionEvent e) {
-
                 try {
                     if (undoManager.canUndo()) {
                         undoManager.undo();
@@ -242,7 +229,11 @@ public class UnRAVLFrame extends JFrame {
                 }
             }
         });
-        am.put(resources.getString("REDO.txt"), new AbstractAction() {
+
+        ks = KeyStroke.getKeyStroke(KeyEvent.VK_Y, modifier);
+        keymap.addActionForKeyStroke(ks, new AbstractAction() {
+            private static final long serialVersionUID = 1L;
+
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
@@ -254,59 +245,128 @@ public class UnRAVLFrame extends JFrame {
                 }
             }
         });
+
+        jsonSourceTextArea.getDocument().addUndoableEditListener(
+                new UndoableEditListener() {
+                    @Override
+                    public void undoableEditHappened(UndoableEditEvent e) {
+                        undoManager.addEdit(e.getEdit());
+                    }
+                });
     }
 
+    // See tutorial
+    // https://docs.oracle.com/javase/tutorial/uiswing/examples/dnd/TextCutPasteProject/src/dnd/TextTransferHandler.java
+    // must override/implement all these bits to preserve Cut/Copy/Paste since
+    // those are done with
+    // the control's TransformHandler
     public void addFileDragAndDropToSourceTextArea() {
         jsonSourceTextArea.setTransferHandler(new TransferHandler() {
             private static final long serialVersionUID = 1L;
 
             @Override
             public boolean canImport(TransferHandler.TransferSupport ts) {
-                for (DataFlavor df : ts.getDataFlavors()) {
-                    if (df.isFlavorTextType() || df.isFlavorJavaFileListType()) {
-                        return true;
+                if (ts.isDataFlavorSupported(DataFlavor.stringFlavor))
+                    return true;
+
+                if (ts.isDataFlavorSupported(DataFlavor.javaFileListFlavor))
+                    return true;
+                return false;
+            }
+
+            @Override
+            public int getSourceActions(JComponent c) {
+                return super.getSourceActions(c) | TransferHandler.COPY_OR_MOVE;
+            }
+
+            Position p0 = null, p1 = null;
+
+            @Override
+            protected void exportDone(JComponent source, Transferable data,
+                    int action) {
+                if (action != MOVE) {
+                    return;
+                }
+
+                if ((p0 != null) && (p1 != null)
+                        && (p0.getOffset() != p1.getOffset())) {
+                    try {
+                        jsonSourceTextArea.getDocument().remove(p0.getOffset(),
+                                p1.getOffset() - p0.getOffset());
+                    } catch (BadLocationException e) {
+                        System.out.println("Can't remove text from source.");
                     }
                 }
-                return false;
             }
 
             @Override
             public boolean importData(TransferHandler.TransferSupport ts) {
                 try {
-                    for (DataFlavor df : ts.getDataFlavors()) {
-                        if (df.isFlavorTextType()) {
-                            String s = (String) ts.getTransferable()
-                                    .getTransferData(DataFlavor.stringFlavor);
-                            jsonSourceTextArea.setText(s);
-                        } else if (df.isFlavorJavaFileListType()) {
-                            @SuppressWarnings("unchecked")
-                            List<File> droppedFiles = (List<File>) ts
-                                    .getTransferable().getTransferData(
-                                            DataFlavor.javaFileListFlavor);
-                            if (droppedFiles != null
-                                    && droppedFiles.size() == 1) {
+                    if (ts.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+                        String s = (String) ts.getTransferable()
+                                .getTransferData(DataFlavor.stringFlavor);
+                        jsonSourceTextArea.replaceSelection(s);
+                        return true;
+                    } else if (ts
+                            .isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+                        @SuppressWarnings("unchecked")
+                        List<File> droppedFiles = (List<File>) ts
+                                .getTransferable().getTransferData(
+                                        DataFlavor.javaFileListFlavor);
+                        if (droppedFiles != null) {
+                            if (droppedFiles.size() == 1) {
                                 File f = droppedFiles.get(0);
                                 try {
                                     String s = Files.toString(f,
                                             Charset.defaultCharset());
                                     jsonSourceTextArea.setText(s);
                                 } catch (IOException ex) {
-                                    status.setText(ex.getMessage());
+                                    setStatusText(ex.getMessage());
                                     Logger.getLogger(
                                             UnRAVLFrame.class.getName()).log(
                                             Level.SEVERE, null, ex);
                                 }
+                            } else if (droppedFiles.size() > 1) {
+                                ArrayNode a = JsonNodeFactory.instance
+                                        .arrayNode();
+                                for (File f : droppedFiles) {
+                                    a.add("@" + f.getAbsolutePath());
+                                }
+                                jsonSourceTextArea.setText(prettyPrint(a));
                             }
-                            return true;
                         }
+                        return true;
                     }
+
                 } catch (UnsupportedFlavorException | IOException ex) {
-                    status.setText(ex.getMessage());
+                    setStatusText(ex.getMessage());
                     Logger.getLogger(UnRAVLFrame.class.getName()).log(
                             Level.SEVERE, null, ex);
                     return false;
                 }
                 return false;
+            }
+
+            @Override
+            protected Transferable createTransferable(JComponent c) {
+                int start = jsonSourceTextArea.getSelectionStart();
+                int end = jsonSourceTextArea.getSelectionEnd();
+                if (start == end) {
+                    return null;
+                }
+                Document doc = jsonSourceTextArea.getDocument();
+                if (start == end) {
+                    return null;
+                }
+                try {
+                    p0 = doc.createPosition(start);
+                    p1 = doc.createPosition(end);
+                } catch (BadLocationException e) {
+                    System.out
+                            .println("Can't create position - unable to remove text from source.");
+                }
+                String data = jsonSourceTextArea.getSelectedText();
+                return new StringSelection(data);
             }
 
         });
@@ -318,8 +378,6 @@ public class UnRAVLFrame extends JFrame {
                 onZoom(evt);
             }
         };
-        textAreas = new JTextArea[] { jsonSourceTextArea, outputTextArea,
-                requestHeaders, responseHeaders, responseBody, variableBinding };
 
         for (JTextArea ta : textAreas) {
             // Note: We cannot add a MouseWheelListener to the JTextArea; the
@@ -335,24 +393,13 @@ public class UnRAVLFrame extends JFrame {
         }
     }
 
-    JTextArea textAreas[];
-
-    private boolean onSourceChange() {
+    private void onSourceChange() {
         if (highlightTag != null) {
             jsonSourceTextArea.getHighlighter().removeHighlight(highlightTag);
         }
-        try {
-            setStatusText(""); // NOI18N
-            Document d = jsonSourceTextArea.getDocument();
-            String s = d.getText(0, d.getEndPosition().getOffset());
-            prefs.put(SCRIPT_SOURCE_PREFERENCE_KEY, s);
-            return validateJson(s);
-
-        } catch (BadLocationException ex) {
-            Logger.getLogger(UnRAVLFrame.class.getName()).log(Level.SEVERE,
-                    null, ex);
-            return false;
-        }
+        String s = jsonSourceTextArea.getText();
+        prefs.put(SCRIPT_SOURCE_PREFERENCE_KEY, s);
+        validateJson(s);
     }
 
     /**
@@ -363,13 +410,11 @@ public class UnRAVLFrame extends JFrame {
     public static JFrame main(String args[]) {
 
         final UnRAVLFrame f = new UnRAVLFrame();
-        redirectStdoOutStdErr(f.outputTextArea);
         /* Create and display the form */
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                f.clearJsonError();
-                f.addHandlers();
                 f.setVisible(true);
+                redirectStdoOutStdErr(f.outputTextArea);
             }
         });
         return f;
@@ -391,7 +436,7 @@ public class UnRAVLFrame extends JFrame {
             @Override
             public void write(int byt) throws IOException {
                 textArea.append(String.valueOf((char) byt));
-                textArea.setCaretPosition(textArea.getDocument().getLength());
+                textArea.setCaretPosition(textArea.getText().length());
             }
         }
         TextAreaOutputStream out = new TextAreaOutputStream(textArea);
@@ -431,7 +476,9 @@ public class UnRAVLFrame extends JFrame {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                Dimension size = status.getSize();
                 status.setText(message);
+                status.setSize(size);
             }
         });
     }
@@ -440,6 +487,7 @@ public class UnRAVLFrame extends JFrame {
     private Object highlightTag = null;
 
     public void clearJsonError() {
+        setStatusText("");
         run.setEnabled(true);
         prettyPrintSource.setEnabled(true);
         jumpToError.setEnabled(false);
@@ -552,7 +600,7 @@ public class UnRAVLFrame extends JFrame {
                 String body = call.getResponseBody() == null ? "" : call // NOI18N
                         .getResponseBody().toString();
                 if (call.getException() != null) {
-                    status.setText(call.getException().getMessage());
+                    setStatusText(call.getException().getMessage());
                 } else {
                     int passed = call.getPassedAssertions().size();
                     int failed = call.getFailedAssertions().size();
@@ -566,7 +614,7 @@ public class UnRAVLFrame extends JFrame {
                     if (call.wasSkipped()) {
                         summary += resources.getString("SKIPPED.txt");
                     }
-                    status.setText(summary);
+                    setStatusText(summary);
                 }
                 if (f.prettyPrintResponseBody.isSelected()) {
                     body = prettyPrint(body);
@@ -646,7 +694,7 @@ public class UnRAVLFrame extends JFrame {
     void onErrorPosition(java.awt.event.ActionEvent evt) {
         try {
             int pos = jsonSourceTextArea.getLineStartOffset(errLine);
-            if (pos + errCol < jsonSourceTextArea.getDocument().getLength()) {
+            if (pos + errCol < jsonSourceTextArea.getText().length()) {
                 pos += errCol;
             }
             jsonSourceTextArea.setCaretPosition(pos);
@@ -665,16 +713,11 @@ public class UnRAVLFrame extends JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed"
     // <editor-fold defaultstate="collapsed"
-    // <editor-fold defaultstate="collapsed"
-    // <editor-fold defaultstate="collapsed"
-    // <editor-fold defaultstate="collapsed"
-    // <editor-fold defaultstate="collapsed"
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+    // desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         title = new javax.swing.JLabel();
         run = new javax.swing.JButton();
-        status = new javax.swing.JLabel();
         reset = new javax.swing.JButton();
         jumpToError = new javax.swing.JButton();
         cancel = new javax.swing.JButton();
@@ -713,6 +756,7 @@ public class UnRAVLFrame extends JFrame {
         variableBinding = new javax.swing.JTextArea();
         position = new javax.swing.JLabel();
         prettyPrintSource = new javax.swing.JButton();
+        status = new javax.swing.JTextField();
 
         setTitle("UnRAVL"); // NOI18N
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -720,7 +764,8 @@ public class UnRAVLFrame extends JFrame {
         setPreferredSize(new java.awt.Dimension(1200, 600));
 
         title.setFont(new java.awt.Font("Lucida Grande", 3, 18)); // NOI18N
-        java.util.ResourceBundle bundle = java.util.ResourceBundle.getBundle("com/sas/unravl/ui/Resources"); // NOI18N
+        java.util.ResourceBundle bundle = java.util.ResourceBundle
+                .getBundle("com/sas/unravl/ui/Resources"); // NOI18N
         title.setText(bundle.getString("UNRAVL_RUNNER.txt")); // NOI18N
 
         run.setText(bundle.getString("RUN.txt")); // NOI18N
@@ -732,8 +777,6 @@ public class UnRAVLFrame extends JFrame {
             }
         });
 
-        status.setToolTipText(bundle.getString("STATUS_TOOLTIP.txt")); // NOI18N
-
         reset.setText(bundle.getString("RESET.txt")); // NOI18N
         reset.setToolTipText(bundle.getString("RESET_TOOLTIP.txt")); // NOI18N
         reset.setEnabled(false);
@@ -744,9 +787,11 @@ public class UnRAVLFrame extends JFrame {
         });
 
         jumpToError.setFont(new java.awt.Font("Arial Unicode MS", 1, 24)); // NOI18N
-        jumpToError.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/sas/unravl/ui/error-up-orange.png"))); // NOI18N
+        jumpToError.setIcon(new javax.swing.ImageIcon(getClass().getResource(
+                "/com/sas/unravl/ui/error-up-orange.png"))); // NOI18N
         jumpToError.setToolTipText(bundle.getString("MOVE_CURSOR_TOOLTIP.txt")); // NOI18N
-        jumpToError.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/com/sas/unravl/ui/error-up-grey.png"))); // NOI18N
+        jumpToError.setDisabledIcon(new javax.swing.ImageIcon(getClass()
+                .getResource("/com/sas/unravl/ui/error-up-grey.png"))); // NOI18N
         jumpToError.setPreferredSize(new java.awt.Dimension(36, 36));
         jumpToError.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -769,25 +814,29 @@ public class UnRAVLFrame extends JFrame {
         jsonSourceTextArea.setColumns(20);
         jsonSourceTextArea.setFont(new java.awt.Font("Lucida Console", 0, 13)); // NOI18N
         jsonSourceTextArea.setRows(5);
-        jsonSourceTextArea.setToolTipText(bundle.getString("SOURCE_TOOLTIP.txt")); // NOI18N
-        jsonSourceTextArea.setInputVerifier(new InputVerifier() {public boolean verify(JComponent input) { return onSourceChange(); }});
-        jsonSourceTextArea.addCaretListener(new javax.swing.event.CaretListener() {
-            public void caretUpdate(javax.swing.event.CaretEvent evt) {
-                onPositionChange(evt);
-            }
-        });
+        jsonSourceTextArea.setToolTipText(bundle
+                .getString("SOURCE_TOOLTIP.txt")); // NOI18N
+        jsonSourceTextArea
+                .addCaretListener(new javax.swing.event.CaretListener() {
+                    public void caretUpdate(javax.swing.event.CaretEvent evt) {
+                        onPositionChange(evt);
+                    }
+                });
         jScrollPane1.setViewportView(jsonSourceTextArea);
 
-        javax.swing.GroupLayout sourcePanelLayout = new javax.swing.GroupLayout(sourcePanel);
+        javax.swing.GroupLayout sourcePanelLayout = new javax.swing.GroupLayout(
+                sourcePanel);
         sourcePanel.setLayout(sourcePanelLayout);
-        sourcePanelLayout.setHorizontalGroup(
-            sourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 827, Short.MAX_VALUE)
-        );
-        sourcePanelLayout.setVerticalGroup(
-            sourcePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 382, Short.MAX_VALUE)
-        );
+        sourcePanelLayout.setHorizontalGroup(sourcePanelLayout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jScrollPane1,
+                        javax.swing.GroupLayout.DEFAULT_SIZE, 827,
+                        Short.MAX_VALUE));
+        sourcePanelLayout.setVerticalGroup(sourcePanelLayout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jScrollPane1,
+                        javax.swing.GroupLayout.DEFAULT_SIZE, 382,
+                        Short.MAX_VALUE));
 
         tabs.addTab(bundle.getString("SOURCE.txt"), sourcePanel); // NOI18N
 
@@ -812,14 +861,16 @@ public class UnRAVLFrame extends JFrame {
         requestHeaders.setColumns(20);
         requestHeaders.setFont(new java.awt.Font("Lucida Console", 0, 13)); // NOI18N
         requestHeaders.setRows(5);
-        requestHeaders.setToolTipText(bundle.getString("REQUEST_HEADERS_TOOLTIP.txt")); // NOI18N
+        requestHeaders.setToolTipText(bundle
+                .getString("REQUEST_HEADERS_TOOLTIP.txt")); // NOI18N
         jScrollPane5.setViewportView(requestHeaders);
 
         responseHeaders.setEditable(false);
         responseHeaders.setColumns(20);
         responseHeaders.setFont(new java.awt.Font("Lucida Console", 0, 13)); // NOI18N
         responseHeaders.setRows(5);
-        responseHeaders.setToolTipText(bundle.getString("RESPONSE_HEADERS_TOOLTIP.txt")); // NOI18N
+        responseHeaders.setToolTipText(bundle
+                .getString("RESPONSE_HEADERS_TOOLTIP.txt")); // NOI18N
         jScrollPane6.setViewportView(responseHeaders);
 
         jLabel4.setText(bundle.getString("REQUEST_HEADERS.txt")); // NOI18N
@@ -831,7 +882,8 @@ public class UnRAVLFrame extends JFrame {
         responseBody.setColumns(20);
         responseBody.setFont(new java.awt.Font("Lucida Console", 0, 13)); // NOI18N
         responseBody.setRows(5);
-        responseBody.setToolTipText(bundle.getString("RESPONSE_BODY_TOOLTIP.txt")); // NOI18N
+        responseBody.setToolTipText(bundle
+                .getString("RESPONSE_BODY_TOOLTIP.txt")); // NOI18N
         jScrollPane7.setViewportView(responseBody);
 
         jLabel6.setLabelFor(responseBody);
@@ -839,12 +891,14 @@ public class UnRAVLFrame extends JFrame {
 
         prettyPrintResponseBody.setSelected(true);
         prettyPrintResponseBody.setText(bundle.getString("PRETTY_PRINT.txt")); // NOI18N
-        prettyPrintResponseBody.setToolTipText(bundle.getString("PRETTY_PRINT_TOOLTIP.txt")); // NOI18N
-        prettyPrintResponseBody.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                prettyPrintResponseBodyActionPerformed(evt);
-            }
-        });
+        prettyPrintResponseBody.setToolTipText(bundle
+                .getString("PRETTY_PRINT_TOOLTIP.txt")); // NOI18N
+        prettyPrintResponseBody
+                .addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        prettyPrintResponseBodyActionPerformed(evt);
+                    }
+                });
 
         jLabel7.setText(bundle.getString("RESPONSE_CODE.txt")); // NOI18N
 
@@ -852,9 +906,11 @@ public class UnRAVLFrame extends JFrame {
         responseCode.setToolTipText(bundle.getString("RESPONSE_CODE.txt")); // NOI18N
 
         previous.setFont(new java.awt.Font("Arial Unicode MS", 1, 24)); // NOI18N
-        previous.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/sas/unravl/ui/left-triangle-black.png"))); // NOI18N
+        previous.setIcon(new javax.swing.ImageIcon(getClass().getResource(
+                "/com/sas/unravl/ui/left-triangle-black.png"))); // NOI18N
         previous.setToolTipText(bundle.getString("PREVIOUS_CALL_TOOLTIP.txt")); // NOI18N
-        previous.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/com/sas/unravl/ui/left-triangle-grey.png"))); // NOI18N
+        previous.setDisabledIcon(new javax.swing.ImageIcon(getClass()
+                .getResource("/com/sas/unravl/ui/left-triangle-grey.png"))); // NOI18N
         previous.setEnabled(false);
         previous.setPreferredSize(new java.awt.Dimension(36, 36));
         previous.addActionListener(new java.awt.event.ActionListener() {
@@ -864,9 +920,11 @@ public class UnRAVLFrame extends JFrame {
         });
 
         next.setFont(new java.awt.Font("Arial Unicode MS", 0, 24)); // NOI18N
-        next.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com/sas/unravl/ui/right-triangle-black.png"))); // NOI18N
+        next.setIcon(new javax.swing.ImageIcon(getClass().getResource(
+                "/com/sas/unravl/ui/right-triangle-black.png"))); // NOI18N
         next.setToolTipText(bundle.getString("NEXT_CALL_TOOLTIP.txt")); // NOI18N
-        next.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource("/com/sas/unravl/ui/right-triangle-grey.png"))); // NOI18N
+        next.setDisabledIcon(new javax.swing.ImageIcon(getClass().getResource(
+                "/com/sas/unravl/ui/right-triangle-grey.png"))); // NOI18N
         next.setEnabled(false);
         next.setPreferredSize(new java.awt.Dimension(36, 36));
         next.addActionListener(new java.awt.event.ActionListener() {
@@ -875,90 +933,270 @@ public class UnRAVLFrame extends JFrame {
             }
         });
 
-        javax.swing.GroupLayout callsPanelLayout = new javax.swing.GroupLayout(callsPanel);
+        javax.swing.GroupLayout callsPanelLayout = new javax.swing.GroupLayout(
+                callsPanel);
         callsPanel.setLayout(callsPanelLayout);
-        callsPanelLayout.setHorizontalGroup(
-            callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(callsPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(callsPanelLayout.createSequentialGroup()
-                        .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(method, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 78, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, callsPanelLayout.createSequentialGroup()
-                                .addComponent(testName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(previous, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(next, javax.swing.GroupLayout.PREFERRED_SIZE, 29, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(url, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 1020, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addComponent(jScrollPane7, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, callsPanelLayout.createSequentialGroup()
-                        .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(callsPanelLayout.createSequentialGroup()
-                                .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGap(185, 185, 185))
-                            .addGroup(callsPanelLayout.createSequentialGroup()
-                                .addComponent(jLabel6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGap(5, 5, 5))
-                            .addGroup(callsPanelLayout.createSequentialGroup()
-                                .addComponent(jScrollPane5)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
-                        .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, callsPanelLayout.createSequentialGroup()
-                                .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 155, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(responseCode, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGap(18, 18, 18)
-                                .addComponent(prettyPrintResponseBody))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, callsPanelLayout.createSequentialGroup()
-                                .addGap(2, 2, 2)
-                                .addComponent(jScrollPane6))
-                            .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                .addGap(0, 0, 0))
-        );
-        callsPanelLayout.setVerticalGroup(
-            callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(callsPanelLayout.createSequentialGroup()
-                .addGap(18, 18, 18)
-                .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(testName)
-                    .addComponent(previous, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(next, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(url, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(method, javax.swing.GroupLayout.DEFAULT_SIZE, 22, Short.MAX_VALUE))
-                .addGap(8, 8, 8)
-                .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(3, 3, 3)
-                .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane5, javax.swing.GroupLayout.DEFAULT_SIZE, 46, Short.MAX_VALUE)
-                    .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 46, Short.MAX_VALUE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(callsPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel6)
-                        .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(responseCode))
-                    .addComponent(prettyPrintResponseBody))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 202, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+        callsPanelLayout
+                .setHorizontalGroup(callsPanelLayout
+                        .createParallelGroup(
+                                javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(
+                                callsPanelLayout
+                                        .createSequentialGroup()
+                                        .addContainerGap()
+                                        .addGroup(
+                                                callsPanelLayout
+                                                        .createParallelGroup(
+                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(
+                                                                callsPanelLayout
+                                                                        .createSequentialGroup()
+                                                                        .addGroup(
+                                                                                callsPanelLayout
+                                                                                        .createParallelGroup(
+                                                                                                javax.swing.GroupLayout.Alignment.LEADING,
+                                                                                                false)
+                                                                                        .addComponent(
+                                                                                                method,
+                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                Short.MAX_VALUE)
+                                                                                        .addComponent(
+                                                                                                jLabel2,
+                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                78,
+                                                                                                Short.MAX_VALUE))
+                                                                        .addPreferredGap(
+                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                        .addGroup(
+                                                                                callsPanelLayout
+                                                                                        .createParallelGroup(
+                                                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                        .addGroup(
+                                                                                                javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                                                callsPanelLayout
+                                                                                                        .createSequentialGroup()
+                                                                                                        .addComponent(
+                                                                                                                testName,
+                                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                                Short.MAX_VALUE)
+                                                                                                        .addPreferredGap(
+                                                                                                                javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                                                                        .addComponent(
+                                                                                                                previous,
+                                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                                                31,
+                                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                                        .addPreferredGap(
+                                                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                                                        .addComponent(
+                                                                                                                next,
+                                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                                                29,
+                                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                                                        .addComponent(
+                                                                                                url,
+                                                                                                javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                                1020,
+                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                                        .addComponent(
+                                                                jScrollPane7,
+                                                                javax.swing.GroupLayout.Alignment.TRAILING)
+                                                        .addGroup(
+                                                                javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                callsPanelLayout
+                                                                        .createSequentialGroup()
+                                                                        .addGroup(
+                                                                                callsPanelLayout
+                                                                                        .createParallelGroup(
+                                                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                        .addGroup(
+                                                                                                callsPanelLayout
+                                                                                                        .createSequentialGroup()
+                                                                                                        .addComponent(
+                                                                                                                jLabel4,
+                                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                                Short.MAX_VALUE)
+                                                                                                        .addGap(185,
+                                                                                                                185,
+                                                                                                                185))
+                                                                                        .addGroup(
+                                                                                                callsPanelLayout
+                                                                                                        .createSequentialGroup()
+                                                                                                        .addComponent(
+                                                                                                                jLabel6,
+                                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                                Short.MAX_VALUE)
+                                                                                                        .addGap(5,
+                                                                                                                5,
+                                                                                                                5))
+                                                                                        .addGroup(
+                                                                                                callsPanelLayout
+                                                                                                        .createSequentialGroup()
+                                                                                                        .addComponent(
+                                                                                                                jScrollPane5)
+                                                                                                        .addPreferredGap(
+                                                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+                                                                        .addGroup(
+                                                                                callsPanelLayout
+                                                                                        .createParallelGroup(
+                                                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                                                        .addGroup(
+                                                                                                javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                                                callsPanelLayout
+                                                                                                        .createSequentialGroup()
+                                                                                                        .addComponent(
+                                                                                                                jLabel7,
+                                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                                                155,
+                                                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                                                        .addPreferredGap(
+                                                                                                                javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                                                                        .addComponent(
+                                                                                                                responseCode,
+                                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                                Short.MAX_VALUE)
+                                                                                                        .addGap(18,
+                                                                                                                18,
+                                                                                                                18)
+                                                                                                        .addComponent(
+                                                                                                                prettyPrintResponseBody))
+                                                                                        .addGroup(
+                                                                                                javax.swing.GroupLayout.Alignment.TRAILING,
+                                                                                                callsPanelLayout
+                                                                                                        .createSequentialGroup()
+                                                                                                        .addGap(2,
+                                                                                                                2,
+                                                                                                                2)
+                                                                                                        .addComponent(
+                                                                                                                jScrollPane6))
+                                                                                        .addComponent(
+                                                                                                jLabel5,
+                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                                                Short.MAX_VALUE))))
+                                        .addGap(0, 0, 0)));
+        callsPanelLayout
+                .setVerticalGroup(callsPanelLayout
+                        .createParallelGroup(
+                                javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(
+                                callsPanelLayout
+                                        .createSequentialGroup()
+                                        .addGap(18, 18, 18)
+                                        .addGroup(
+                                                callsPanelLayout
+                                                        .createParallelGroup(
+                                                                javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(jLabel2)
+                                                        .addComponent(testName)
+                                                        .addComponent(
+                                                                previous,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                32,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(
+                                                                next,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                32,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addPreferredGap(
+                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addGroup(
+                                                callsPanelLayout
+                                                        .createParallelGroup(
+                                                                javax.swing.GroupLayout.Alignment.LEADING,
+                                                                false)
+                                                        .addComponent(
+                                                                url,
+                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                Short.MAX_VALUE)
+                                                        .addComponent(
+                                                                method,
+                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                22,
+                                                                Short.MAX_VALUE))
+                                        .addGap(8, 8, 8)
+                                        .addGroup(
+                                                callsPanelLayout
+                                                        .createParallelGroup(
+                                                                javax.swing.GroupLayout.Alignment.LEADING,
+                                                                false)
+                                                        .addComponent(
+                                                                jLabel4,
+                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                Short.MAX_VALUE)
+                                                        .addComponent(
+                                                                jLabel5,
+                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                Short.MAX_VALUE))
+                                        .addGap(3, 3, 3)
+                                        .addGroup(
+                                                callsPanelLayout
+                                                        .createParallelGroup(
+                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(
+                                                                jScrollPane5,
+                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                46,
+                                                                Short.MAX_VALUE)
+                                                        .addComponent(
+                                                                jScrollPane6,
+                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                46,
+                                                                Short.MAX_VALUE))
+                                        .addPreferredGap(
+                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addGroup(
+                                                callsPanelLayout
+                                                        .createParallelGroup(
+                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(
+                                                                callsPanelLayout
+                                                                        .createParallelGroup(
+                                                                                javax.swing.GroupLayout.Alignment.BASELINE)
+                                                                        .addComponent(
+                                                                                jLabel6)
+                                                                        .addComponent(
+                                                                                jLabel7,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                23,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addComponent(
+                                                                                responseCode))
+                                                        .addComponent(
+                                                                prettyPrintResponseBody))
+                                        .addPreferredGap(
+                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(
+                                                jScrollPane7,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                202,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addContainerGap(
+                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                Short.MAX_VALUE)));
 
         tabs.addTab("Calls", callsPanel);
 
         varNames.setModel(new javax.swing.AbstractListModel<String>() {
             String[] strings = { "name", "jsonResponse" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
+
+            public int getSize() {
+                return strings.length;
+            }
+
+            public String getElementAt(int i) {
+                return strings[i];
+            }
         });
         varNames.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
         varNames.setToolTipText(bundle.getString("SELECT_VAR.txt")); // NOI18N
@@ -994,38 +1232,85 @@ public class UnRAVLFrame extends JFrame {
         variableBinding.setRows(5);
         jScrollPane4.setViewportView(variableBinding);
 
-        javax.swing.GroupLayout varPanelLayout = new javax.swing.GroupLayout(varPanel);
+        javax.swing.GroupLayout varPanelLayout = new javax.swing.GroupLayout(
+                varPanel);
         varPanel.setLayout(varPanelLayout);
-        varPanelLayout.setHorizontalGroup(
-            varPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, varPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(varPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane4)
-                    .addComponent(jScrollPane3, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, varPanelLayout.createSequentialGroup()
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 63, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(varName, javax.swing.GroupLayout.PREFERRED_SIZE, 345, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(showAll)
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
-        );
-        varPanelLayout.setVerticalGroup(
-            varPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, varPanelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(varPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(varName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel3)
-                    .addComponent(showAll))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 78, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.DEFAULT_SIZE, 252, Short.MAX_VALUE)
-                .addContainerGap())
-        );
+        varPanelLayout
+                .setHorizontalGroup(varPanelLayout
+                        .createParallelGroup(
+                                javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(
+                                javax.swing.GroupLayout.Alignment.TRAILING,
+                                varPanelLayout
+                                        .createSequentialGroup()
+                                        .addContainerGap()
+                                        .addGroup(
+                                                varPanelLayout
+                                                        .createParallelGroup(
+                                                                javax.swing.GroupLayout.Alignment.TRAILING)
+                                                        .addComponent(
+                                                                jScrollPane4)
+                                                        .addComponent(
+                                                                jScrollPane3,
+                                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(
+                                                                javax.swing.GroupLayout.Alignment.LEADING,
+                                                                varPanelLayout
+                                                                        .createSequentialGroup()
+                                                                        .addComponent(
+                                                                                jLabel3,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                63,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addPreferredGap(
+                                                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                        .addComponent(
+                                                                                varName,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                                345,
+                                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                        .addPreferredGap(
+                                                                                javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                                                        .addComponent(
+                                                                                showAll)
+                                                                        .addGap(0,
+                                                                                0,
+                                                                                Short.MAX_VALUE)))
+                                        .addContainerGap()));
+        varPanelLayout
+                .setVerticalGroup(varPanelLayout
+                        .createParallelGroup(
+                                javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(
+                                javax.swing.GroupLayout.Alignment.TRAILING,
+                                varPanelLayout
+                                        .createSequentialGroup()
+                                        .addContainerGap()
+                                        .addGroup(
+                                                varPanelLayout
+                                                        .createParallelGroup(
+                                                                javax.swing.GroupLayout.Alignment.BASELINE)
+                                                        .addComponent(
+                                                                varName,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                        .addComponent(jLabel3)
+                                                        .addComponent(showAll))
+                                        .addPreferredGap(
+                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(
+                                                jScrollPane3,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                78,
+                                                javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(
+                                                javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(
+                                                jScrollPane4,
+                                                javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                252, Short.MAX_VALUE)
+                                        .addContainerGap()));
 
         tabs.addTab(bundle.getString("VARIABLES.txt"), varPanel); // NOI18N
 
@@ -1035,63 +1320,129 @@ public class UnRAVLFrame extends JFrame {
 
         prettyPrintSource.setFont(new java.awt.Font("Lucida Console", 1, 12)); // NOI18N
         prettyPrintSource.setText("{ }");
-        prettyPrintSource.setToolTipText(bundle.getString("PETTY_PRINT_SOURCE.txt")); // NOI18N
+        prettyPrintSource.setToolTipText(bundle
+                .getString("PETTY_PRINT_SOURCE.txt")); // NOI18N
         prettyPrintSource.setMargin(new java.awt.Insets(0, 0, 0, 0));
-        prettyPrintSource.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                prettyPrintSource(evt);
-            }
-        });
+        prettyPrintSource
+                .addActionListener(new java.awt.event.ActionListener() {
+                    public void actionPerformed(java.awt.event.ActionEvent evt) {
+                        prettyPrintSource(evt);
+                    }
+                });
 
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+        status.setEditable(false);
+
+        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(
+                getContentPane());
         getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(8, 8, 8)
-                        .addComponent(jumpToError, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(prettyPrintSource, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(position, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(14, 14, 14))
-                    .addComponent(tabs, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
-                .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(14, 14, 14)
-                .addComponent(title, javax.swing.GroupLayout.PREFERRED_SIZE, 215, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(run)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cancel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 362, Short.MAX_VALUE)
-                .addComponent(reset)
-                .addGap(18, 18, 18))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addGap(8, 8, 8)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(title)
-                    .addComponent(run)
-                    .addComponent(cancel)
-                    .addComponent(reset))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 428, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                    .addComponent(prettyPrintSource, javax.swing.GroupLayout.DEFAULT_SIZE, 37, Short.MAX_VALUE)
-                    .addComponent(jumpToError, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(status, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(position, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap())
-        );
+        layout.setHorizontalGroup(layout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(
+                        layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(
+                                        layout.createParallelGroup(
+                                                javax.swing.GroupLayout.Alignment.LEADING)
+                                                .addGroup(
+                                                        layout.createSequentialGroup()
+                                                                .addGap(8, 8, 8)
+                                                                .addComponent(
+                                                                        jumpToError,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(
+                                                                        status)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(
+                                                                        prettyPrintSource,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                        48,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addPreferredGap(
+                                                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                .addComponent(
+                                                                        position,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                        46,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                                .addGap(14, 14,
+                                                                        14))
+                                                .addComponent(
+                                                        tabs,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        0, Short.MAX_VALUE))
+                                .addContainerGap())
+                .addGroup(
+                        layout.createSequentialGroup()
+                                .addGap(14, 14, 14)
+                                .addComponent(title,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                        215,
+                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(
+                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(run)
+                                .addPreferredGap(
+                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(cancel)
+                                .addPreferredGap(
+                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                        362, Short.MAX_VALUE)
+                                .addComponent(reset).addGap(18, 18, 18)));
+        layout.setVerticalGroup(layout
+                .createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(
+                        javax.swing.GroupLayout.Alignment.TRAILING,
+                        layout.createSequentialGroup()
+                                .addGap(8, 8, 8)
+                                .addGroup(
+                                        layout.createParallelGroup(
+                                                javax.swing.GroupLayout.Alignment.BASELINE)
+                                                .addComponent(title)
+                                                .addComponent(run)
+                                                .addComponent(cancel)
+                                                .addComponent(reset))
+                                .addPreferredGap(
+                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(tabs,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                        428, Short.MAX_VALUE)
+                                .addPreferredGap(
+                                        javax.swing.LayoutStyle.ComponentPlacement.RELATED,
+                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                        Short.MAX_VALUE)
+                                .addGroup(
+                                        layout.createParallelGroup(
+                                                javax.swing.GroupLayout.Alignment.TRAILING,
+                                                false)
+                                                .addGroup(
+                                                        layout.createParallelGroup(
+                                                                javax.swing.GroupLayout.Alignment.BASELINE)
+                                                                .addComponent(
+                                                                        prettyPrintSource,
+                                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                        37,
+                                                                        Short.MAX_VALUE)
+                                                                .addComponent(
+                                                                        status,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE))
+                                                .addComponent(
+                                                        jumpToError,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(
+                                                        position,
+                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                        Short.MAX_VALUE))
+                                .addContainerGap()));
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -1182,7 +1533,7 @@ public class UnRAVLFrame extends JFrame {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    status.setText(statusText);
+                    setStatusText(statusText);
                     outputTextArea.setCaretPosition(0);
                     callIndex = runtime.size() - 1;
                     updateCallsTab();
@@ -1284,7 +1635,7 @@ public class UnRAVLFrame extends JFrame {
     private javax.swing.JButton run;
     private javax.swing.JCheckBox showAll;
     private javax.swing.JPanel sourcePanel;
-    private javax.swing.JLabel status;
+    private javax.swing.JTextField status;
     private javax.swing.JTabbedPane tabs;
     private javax.swing.JLabel testName;
     private javax.swing.JLabel title;
