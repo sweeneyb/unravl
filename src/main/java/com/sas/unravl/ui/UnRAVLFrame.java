@@ -6,6 +6,8 @@ import com.fasterxml.jackson.core.util.DefaultIndenter;
 import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.google.common.io.Files;
 import com.sas.unravl.ApiCall;
 import com.sas.unravl.Main;
@@ -14,9 +16,9 @@ import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.UnRAVLRuntime;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Toolkit;
-import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
@@ -40,8 +42,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -60,7 +60,6 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.DefaultHighlighter;
 import javax.swing.text.Document;
 import javax.swing.text.Highlighter;
@@ -247,13 +246,6 @@ public class UnRAVLFrame extends JFrame {
             }
         });
 
-        ks = KeyStroke.getKeyStroke(KeyEvent.VK_C, modifier);
-        keymap.addActionForKeyStroke(ks, TransferHandler.getCopyAction());
-        ks = KeyStroke.getKeyStroke(KeyEvent.VK_X, modifier);
-        keymap.addActionForKeyStroke(ks,  TransferHandler.getCutAction());
-        ks = KeyStroke.getKeyStroke(KeyEvent.VK_V, modifier);
-        keymap.addActionForKeyStroke(ks,  TransferHandler.getPasteAction());
-
         jsonSourceTextArea.getDocument().addUndoableEditListener(
                 new UndoableEditListener() {
                     @Override
@@ -263,8 +255,11 @@ public class UnRAVLFrame extends JFrame {
                 });
     }
 
-    // See tutorial https://docs.oracle.com/javase/tutorial/uiswing/examples/dnd/TextCutPasteProject/src/dnd/TextTransferHandler.java
-    
+    // See tutorial
+    // https://docs.oracle.com/javase/tutorial/uiswing/examples/dnd/TextCutPasteProject/src/dnd/TextTransferHandler.java
+    // must override/implement all these bits to preserve Cut/Copy/Paste since
+    // those are done with
+    // the control's TransformHandler
     public void addFileDragAndDropToSourceTextArea() {
         jsonSourceTextArea.setTransferHandler(new TransferHandler() {
             private static final long serialVersionUID = 1L;
@@ -285,6 +280,7 @@ public class UnRAVLFrame extends JFrame {
             }
 
             Position p0 = null, p1 = null;
+
             @Override
             protected void exportDone(JComponent source, Transferable data,
                     int action) {
@@ -292,10 +288,10 @@ public class UnRAVLFrame extends JFrame {
                     return;
                 }
 
-                if ((p0 != null) && (p1 != null) &&
-                    (p0.getOffset() != p1.getOffset())) {
+                if ((p0 != null) && (p1 != null)
+                        && (p0.getOffset() != p1.getOffset())) {
                     try {
-                        jsonSourceTextArea.getDocument().remove(p0.getOffset(), 
+                        jsonSourceTextArea.getDocument().remove(p0.getOffset(),
                                 p1.getOffset() - p0.getOffset());
                     } catch (BadLocationException e) {
                         System.out.println("Can't remove text from source.");
@@ -317,23 +313,33 @@ public class UnRAVLFrame extends JFrame {
                         List<File> droppedFiles = (List<File>) ts
                                 .getTransferable().getTransferData(
                                         DataFlavor.javaFileListFlavor);
-                        if (droppedFiles != null && droppedFiles.size() == 1) {
-                            File f = droppedFiles.get(0);
-                            try {
-                                String s = Files.toString(f,
-                                        Charset.defaultCharset());
-                                jsonSourceTextArea.setText(s);
-                            } catch (IOException ex) {
-                                setStatusText(ex.getMessage());
-                                Logger.getLogger(UnRAVLFrame.class.getName())
-                                        .log(Level.SEVERE, null, ex);
+                        if (droppedFiles != null) {
+                            if (droppedFiles.size() == 1) {
+                                File f = droppedFiles.get(0);
+                                try {
+                                    String s = Files.toString(f,
+                                            Charset.defaultCharset());
+                                    jsonSourceTextArea.setText(s);
+                                } catch (IOException ex) {
+                                    setStatusText(ex.getMessage());
+                                    Logger.getLogger(
+                                            UnRAVLFrame.class.getName()).log(
+                                            Level.SEVERE, null, ex);
+                                }
+                            } else if (droppedFiles.size() > 1) {
+                                ArrayNode a = JsonNodeFactory.instance
+                                        .arrayNode();
+                                for (File f : droppedFiles) {
+                                    a.add("@" + f.getAbsolutePath());
+                                }
+                                jsonSourceTextArea.setText(prettyPrint(a));
                             }
-                        } // TODO: Create an array with [ "@file names" ... ]
+                        }
                         return true;
                     }
 
                 } catch (UnsupportedFlavorException | IOException ex) {
-                    status.setText(ex.getMessage());
+                    setStatusText(ex.getMessage());
                     Logger.getLogger(UnRAVLFrame.class.getName()).log(
                             Level.SEVERE, null, ex);
                     return false;
@@ -356,8 +362,8 @@ public class UnRAVLFrame extends JFrame {
                     p0 = doc.createPosition(start);
                     p1 = doc.createPosition(end);
                 } catch (BadLocationException e) {
-                    System.out.println(
-                            "Can't create position - unable to remove text from source.");
+                    System.out
+                            .println("Can't create position - unable to remove text from source.");
                 }
                 String data = jsonSourceTextArea.getSelectedText();
                 return new StringSelection(data);
@@ -387,36 +393,13 @@ public class UnRAVLFrame extends JFrame {
         }
     }
 
-    Timer timer = new Timer();
-    AtomicBoolean validating = new AtomicBoolean();
-
     private void onSourceChange() {
-        if (validating.get())
-            return;
-        validating.set(true);
-        timer.schedule(new JsonValidator(), 500);
-    }
-
-    class JsonValidator extends TimerTask {
-        @Override
-        public void run() {
-            validateJson();
+        if (highlightTag != null) {
+            jsonSourceTextArea.getHighlighter().removeHighlight(highlightTag);
         }
-    }
-
-    private void validateJson() {
-        try {
-            if (highlightTag != null) {
-                jsonSourceTextArea.getHighlighter().removeHighlight(
-                        highlightTag);
-            }
-            setStatusText(""); // NOI18N
-            String s = jsonSourceTextArea.getText();
-            prefs.put(SCRIPT_SOURCE_PREFERENCE_KEY, s);
-            validateJson(s);
-        } finally {
-            validating.set(false);
-        }
+        String s = jsonSourceTextArea.getText();
+        prefs.put(SCRIPT_SOURCE_PREFERENCE_KEY, s);
+        validateJson(s);
     }
 
     /**
@@ -493,7 +476,9 @@ public class UnRAVLFrame extends JFrame {
 
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
+                Dimension size = status.getSize();
                 status.setText(message);
+                status.setSize(size);
             }
         });
     }
@@ -502,6 +487,7 @@ public class UnRAVLFrame extends JFrame {
     private Object highlightTag = null;
 
     public void clearJsonError() {
+        setStatusText("");
         run.setEnabled(true);
         prettyPrintSource.setEnabled(true);
         jumpToError.setEnabled(false);
@@ -614,7 +600,7 @@ public class UnRAVLFrame extends JFrame {
                 String body = call.getResponseBody() == null ? "" : call // NOI18N
                         .getResponseBody().toString();
                 if (call.getException() != null) {
-                    status.setText(call.getException().getMessage());
+                    setStatusText(call.getException().getMessage());
                 } else {
                     int passed = call.getPassedAssertions().size();
                     int failed = call.getFailedAssertions().size();
@@ -628,7 +614,7 @@ public class UnRAVLFrame extends JFrame {
                     if (call.wasSkipped()) {
                         summary += resources.getString("SKIPPED.txt");
                     }
-                    status.setText(summary);
+                    setStatusText(summary);
                 }
                 if (f.prettyPrintResponseBody.isSelected()) {
                     body = prettyPrint(body);
@@ -726,12 +712,12 @@ public class UnRAVLFrame extends JFrame {
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed"
+    // <editor-fold defaultstate="collapsed"
     // desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
         title = new javax.swing.JLabel();
         run = new javax.swing.JButton();
-        status = new javax.swing.JLabel();
         reset = new javax.swing.JButton();
         jumpToError = new javax.swing.JButton();
         cancel = new javax.swing.JButton();
@@ -770,6 +756,7 @@ public class UnRAVLFrame extends JFrame {
         variableBinding = new javax.swing.JTextArea();
         position = new javax.swing.JLabel();
         prettyPrintSource = new javax.swing.JButton();
+        status = new javax.swing.JTextField();
 
         setTitle("UnRAVL"); // NOI18N
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
@@ -789,8 +776,6 @@ public class UnRAVLFrame extends JFrame {
                 onRun(evt);
             }
         });
-
-        status.setToolTipText(bundle.getString("STATUS_TOOLTIP.txt")); // NOI18N
 
         reset.setText(bundle.getString("RESET.txt")); // NOI18N
         reset.setToolTipText(bundle.getString("RESET_TOOLTIP.txt")); // NOI18N
@@ -1203,7 +1188,6 @@ public class UnRAVLFrame extends JFrame {
         tabs.addTab("Calls", callsPanel);
 
         varNames.setModel(new javax.swing.AbstractListModel<String>() {
-            private static final long serialVersionUID = 1L;
             String[] strings = { "name", "jsonResponse" };
 
             public int getSize() {
@@ -1346,6 +1330,8 @@ public class UnRAVLFrame extends JFrame {
                     }
                 });
 
+        status.setEditable(false);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(
                 getContentPane());
         getContentPane().setLayout(layout);
@@ -1368,10 +1354,7 @@ public class UnRAVLFrame extends JFrame {
                                                                 .addPreferredGap(
                                                                         javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                                 .addComponent(
-                                                                        status,
-                                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                                        Short.MAX_VALUE)
+                                                                        status)
                                                                 .addPreferredGap(
                                                                         javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                                                 .addComponent(
@@ -1436,19 +1419,23 @@ public class UnRAVLFrame extends JFrame {
                                         layout.createParallelGroup(
                                                 javax.swing.GroupLayout.Alignment.TRAILING,
                                                 false)
-                                                .addComponent(
-                                                        prettyPrintSource,
-                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                        37, Short.MAX_VALUE)
+                                                .addGroup(
+                                                        layout.createParallelGroup(
+                                                                javax.swing.GroupLayout.Alignment.BASELINE)
+                                                                .addComponent(
+                                                                        prettyPrintSource,
+                                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                        37,
+                                                                        Short.MAX_VALUE)
+                                                                .addComponent(
+                                                                        status,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
+                                                                        javax.swing.GroupLayout.DEFAULT_SIZE,
+                                                                        javax.swing.GroupLayout.PREFERRED_SIZE))
                                                 .addComponent(
                                                         jumpToError,
                                                         javax.swing.GroupLayout.PREFERRED_SIZE,
                                                         javax.swing.GroupLayout.DEFAULT_SIZE,
-                                                        javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(
-                                                        status,
-                                                        javax.swing.GroupLayout.PREFERRED_SIZE,
-                                                        36,
                                                         javax.swing.GroupLayout.PREFERRED_SIZE)
                                                 .addComponent(
                                                         position,
@@ -1546,7 +1533,7 @@ public class UnRAVLFrame extends JFrame {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    status.setText(statusText);
+                    setStatusText(statusText);
                     outputTextArea.setCaretPosition(0);
                     callIndex = runtime.size() - 1;
                     updateCallsTab();
@@ -1648,7 +1635,7 @@ public class UnRAVLFrame extends JFrame {
     private javax.swing.JButton run;
     private javax.swing.JCheckBox showAll;
     private javax.swing.JPanel sourcePanel;
-    private javax.swing.JLabel status;
+    private javax.swing.JTextField status;
     private javax.swing.JTabbedPane tabs;
     private javax.swing.JLabel testName;
     private javax.swing.JLabel title;
