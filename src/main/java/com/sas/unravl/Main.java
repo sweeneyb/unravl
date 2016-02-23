@@ -56,7 +56,7 @@ public final class Main {
         configureLog4j();
         UnRAVLRuntime.configure();
         if (ui) {
-            javax.swing.JFrame frame = UnRAVLFrame.main(argv);
+            javax.swing.JFrame frame = UnRAVLFrame.main(redirectOutput);
             frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         } else {
             int rc = new Main().run(argv);
@@ -65,8 +65,9 @@ public final class Main {
     }
 
     static boolean ui = false;
+    static boolean redirectOutput = true;
 
-    // Scan for --v | -verbose | -q | --quiet and set the log4j configuration
+    // Scan for --v | -verbose | -q | --quiet | --stdout and set the log4j configuration
     // remove those args from the arg list and return the remainder
     // Print help and exit on -h | --help options.
     private static String[] preProcessArgs(String[] argv) {
@@ -82,6 +83,8 @@ public final class Main {
                 log4j = "log4j-quiet.properties";
             else if (arg.matches("^--?v(erbose)?"))
                 log4j = "log4j-trace.properties";
+            else if (arg.matches("^--?stdout"))
+                redirectOutput = false;
             else {
                 args.add(arg);
                 ui = false;
@@ -109,9 +112,11 @@ public final class Main {
         System.out.println("   -q | --quiet : decrease the logging level.");
         System.out.println("   -v | --verbose : increase the logging level.");
         System.out.println("   -h | --help : Display this message and exit.");
+        System.out.println("   --stdout : In interactive mode, write output to the standard output, not the Output panel.");
         System.out.println("");
-        System.out.println("If you do not specify any <script-file> options, launch a");
-        System.out.println("user interface from which you can edit and execute scripts.");
+        System.out.println("If you do not specify any <script-file> options, start UnRAVL in");
+        System.out.println("interactive mode, from which you can edit and execute scripts.");
+        System.out.println("This requires a window system.");
         System.out.println("");
         System.out.println("See http://www.github.com/sassoftware/unravl");
         System.exit(1);
