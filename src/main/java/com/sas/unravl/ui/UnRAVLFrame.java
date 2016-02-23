@@ -100,10 +100,15 @@ public class UnRAVLFrame extends JFrame {
 
     // Additional initialization done after initComponents();
     private void postInitComponents() {
-        jsonSourceTextArea.setText(scriptTemplate());
-        jsonSourceTextArea.setCaretPosition(0);
-        tabs.setSelectedIndex(SOURCE_TAB);
-        reset();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                jsonSourceTextArea.setText(scriptTemplate());
+                jsonSourceTextArea.setCaretPosition(0);
+                tabs.setSelectedIndex(SOURCE_TAB);
+                reset();
+            }
+        });
     }
 
     private void setHeaders(List<Header> headers, JTextArea textArea) {
@@ -403,18 +408,19 @@ public class UnRAVLFrame extends JFrame {
     }
 
     /**
-     * @param args
-     *            the command line arguments
+     * @param redirectStdout
+     *            TODO
      * @return the JFrame that is created
      */
-    public static JFrame main(String args[]) {
+    public static JFrame main(final boolean redirectStdout) {
 
         final UnRAVLFrame f = new UnRAVLFrame();
         /* Create and display the form */
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 f.setVisible(true);
-                redirectStdoOutStdErr(f.outputTextArea);
+                if (redirectStdout)
+                    redirectStdoOutStdErr(f.outputTextArea);
             }
         });
         return f;
@@ -487,42 +493,59 @@ public class UnRAVLFrame extends JFrame {
     private Object highlightTag = null;
 
     public void clearJsonError() {
-        setStatusText("");
-        run.setEnabled(true);
-        prettyPrintSource.setEnabled(true);
-        jumpToError.setEnabled(false);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                setStatusText("");
+                run.setEnabled(true);
+                prettyPrintSource.setEnabled(true);
+                jumpToError.setEnabled(false);
+            }
+        });
     }
 
     int errLine = 0;
     int errCol = 0;
 
-    void jsonError(Integer line, Integer col, String message) {
-        String prefix = ""; // NOI18N
-        run.setEnabled(false);
-        prettyPrintSource.setEnabled(false);
-        if (line != null && col != null) {
-            try {
+    void jsonError(final Integer line, final Integer col, final String message) {
 
-                jumpToError.setEnabled(true);
-                prefix = "[" + line + "," + col + "] "; // NOI18N //NOI18N
-                errLine = line > 0 ? line - 1 : line;
-                errLine = Math.max(0, Math.min(errLine,
-                        jsonSourceTextArea.getLineCount() - 1));
-                errCol = col - 1;
-                int startIndex = jsonSourceTextArea.getLineStartOffset(errLine);
-                int endIndex = jsonSourceTextArea.getLineEndOffset(errLine);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
 
-                painter = new DefaultHighlighter.DefaultHighlightPainter(
-                        Color.ORANGE);
-                highlightTag = jsonSourceTextArea.getHighlighter()
-                        .addHighlight(startIndex, endIndex, painter);
+                String prefix = ""; // NOI18N
+                run.setEnabled(false);
+                prettyPrintSource.setEnabled(false);
+                if (line != null && col != null) {
+                    try {
 
-            } catch (BadLocationException ex) {
-                Logger.getLogger(UnRAVLFrame.class.getName()).log(Level.SEVERE,
-                        null, ex);
+                        jumpToError.setEnabled(true);
+                        prefix = "[" + line + "," + col + "] "; // NOI18N
+                                                                // //NOI18N
+                        errLine = line > 0 ? line - 1 : line;
+                        errLine = Math.max(
+                                0,
+                                Math.min(errLine,
+                                        jsonSourceTextArea.getLineCount() - 1));
+                        errCol = col - 1;
+                        int startIndex = jsonSourceTextArea
+                                .getLineStartOffset(errLine);
+                        int endIndex = jsonSourceTextArea
+                                .getLineEndOffset(errLine);
+
+                        painter = new DefaultHighlighter.DefaultHighlightPainter(
+                                Color.ORANGE);
+                        highlightTag = jsonSourceTextArea.getHighlighter()
+                                .addHighlight(startIndex, endIndex, painter);
+
+                    } catch (BadLocationException ex) {
+                        Logger.getLogger(UnRAVLFrame.class.getName()).log(
+                                Level.SEVERE, null, ex);
+                    }
+                }
+                setStatusText(prefix + message);
             }
-        }
-        setStatusText(prefix + message);
+        });
     }
 
     LinkedHashMap<String, Object> changedVars = new LinkedHashMap<String, Object>();
