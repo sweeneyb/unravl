@@ -22,20 +22,10 @@ if [[ -d $DIST ]]; then rm -rf $DIST; fi
 
 mkdir -p $DIST/bin
 
-sed -e 's=\.\./\.\./==' \
-    -e 's=build/==' \
-    -e 's=output/==' \
-    -e 's=^UNRAVL_JAR.*==' \
-    -e 's=.UNRAVL_JAR_DIR/.:=='  \
-    src/main/bin/unravl.sh >| $DIST/bin/unravl.sh  || exit $?
+cp src/main/bin/unravl.sh $DIST/bin/unravl.sh  || exit $?
 chmod +x $DIST/bin/unravl.sh  || exit $?
 
-sed -e 's=\.\.\\\.\.\\==' \
-    -e 's=build\\==' \
-    -e 's=output\\==' \
-    -e 's=^set UNRAVL_JAR_DIR.*==' \
-    -e 's=%UNRAVL_JAR_DIR%...==' \
-    src/main/bin/unravl.bat >| $DIST/bin/unravl.bat  || exit $?
+cp src/main/bin/unravl.bat $DIST/bin/unravl.bat  || exit $?
 
 mkdir -p $DIST/lib
 cp build/libs/sas.unravl-$VERSION.jar $DIST/lib || exit $?
