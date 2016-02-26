@@ -1,5 +1,8 @@
 ## UnRAVL releases
 
+* [Release v1.2.1](https://github.com/sassoftware/unravl/releases/tag/v1.2.1)
+  * Improved Cut/Copy/Paste, layout, threading, and other
+    interactive mode improvements
 * [Release v1.2.0](https://github.com/sassoftware/unravl/releases/tag/v1.2.0)
   * Added a [user interface](ui/UI.md) for running UnRAVL scripts
     interactively.
