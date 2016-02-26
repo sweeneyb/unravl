@@ -505,15 +505,13 @@ using them to invoke an API call, and binding values from the API results.
   "GET" : "{API_ROOT}/json?locations={latitude},{longitude}",
   "bind" : [
      { "json" : "@{outputDir}/{name}.json" },
-     { "headers" : { "contentType" : "Content-Type" } },
-     { "json" : "response" },
      { "jsonPath" : { "actualElevation" : "$.results[0].elevation",
                       "actualLat"       : "$.results[0].location.lat",
                       "actualLong"      : "$.results[0].location.lng",
-                      "actualStatus"    : "status"
+                      "actualStatus"    : "$.status"
                     }
      }
-  ],x
+  ],
   "assert": [
     "actualElevation == expectedElevation",
     "actualLat == latitude",
