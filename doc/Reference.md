@@ -134,8 +134,8 @@ See [template](Templates.md) for more details.
 "env" : collection-of-bindings
 ```
 
-This is a collection of `"name" : *value*` pairs (a Map, if you will).
-Each `*value*` is bound to an variable named "name" in the current
+This is a collection of `"name"` `:` *`value`* pairs (also known as a *map*).
+Each *`value`* is bound to an variable named "name" in the current
 environment. These values may later be used by referencing
 them as `{name}` inside String values, or as values bound
 when Groovy or JavaScript expressions are run.
@@ -246,7 +246,7 @@ Use the `headers` element to specify one or more request headers.
   "headers" : { request-headers }
 ```
 
-The `{ *request-headers* }` is a JSON object consisting one more more header name and value pairs.
+The `{ request-headers }` is a JSON object consisting one more more header name/value pairs.
 The values may use [environment](*Environment) substitution.
 
 ```JSON
@@ -280,7 +280,7 @@ of the different forms of authentication.
 
 ### body
 
-For "PUT", "POST" and "PATCH" methods, the request body can be expressed in multiple ways.
+For `"PUT"`, "`POST"` and `"PATCH"` methods, the request body can be expressed in multiple ways.
 
 ```
  "body" : *body-specification*
@@ -296,7 +296,7 @@ The *body-specification* may take one of several forms:
 
 The different forms are described in [Body](Body.md).
 
-### Method and URL:
+### Method and URL
 
 The UnRAVL script specifies the API call with the method name and URL.
 
@@ -305,17 +305,18 @@ The UnRAVL script specifies the API call with the method name and URL.
 ```
 
 The *`method`* and *`URL`* are both strings. The *method* must be one of
-`"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"`.
+`"GET", "HEAD", "POST", "PUT", "DELETE", "PATCH"`. (Spaces are *not*
+allowed in the method names, and the methods **must** be ALLCAPS.)
 The *`URL`* is the REST API being tested.
-Only one `*method* : *URL*` pair is allowed per test object.
+Only one *`method`* `:` *`URL`* pair is allowed per test object.
 Use an array of test objects to perform multiple API calls.
 
 Examples:
 
 ```JSON
 [
-  { "GET" : "http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278&sensor=false" },
-  { "DELETE" : "http://www.example.com/rest/myService/myCollection/xk4783" }
+ { "GET" : "http://maps.googleapis.com/maps/api/elevation/json?locations=27.988056,86.925278" },
+ { "DELETE" : "http://www.example.com/rest/myService/myCollection/xk4783" }
 ]
 ```
 
@@ -389,9 +390,8 @@ The value of that binding is substituted.
 (However, Groovy or JavaScript scripts do not need the braces as the environment bindings
 are made directly available as script variables.)
 
-If a variable is not bound, this notation passes through; that is
-the value of `{undefinedVariable}`
-is `{undefinedVariable}`.
+If a variable is not bound, this notation passes through. That is,
+the value of `{undefinedVariable}` is `{undefinedVariable}`.
 
 #### Automatically bound variables
 
@@ -417,7 +417,7 @@ You may also provide alternate text to use if a variable is
 not defined. Add a '|' vertical bar (pipe) character and the alternative text
 before the closing brace:
 
-`{varName|*alt text*}`
+`{varName|alt text}`
 
 If `varName` is bound, the result will be the value of that variable and the *`alt text`* is discarded,
 else the result will be *`alt text`*. The *`alt text`* can also
@@ -440,27 +440,26 @@ the following
       { next = state|ACTIVE ? active : inactive; }
 ```
 
-UnRAVL should not process this like a `{varName|*alt text*}`
-expression. If it did, it would parse this as
-
-`varName == " next = state"`
-`*alt text* == "ACTIVE ? active : inactive; "`
+UnRAVL should not process this like a `{varName|alt text}`
+expression. If it did, it would parse the second line of text as
+a variable named `" next = state"`
+and *`alt text`* of `"ACTIVE ? active : inactive; "`,
 
 Since there is no UnRAVL variable binding for a variable with the name ` next = state`,
-the result would be the `*alt text*, "ACTIVE ? active : inactive; "`
-Thus, the net result would be the unexpected
+the result would be the alternate text `"ACTIVE ? active : inactive; "`
+The full result would be the unexpected
 
 ```
     if (pending)
        ACTIVE ? active : inactive;
 ```
-Warning: because of this *alt text* processing, some text may
+**Warning**: because of this *`alt text`* processing, some text may
 be replaced even if you do not intend it to be interpreted as
 variable references. For example, if A and D are not bound, the input text
 
 ```
     {A|B|C} | {D|E} is the same as {A|B|C|D|E}
-````
+```
 
 will result in the text
 
@@ -468,20 +467,26 @@ will result in the text
     B|C | E is the same as B|C|D|E
 ```
 
-Note: If you wish to include unbalanced left and right braces in `*alt text*`,
-you may use Unicode replacement.  For example, if you want the value
+If you wish to prevent varibable expansion or include unbalanced left and right braces in *`alt text`*,
+you may use Unicode character replacement.
+```
+    {U+007b}A|B|C} | {U+007b}D|E} is the same as {U+007b}A|B|C|D|E}
+```
+
+Here is another example. If you want the value
 of the variable `end`, but use `%}` if end is not defined, you cannot use
-    {end|}}
-because the first `}` will be used as the end of the variable reference and the `*alt text*` will be empty.
-(If `end` is bound to the string `$` then `{end|}}` will result in `$}`,
-and if `end` is not bound, the result will be `}`,
-neither of which is not desired.)
+    `{end|}}`
+because the first `}` will be used as the end of the variable reference,
+and the *`alt text`* will be empty.
+If `end` is bound to the string `$` then `{end|}}` will result in `$}`.
+However, if `end` is *not* bound, the result will be `}`.
+Neither of these results is desired.
 
 Instead, use
 ```
-    {end|%{U+002D}}
-````
-Here, the `*alt text*` is `%{U+002D}` which will expand to the desired `%}`.
+    {end|%{U+007D}}
+```
+Here, the *`alt text`* is `%{U+007D}` which will expand to the desired `%}`.
 
 #### Examples
 
@@ -493,48 +498,55 @@ using them to invoke an API call, and binding values from the API results.
   "name" : "GoogleEverestElevation",
   "env" : { "latitude" : 27.988056,
             "longitude" : 86.925278,
-             "expectedElevation" :  8815.7158203125,
-            "API_ROOT" : "http://maps.googleapis.com/maps/api/elevation"
-            },
-  "GET" : "{API_ROOT}/json?locations={latitude},{longitude}&sensor=false" },
+            "expectedElevation" :  8815.7158203125,
+            "API_ROOT" : "http://maps.googleapis.com/maps/api/elevation",
+            "outputDir" : "{java.io.tmpdir}"
+          },
+  "GET" : "{API_ROOT}/json?locations={latitude},{longitude}",
   "bind" : [
      { "json" : "@{outputDir}/{name}.json" },
      { "headers" : { "contentType" : "Content-Type" } },
      { "json" : "response" },
-     { "jsonPath" : {
-           "actualElevation" : "results[0].elevation",
-           "actualLat" : "results[0].location.lat",
-           "actualLong" :"results[0].location.lng",
-           "actualStatus" "status" }},
-     ],
+     { "jsonPath" : { "actualElevation" : "$.results[0].elevation",
+                      "actualLat"       : "$.results[0].location.lat",
+                      "actualLong"      : "$.results[0].location.lng",
+                      "actualStatus"    : "status"
+                    }
+     }
+  ],x
   "assert": [
-    { "status" : 200 },
-
-    { "groovy" : [ "response.results[0].elevation.doubleValue() == {expectedElevation}",
-                   "response.results[0].location.lat.doubleValue() == {latitude}",
-                   "response.results[0].location.lng.doubleValue() == {longitude}",
-                   "'OK' == actualStatus"
-                 ]
-    }
-    ]
+    "actualElevation == expectedElevation",
+    "actualLat == latitude",
+    "actualLong == longitude",
+    "actualStatus == 'OK'"
+  ]
 }
 ```
 
 Here, the response body is saved in a file in the output directory with a file name based on the test name,
 for later analysis/use, or for creating a benchmark for later validation.
 The specific values from the body are bound to environment variables, `actualElevation`, `actualLat`, `actualLong`,
-and `actualStatus` which may be used in assertions later.
+and `actualStatus` which are used in later assertions.
 
 The values in the current environment are passed
 to the Groovy (or JavaScript) scripts as script language bindings, so the `{varName}` notation is not needed
-in the expressions. If you use `{varName}` in a groovy expression, it will be substituted
+in the assertion expressions. If you use `{varName}` in a groovy expression, it will be substituted
 before the script is interpreted, so it is useful to *generate* the script source,
-or to inject content into string literals.
+or to inject content into string literals. That is, the Groovy
+interpreter will evaluate the  expression
+`"actualLat == latitude"` by comparing the values of the variables
+`actualLat` and `latitude`. However, for the expression
+`"{actualLat} == {latitude}"`, UnRAVL will perform veriable substitution
+*before* passing the expression to Groovy  to evaluate. Thus,
+teh expression evaluated by Groovy is will be `27.988056 == 27.988056`.
+Both will be true, but derived in different ways. The former lets Groovy
+resolve the variable; the latter lets UnRAVL expand the variables as
+text first.
 
 Note how the literal value `"OK"` may be quoted `'OK'`
-in the Groovy assertion `"'OK' == actualStatus"`.
+in the Groovy assertion `"actualStatus 'OK'"`.
 
-Note that values captured in the environment may be used in subsequent tests.
+Values captured in the environment by `"bind"` elements may be used in subsequent tests.
 
 ## Miscellaneous
 
@@ -613,14 +625,9 @@ The `"assert"` and `"bind"` elements also allow a nested `"doc"` or `"ignore"` e
 
 ### Redirection
 
-TODO
-
 The default operation is to apply redirection if a 3xx responses is received.
-For 300, 301, and 302, UnRAVL will retry with GET. For 303 and higher,
-UnRAVL will retry with the same method.  (Via Apache HTTP Components.)
-
-Redirect retries are controlled by environment variables
-_maxRedirect (integer, valid values 0-5). If 0, no redirects are followed.
+For 300, 301, and 302, UnRAVL will retry `GET` and `HEAD` requests,
+but not other methods (via Apache HTTP Components.)
 
 ### JUnit integration
 
@@ -706,7 +713,7 @@ You can configure more fine-grained logging other Log4J configuration files:
 
 ## Logistics
 
-UnRAVL is built with either [Gradle](http://gradle.org/) or [Maven](https://maven.apache.org/). 
+UnRAVL is built with either [Gradle](http://gradle.org/) or [Maven](https://maven.apache.org/).
 The Gradle wrapper is included in the project,
 so no extra setup is required (unlike Maven)
 to create a jar file `sas.unravl-<em>version</em>.jar`
