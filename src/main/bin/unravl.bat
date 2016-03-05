@@ -1,5 +1,7 @@
 @echo off
 
+setlocal
+
 Rem Run UnRAVL's main entry point.
 Rem Command line arguments are UnRAVL script files to execute:
 Rem unravl.bat script1.json script2.json script3.json
@@ -32,10 +34,10 @@ if exist %UNRAVL_DIR%\lib (
   )
 )
 
-if [%JAVA_HOME%] == [] (
+if ["%JAVA_HOME%"] == [""] (
    set java=java
 ) else (
-   set java=%JAVA_HOME%\bin\java.exe
+   set java="%JAVA_HOME%\bin\java.exe"
 )
 
 %java% -Dapp.name=UNRAVL ^
@@ -43,3 +45,5 @@ if [%JAVA_HOME%] == [] (
        %UNRAVL_OPT% ^
        com.sas.unravl.Main ^
        %*
+
+endlocal
