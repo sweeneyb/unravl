@@ -37,6 +37,5 @@ fi
 $java -Dapp.name=UNRAVL \
       -classpath $UNRAVL_CLASSPATH \
       $UNRAVL_OPT \
-      -Xdock:name="UnRAVL" \
       com.sas.unravl.Main \
       "$@"
