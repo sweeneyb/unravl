@@ -407,7 +407,7 @@ specify a prefix string to be prepended to the href values. This may be a URL
 such as `"http://www.example.com/myApi"`. The prefix is applied to the href if
 and only if the href value is not a full URL.
 
-If the variable `unravl.href.prefix` is defined, its value will
+If the variable `unravl.hrefs.prefix` is defined, its value will
 be used if no `"prefix"` is defined.
 
 Examples:
@@ -423,7 +423,7 @@ Examples:
    "bind" : { "href" : "self", "prefix" : "{site}" }
  }
 
- { "env" : { "unravl.href.prefix " : "https://www.example.com/myApi" },
+ { "env" : { "unravl.hrefs.prefix " : "https://www.example.com/myApi" },
    "GET" : "{site}/apiPath",
    "bind" : { "href" : "self" }
  }

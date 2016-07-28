@@ -164,7 +164,7 @@ import org.apache.log4j.Logger;
  * and only if the href value is not a full URL.
  * </p>
  * <p>
- * If the variable </code>unravl.href.prefix </code>is defined, its value will
+ * If the variable </code>unravl.hrefs.prefix </code>is defined, its value will
  * be used if no "prefix" is defined
  * </p>
  * <p>
@@ -182,7 +182,7 @@ import org.apache.log4j.Logger;
  *    "bind" : { "href" : "self", "prefix" : "{site}" }
  *  }
  *  
- *  { "env" : { "unravl.href.prefix " : "https://www.example.com/myApi" },
+ *  { "env" : { "unravl.hrefs.prefix " : "https://www.example.com/myApi" },
  *    "GET" : "{site}/apiPath", 
  *    "bind" : { "href" : "self" }
  *  }
@@ -305,7 +305,7 @@ import org.apache.log4j.Logger;
 public class LinksExtractor extends BaseUnRAVLExtractor {
 
     private static final String PREFIX_KEY = "prefix";
-    private static final String UNRAVL_HREF_PREFIX = "unravl.href.prefix";
+    private static final String UNRAVL_HREF_PREFIX = "unravl.hrefs.prefix";
     private static final String REL_KEY = "rel";
     private static final String COLLECTION_KEY = "collection";
     private static final String HREF_KEY = "href";
