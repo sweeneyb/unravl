@@ -9,7 +9,6 @@ import com.sas.unravl.UnRAVL;
 import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.annotations.UnRAVLExtractorPlugin;
 import com.sas.unravl.util.Json;
-import com.sas.unravl.util.VariableResolver;
 
 import java.net.MalformedURLException;
 import java.net.URL;
