@@ -1,0 +1,98 @@
+[
+  {
+   "name" : "define sample responses and expected values",
+   "env" : { "expectedAtomPrefix" : "http://www.example.com/atomApi",
+             "expectedHALPrefix" : "http://www.example.com/halApi",
+             "sampleAtomResponse" : { "id" : "xyz-123",
+                                     "links" : [
+                                           { "rel" : "self",
+                                             "href" : "/relative/resource/xyz-123",
+                                             "method" : "GET"
+                                           },
+
+                                           { "rel" : "absolute",
+                                             "href" : "http://api.example.com/otherApiName/relative/resource/xyz-123",
+                                             "method" : "GET"
+                                           }
+                                           ]
+                                    },
+             "sampleHALResponse" :   { "id" : "xyz-123",
+                                       "_links": {
+                                           "self": { "href": "/orders" },
+                                           "absolute": { "href": "http://api.example.com/otherApiName/orders?id={order_id}" }
+                                       }
+                                     },
+             "expectedAtomSelf" : "http://www.example.com/atomApi/relative/resource/xyz-123",
+             "expectedAtomSelfAbsolute" : "http://api.example.com/otherApiName/relative/resource/xyz-123",
+             "expectedHALSelf" : "http://www.example.com/halApi/orders",
+             "expectedHALSelfAbsolute" : "http://api.example.com/otherApiName/orders?id={order_id}"
+
+          }
+   },
+
+   { "name" : "test atom links with no prefix.",
+
+    "bind" : {"hrefs" : ["self", "absolute"], "from" : "sampleAtomResponse"},
+    "assert" : [
+                 "self == sampleAtomResponse.links[0].href.textValue()",
+                 "absolute == expectedAtomSelfAbsolute"
+               ]
+   },
+   
+   
+   { "name" : "test atom links with explicit prefix.",
+
+    "bind" : {"hrefs" : ["self", "absolute"], "from" : "sampleAtomResponse", "prefix" : "{expectedAtomPrefix}"},
+    "assert" : [
+                 "self == expectedAtomSelf",
+                 "absolute == expectedAtomSelfAbsolute"
+               ]
+   },
+   
+   
+   { "name" : "test HAL links with no prefix.",
+
+    "bind" : {"hrefs" : ["self", "absolute"], "from" : "sampleHALResponse"},
+    "assert" : [
+                 "self == sampleHALResponse._links.self.href.textValue()",
+                 "absolute == expectedHALSelfAbsolute"
+               ]
+   },
+   
+   
+   { "name" : "test HAL links with explicit prefix.",
+
+    "bind" : {"hrefs" : ["self", "absolute"], "from" : "sampleHALResponse", "prefix" : "{expectedHALPrefix}"},
+    "assert" : [
+                 "self == expectedHALSelf",
+                 "absolute == expectedHALSelfAbsolute"
+               ]
+   },
+   
+   { "name" : "Assign unravl.hrefs.prefix (for Atom)",
+     "env" : { "unravl.hrefs.prefix" : "{expectedAtomPrefix}" }
+   },
+   
+   { "name" : "test atom links with implicit unravl.hrefs.prefix prefix.",
+
+    "bind" : {"hrefs" : ["self", "absolute"], "from" : "sampleAtomResponse"},
+    "assert" : [
+                 "self == expectedAtomSelf",
+                 "absolute == expectedAtomSelfAbsolute"
+               ]
+   },
+   
+   { "name" : "Assign unravl.hrefs.prefix (for HAL)",
+     "env" : { "unravl.hrefs.prefix" : "{expectedHALPrefix}" }
+   },   
+   
+   { "name" : "test HAL links with implicit unravl.hrefs.prefix prefix.",
+
+    "bind" : {"hrefs" : ["self", "absolute"], "from" : "sampleHALResponse"},
+    "assert" : [
+                 "self == expectedHALSelf",
+                 "absolute == expectedHALSelfAbsolute"
+               ]
+   }
+   
+]

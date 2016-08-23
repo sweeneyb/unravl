@@ -10,6 +10,8 @@ import com.sas.unravl.UnRAVLException;
 import com.sas.unravl.annotations.UnRAVLExtractorPlugin;
 import com.sas.unravl.util.Json;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -155,7 +157,42 @@ import org.apache.log4j.Logger;
  * <p>
  * If "from" is present, its value should be the name of an UnRAVL variable that
  * contains the links collection. By default, this is the JSON response object.
- *
+ * <p>
+ * An extra option, <code>"prefix" : "<em>prefix</em>"</code> may be used to to
+ * specify a prefix string to be prepended to the href values. This may be a URL
+ * such as "http://www.example.com/myApi". The prefix is applied to the href if
+ * and only if the href value is not a full URL.
+ * </p>
+ * <p>
+ * If the variable </code>unravl.hrefs.prefix </code>is defined, its value will
+ * be used if no "prefix" is defined
+ * </p>
+ * <p>
+ * Examples:
+ * </p>
+ * 
+ * <pre>
+ *  { 
+ *    "GET" : "{site}/apiPath", 
+ *    "bind" : { "href" : "self", "prefix" : "https://www.example.com/myApi"  }
+ *  }
+ *  
+ *  { "env" : { "site" : "https://www.example.com/myApi" },
+ *    "GET" : "{site}/apiPath", 
+ *    "bind" : { "href" : "self", "prefix" : "{site}" }
+ *  }
+ *  
+ *  { "env" : { "unravl.hrefs.prefix " : "https://www.example.com/myApi" },
+ *    "GET" : "{site}/apiPath", 
+ *    "bind" : { "href" : "self" }
+ *  }
+ * </pre>
+ * 
+ * <p>
+ * All three of these forms will convert a href from the <code>"self"</code>
+ * link such as <code>"/myResources/ab54d8bc4f"</code> to
+ * <code>"https://www.example.com/myApi/myResources/ab54d8bc4f"</code>.
+ * 
  * <h2>Example: Extracting multiple links</h2>
  *
  * <p>
@@ -267,6 +304,8 @@ import org.apache.log4j.Logger;
 @UnRAVLExtractorPlugin({ "link", "links", "href", "hrefs" })
 public class LinksExtractor extends BaseUnRAVLExtractor {
 
+    private static final String PREFIX_KEY = "prefix";
+    private static final String UNRAVL_HREF_PREFIX = "unravl.hrefs.prefix";
     private static final String REL_KEY = "rel";
     private static final String COLLECTION_KEY = "collection";
     private static final String HREF_KEY = "href";
@@ -287,10 +326,9 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
             ObjectNode effectiveSpec = effectiveLinksSpec(extractor, spec);
             extractLinks(extractor, from, effectiveSpec, href, call);
         } catch (ClassCastException e) {
-            throw new UnRAVLException(
-                    String.format(
-                            "%s extractor invalid or corresponding links are not well formed",
-                            key(extractor)));
+            throw new UnRAVLException(String.format(
+                    "%s extractor invalid or corresponding links are not well formed",
+                    key(extractor)));
         }
     }
 
@@ -316,10 +354,11 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
             JsonNode coll = from.get(COLLECTION_KEY);
             if (coll != null && coll.isObject()) {
                 linksArray = Json.array(coll.get(LINKS_KEY));
-                logger.info("Extracting Collection+JSON style links from \"collection\" member");
+                logger.info(
+                        "Extracting Collection+JSON style links from \"collection\" member");
             } else {
-                String msg = String.format(
-                        "Cannot infer links in %s extractor", key(root));
+                String msg = String.format("Cannot infer links in %s extractor",
+                        key(root));
                 logger.error(msg);
                 throw new UnRAVLException(msg);
             }
@@ -327,10 +366,12 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
         for (Map.Entry<String, JsonNode> e : Json.fields(effectiveSpec)) {
             String name = e.getKey();
             JsonNode spec = e.getValue();
-            JsonNode link = matchLink(name, spec, linksArray, linksObject, root);
+            JsonNode link = matchLink(name, spec, linksArray, linksObject,
+                    root);
             Object value = link;
             if (href) {
                 value = link.get(HREF_KEY).textValue();
+                value = applyPrefix(root, (String) value, name);
             } else if (unwrap)
                 value = Json.unwrap(link);
             logger.info(String.format("Bound link name %s to %s", name, value));
@@ -338,9 +379,53 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
         }
     }
 
-    private JsonNode matchLink(String name, JsonNode spec,
-            ArrayNode linksArray, ObjectNode linksObject, ObjectNode root)
+    private String applyPrefix(ObjectNode root, String value, String name)
             throws UnRAVLException {
+        if (isUrl(value))
+            return value;
+        JsonNode prefixSpec = root.get(PREFIX_KEY);
+        String prefix = null;
+        String why = ""; 
+        if (prefixSpec == null) {
+            Object implicitPrefix = getScript().binding(UNRAVL_HREF_PREFIX);
+            if (implicitPrefix == null) {
+                return value;
+            } else if (implicitPrefix instanceof String) {
+                prefix = (String) implicitPrefix;
+                why = "(implicit " + UNRAVL_HREF_PREFIX + ")";
+            }
+            else {
+                throw new UnRAVLException(
+                        "href prefix value must be a string, found "
+                                + implicitPrefix.getClass().getName()
+                                + ", value = " + prefixSpec);
+            }
+        } else {
+            if (!prefixSpec.isTextual()) {
+                throw new UnRAVLException(
+                        "href prefix value must be a string, found "
+                                + prefixSpec.getClass().getName()
+                                + ", value = " + prefixSpec);
+            } else {
+                prefix = getScript().expand(prefixSpec.textValue());
+                why = "(explicit \"prefix\")";
+                }
+        }
+        logger.info(String.format("Prepended '%s' to the '%s' link href '%s' %s.", prefix, name, value, why));
+        return prefix + value;
+    }
+
+    private boolean isUrl(String value) {
+        try {
+            new URL(value);
+            return true;
+        } catch (MalformedURLException e) {
+            return false;
+        }
+    }
+
+    private JsonNode matchLink(String name, JsonNode spec, ArrayNode linksArray,
+            ObjectNode linksObject, ObjectNode root) throws UnRAVLException {
         if (linksArray != null) {// Collection+JSON mode
             for (JsonNode link : Json.toArray(linksArray)) {
                 if (matches(root, name, spec, link))
@@ -397,10 +482,9 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
                     String name = e.textValue();
                     effectiveSpec.set(name, e);
                 } else
-                    throw new UnRAVLException(
-                            String.format(
-                                    "Array elements must be strings in %s extractor: %s",
-                                    key(root), e));
+                    throw new UnRAVLException(String.format(
+                            "Array elements must be strings in %s extractor: %s",
+                            key(root), e));
             }
         } else if (spec.isObject()) {
             effectiveSpec = (ObjectNode) spec;
@@ -429,10 +513,9 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
             } else if (f instanceof ObjectNode) {
                 from = (ObjectNode) f;
             } else {
-                throw new UnRAVLException(
-                        String.format(
-                                "responseBody is not bound to a JSON object in %s extractor: %s",
-                                key(root), f));
+                throw new UnRAVLException(String.format(
+                        "responseBody is not bound to a JSON object in %s extractor: %s",
+                        key(root), f));
             }
         } else {
             if (fromNode.isTextual()) {
@@ -444,20 +527,18 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
                     } else if (val instanceof Map) {
                         from = Json.wrap((Map) val);
                     } else {
-                        throw new UnRAVLException(
-                                String.format(
-                                        "Value of \"from\": \"%s\" in %s extractor is not a JSON object:\n%s",
-                                        fromNode.textValue(), key(root), val));
+                        throw new UnRAVLException(String.format(
+                                "Value of \"from\": \"%s\" in %s extractor is not a JSON object:\n%s",
+                                fromNode.textValue(), key(root), val));
                     }
                 } else {
                     Object o = call.getScript().eval(where);
                     if (o instanceof ObjectNode) {
                         from = (ObjectNode) o;
                     } else
-                        throw new UnRAVLException(
-                                String.format(
-                                        "expression %s did not yield a JSON object in %s extractor",
-                                        where, key(root)));
+                        throw new UnRAVLException(String.format(
+                                "expression %s did not yield a JSON object in %s extractor",
+                                where, key(root)));
                 }
             }
         }
