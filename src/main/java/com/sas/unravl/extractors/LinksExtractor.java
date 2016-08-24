@@ -127,11 +127,11 @@ import org.apache.log4j.Logger;
  * An extra option, <code>"unwrap" : true</code> may be used to unwrap the
  * Jackson <code>ObjectNode</code> values from the links into a
  * <code>java.util.Map</code>. For example:
- * 
+ *
  * <pre>
  *  { "link" : { "self" : "self" }, "unwrap" : true }
  * </pre>
- * 
+ *
  * <h3>Extracting just the href value from links</h3>
  * <p>
  * If the extractor is used with the key "hrefs" or "href" instead of "links",
@@ -139,7 +139,7 @@ import org.apache.log4j.Logger;
  * of the corresponding link representation. not the entire link object. For
  * example,
  * </p>
- * 
+ *
  * <pre>
  *  { "links" : [ "self", "update", "delete" ] }
  * </pre>
@@ -164,35 +164,35 @@ import org.apache.log4j.Logger;
  * and only if the href value is not a full URL.
  * </p>
  * <p>
- * If the variable </code>unravl.hrefs.prefix </code>is defined, its value will
+ * If the variable <code>unravl.hrefs.prefix </code>is defined, its value will
  * be used if no "prefix" is defined
  * </p>
  * <p>
  * Examples:
  * </p>
- * 
+ *
  * <pre>
- *  { 
- *    "GET" : "{site}/apiPath", 
+ *  {
+ *    "GET" : "{site}/apiPath",
  *    "bind" : { "href" : "self", "prefix" : "https://www.example.com/myApi"  }
  *  }
- *  
+ *
  *  { "env" : { "site" : "https://www.example.com/myApi" },
- *    "GET" : "{site}/apiPath", 
+ *    "GET" : "{site}/apiPath",
  *    "bind" : { "href" : "self", "prefix" : "{site}" }
  *  }
- *  
+ *
  *  { "env" : { "unravl.hrefs.prefix " : "https://www.example.com/myApi" },
- *    "GET" : "{site}/apiPath", 
+ *    "GET" : "{site}/apiPath",
  *    "bind" : { "href" : "self" }
  *  }
  * </pre>
- * 
+ *
  * <p>
  * All three of these forms will convert a href from the <code>"self"</code>
  * link such as <code>"/myResources/ab54d8bc4f"</code> to
  * <code>"https://www.example.com/myApi/myResources/ab54d8bc4f"</code>.
- * 
+ *
  * <h2>Example: Extracting multiple links</h2>
  *
  * <p>
@@ -247,11 +247,11 @@ import org.apache.log4j.Logger;
  *  "bind" : [
  *             { "href" : { "coll" : "self" },
  *               "from" : "responseBody.collection" } },
- * 
+ *
  *             { "href" : { "self0" : "self",
  *                          "delete0" : "delete" },
  *               "from" : "responseBody.collection.items[0]" } },
- * 
+ *
  *             { "href" : { "selfLast" : "self",
  *                          "deleteLast" : "delete" },
  *               "from" : "responseBody.collection.items[responseBody.collection.items.size()-1]" } }
@@ -385,7 +385,7 @@ public class LinksExtractor extends BaseUnRAVLExtractor {
             return value;
         JsonNode prefixSpec = root.get(PREFIX_KEY);
         String prefix = null;
-        String why = ""; 
+        String why = "";
         if (prefixSpec == null) {
             Object implicitPrefix = getScript().binding(UNRAVL_HREF_PREFIX);
             if (implicitPrefix == null) {
