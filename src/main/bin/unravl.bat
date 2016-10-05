@@ -1,6 +1,7 @@
 @echo off
 
-setlocal
+setlocal EnableDelayedExpansion
+
 
 Rem Run UnRAVL's main entry point.
 Rem Command line arguments are UnRAVL script files to execute:
@@ -23,9 +24,9 @@ if exist %UNRAVL_DIR%\lib (
     Rem    .\gradlew clean build copyDeps
     Rem Gradle will put the UnRAVL jar in build/libs
     Rem and dependent jars in build/output/lib
-    set UNRAVL_JAR_DIR=%UNRAVL_DEV_DIR%\build\libs
-    set UNRAVL_LIB_DIR=%UNRAVL_DEV_DIR%\build\output\lib
-    set UNRAVL_CLASSPATH=%UNRAVL_LIB_DIR%/*;%UNRAVL_JAR_DIR%/*;
+    set UNRAVL_JAR_DIR=!UNRAVL_DEV_DIR!\build\libs
+    set UNRAVL_LIB_DIR=!UNRAVL_DEV_DIR!\build\output\lib
+    set UNRAVL_CLASSPATH=!UNRAVL_LIB_DIR!/*;!UNRAVL_JAR_DIR!/*;
   ) else (
     echo %UNRAVL_DIR% does not contain libraries in lib or build\libs
     echo If in development, run:
